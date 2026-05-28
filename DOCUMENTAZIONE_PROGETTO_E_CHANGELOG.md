@@ -287,6 +287,12 @@ Job schedulati:
   - crea il contatto se non esiste
   - salva il messaggio inbound
   - aggiorna `ultimo_contatto`
+  - attiva il booking assistant se la chat non e` assegnata
+
+- invio WhatsApp outbound via Meta Cloud API
+  - usato dai messaggi manuali dello staff su canale WhatsApp
+  - usato dalle risposte automatiche di Zak AI
+  - salva sempre il messaggio in inbox anche se Meta non e` configurato o fallisce
 
 - `POST /api/webhook/voice-assistant`
   - riceve trascrizione chiamata
@@ -294,7 +300,7 @@ Job schedulati:
 
 ### Non ancora completato o non evidenziato nel codice
 
-- integrazione reale con Meta Cloud API per invio/risposta live
+- gestione avanzata errori/consegne Meta Cloud API
 - integrazione reale con Google Calendar
 - integrazione reale con Vapi/Bland AI
 - logica LLM per qualificazione lead automatica
@@ -455,6 +461,16 @@ Nota ambiente Windows:
 - sono state aggiunte dipendenze native Windows esplicite per eseguire codegen/build anche su questa macchina;
 - `corepack pnpm` e` il comando consigliato quando `pnpm` non e` disponibile come binario globale.
 
+## 11.1 Variabili ambiente integrazioni
+
+### Meta WhatsApp Cloud API
+
+- `META_WHATSAPP_ACCESS_TOKEN`: token Meta Cloud API
+- `META_WHATSAPP_PHONE_NUMBER_ID`: ID del numero WhatsApp Business
+- `META_GRAPH_API_VERSION`: versione Graph API opzionale, default `v20.0`
+
+Se queste variabili non sono presenti, l'app continua a salvare i messaggi outbound in inbox ma salta l'invio reale verso Meta.
+
 ## 12. Regole per mantenere questo file aggiornato
 
 Da questo momento, ogni modifica dovrebbe aggiungere o aggiornare:
@@ -544,3 +560,10 @@ Formato consigliato per nuove voci:
   - `corepack pnpm --filter @workspace/api-spec run codegen`
   - `corepack pnpm run typecheck`
   - `corepack pnpm run build`
+
+### 2026-05-29 - Invio WhatsApp outbound Meta-ready
+
+- aggiunto client backend per inviare messaggi testuali tramite Meta WhatsApp Cloud API
+- collegato l'invio reale ai messaggi manuali staff su canale WhatsApp
+- collegato l'invio reale alle risposte automatiche di Zak AI
+- mantenuto fallback sicuro: i messaggi restano salvati in inbox anche quando le credenziali Meta non sono configurate o l'invio fallisce

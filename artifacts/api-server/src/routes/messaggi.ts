@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { db, messaggiTable, contattiCrmTable, utentiTable, insertMessaggioSchema } from "@workspace/db";
 import { eq, and, desc, sql } from "drizzle-orm";
+import { sendWhatsAppTextSafely } from "../lib/whatsapp";
 
 const router = Router();
 
@@ -30,9 +31,21 @@ router.post("/messaggi", async (req, res) => {
     mittente_nome: "Staff",
   }).returning();
 
+  const [contatto] = await db
+    .select()
+    .from(contattiCrmTable)
+    .where(eq(contattiCrmTable.id, parsed.data.contatto_id));
+
   await db.update(contattiCrmTable)
     .set({ ultimo_contatto: new Date() })
     .where(eq(contattiCrmTable.id, parsed.data.contatto_id));
+
+  if (parsed.data.canale === "whatsapp" && contatto?.telefono) {
+    await sendWhatsAppTextSafely({
+      to: contatto.telefono,
+      text: parsed.data.testo,
+    });
+  }
 
   res.status(201).json(row);
 });

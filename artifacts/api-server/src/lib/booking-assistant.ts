@@ -7,6 +7,7 @@ import {
   type Contatto,
   type Preventivo,
 } from "@workspace/db";
+import { sendWhatsAppTextSafely } from "./whatsapp";
 
 const EVENT_TYPES = [
   "diciottesimo",
@@ -208,13 +209,18 @@ function buildNextQuestion(contatto: Contatto, preventivo: Preventivo): string {
   return `Perfetto ${contatto.nome}, ho raccolto tutte le informazioni principali per il tuo ${contatto.tipo_evento} del ${formatDateForReply(preventivo.data_evento_richiesta)} per circa ${preventivo.numero_invitati} invitati. Ti ricontatteremo presto con i dettagli.`;
 }
 
-async function saveAssistantMessage(contattoId: string, testo: string) {
+async function saveAssistantMessage(contatto: Contatto, testo: string) {
   await db.insert(messaggiTable).values({
-    contatto_id: contattoId,
+    contatto_id: contatto.id,
     canale: "whatsapp",
     direzione: "outbound",
     testo,
     mittente_nome: "Zak AI",
+  });
+
+  await sendWhatsAppTextSafely({
+    to: contatto.telefono,
+    text: testo,
   });
 }
 
@@ -307,7 +313,7 @@ export async function processBookingAssistantMessage(input: {
   }
 
   if (risposta) {
-    await saveAssistantMessage(contatto.id, risposta);
+    await saveAssistantMessage(contatto, risposta);
   }
 
   return {
