@@ -3,13 +3,28 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Zak Ecosystem AI - CRM Omnicanale API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: utenti
+    description: Staff users
+  - name: contatti
+    description: CRM contacts and leads
+  - name: preventivi
+    description: Event quotes
+  - name: agenda
+    description: Personal agenda
+  - name: chat
+    description: Unified chat messages
+  - name: dashboard
+    description: Dashboard summaries and analytics
+  - name: webhooks
+    description: External webhook receivers
+
 paths:
   /healthz:
     get:
@@ -24,6 +39,612 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  # ── UTENTI ──────────────────────────────────────────────────────────────────
+  /utenti:
+    get:
+      operationId: listUtenti
+      tags: [utenti]
+      summary: List all staff users
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Utente"
+    post:
+      operationId: createUtente
+      tags: [utenti]
+      summary: Create a staff user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UtenteInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Utente"
+
+  /utenti/{id}:
+    get:
+      operationId: getUtente
+      tags: [utenti]
+      summary: Get a staff user
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Utente"
+    patch:
+      operationId: updateUtente
+      tags: [utenti]
+      summary: Update a staff user
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UtenteUpdate"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Utente"
+    delete:
+      operationId: deleteUtente
+      tags: [utenti]
+      summary: Delete a staff user
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
+
+  # ── CONTATTI CRM ─────────────────────────────────────────────────────────────
+  /contatti:
+    get:
+      operationId: listContatti
+      tags: [contatti]
+      summary: List CRM contacts
+      parameters:
+        - name: stato_lead
+          in: query
+          schema:
+            type: string
+        - name: tipo_evento
+          in: query
+          schema:
+            type: string
+        - name: origine_lead
+          in: query
+          schema:
+            type: string
+        - name: search
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Contatto"
+    post:
+      operationId: createContatto
+      tags: [contatti]
+      summary: Create a CRM contact
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ContattoInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Contatto"
+
+  /contatti/{id}:
+    get:
+      operationId: getContatto
+      tags: [contatti]
+      summary: Get a CRM contact
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Contatto"
+    patch:
+      operationId: updateContatto
+      tags: [contatti]
+      summary: Update a CRM contact
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ContattoUpdate"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Contatto"
+    delete:
+      operationId: deleteContatto
+      tags: [contatti]
+      summary: Delete a CRM contact
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
+
+  /contatti/{id}/messaggi:
+    get:
+      operationId: getContattoMessaggi
+      tags: [contatti]
+      summary: Get chat messages for a contact
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Messaggio"
+
+  # ── PREVENTIVI EVENTI ────────────────────────────────────────────────────────
+  /preventivi:
+    get:
+      operationId: listPreventivi
+      tags: [preventivi]
+      summary: List event quotes
+      parameters:
+        - name: stato_evento
+          in: query
+          schema:
+            type: string
+        - name: contatto_id
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Preventivo"
+    post:
+      operationId: createPreventivo
+      tags: [preventivi]
+      summary: Create an event quote
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PreventivoInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Preventivo"
+
+  /preventivi/{id}:
+    get:
+      operationId: getPreventivo
+      tags: [preventivi]
+      summary: Get an event quote
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Preventivo"
+    patch:
+      operationId: updatePreventivo
+      tags: [preventivi]
+      summary: Update an event quote
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PreventivoUpdate"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Preventivo"
+    delete:
+      operationId: deletePreventivo
+      tags: [preventivi]
+      summary: Delete an event quote
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
+
+  # ── AGENDA PERSONALE ─────────────────────────────────────────────────────────
+  /agenda:
+    get:
+      operationId: listAgenda
+      tags: [agenda]
+      summary: List personal agenda items
+      parameters:
+        - name: categoria
+          in: query
+          schema:
+            type: string
+        - name: data_da
+          in: query
+          schema:
+            type: string
+        - name: data_a
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AgendaItem"
+    post:
+      operationId: createAgendaItem
+      tags: [agenda]
+      summary: Create an agenda item
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AgendaItemInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgendaItem"
+
+  /agenda/{id}:
+    get:
+      operationId: getAgendaItem
+      tags: [agenda]
+      summary: Get an agenda item
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgendaItem"
+    patch:
+      operationId: updateAgendaItem
+      tags: [agenda]
+      summary: Update an agenda item
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AgendaItemUpdate"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AgendaItem"
+    delete:
+      operationId: deleteAgendaItem
+      tags: [agenda]
+      summary: Delete an agenda item
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
+
+  # ── CHAT MESSAGES (Unified Inbox) ─────────────────────────────────────────────
+  /messaggi:
+    get:
+      operationId: listMessaggi
+      tags: [chat]
+      summary: List all chat messages across channels
+      parameters:
+        - name: canale
+          in: query
+          schema:
+            type: string
+        - name: contatto_id
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Messaggio"
+    post:
+      operationId: sendMessaggio
+      tags: [chat]
+      summary: Send a message to a contact
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MessaggioInput"
+      responses:
+        "201":
+          description: Sent
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Messaggio"
+
+  /chat/inbox:
+    get:
+      operationId: getChatInbox
+      tags: [chat]
+      summary: Get unified inbox - one entry per contact with last message
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/InboxEntry"
+
+  /chat/assign:
+    post:
+      operationId: assignChat
+      tags: [chat]
+      summary: Assign a chat to an operator
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AssignChatInput"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Contatto"
+
+  # ── DASHBOARD & ANALYTICS ────────────────────────────────────────────────────
+  /dashboard/stats:
+    get:
+      operationId: getDashboardStats
+      tags: [dashboard]
+      summary: Get dashboard summary stats
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardStats"
+
+  /dashboard/lead-pipeline:
+    get:
+      operationId: getLeadPipeline
+      tags: [dashboard]
+      summary: Get lead counts by status
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PipelineCount"
+
+  /dashboard/eventi-mese:
+    get:
+      operationId: getEventiMese
+      tags: [dashboard]
+      summary: Get confirmed events by month for the current year
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/EventiMeseCount"
+
+  /dashboard/attivita-recente:
+    get:
+      operationId: getAttivitaRecente
+      tags: [dashboard]
+      summary: Get recent activity feed
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AttivitaItem"
+
+  /calendar/check-availability:
+    get:
+      operationId: checkCalendarAvailability
+      tags: [dashboard]
+      summary: Check if a date is available for events
+      parameters:
+        - name: data
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CalendarAvailability"
+
+  # ── WEBHOOKS ─────────────────────────────────────────────────────────────────
+  /webhook/whatsapp:
+    post:
+      operationId: webhookWhatsapp
+      tags: [webhooks]
+      summary: Receive WhatsApp message from Meta
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WebhookPayload"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WebhookResponse"
+
+  /webhook/voice-assistant:
+    post:
+      operationId: webhookVoiceAssistant
+      tags: [webhooks]
+      summary: Receive voice call transcription from Vapi
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VoiceWebhookPayload"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WebhookResponse"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +655,369 @@ components:
       required:
         - status
 
+    # ── UTENTE ────────────────────────────────────────────────────────────────
+    Utente:
+      type: object
+      required: [id, nome, ruolo, email, data_creazione]
+      properties:
+        id:
+          type: string
+        nome:
+          type: string
+        ruolo:
+          type: string
+        email:
+          type: string
+        data_creazione:
+          type: string
+
+    UtenteInput:
+      type: object
+      required: [nome, ruolo, email]
+      properties:
+        nome:
+          type: string
+        ruolo:
+          type: string
+        email:
+          type: string
+
+    UtenteUpdate:
+      type: object
+      properties:
+        nome:
+          type: string
+        ruolo:
+          type: string
+        email:
+          type: string
+
+    # ── CONTATTO ──────────────────────────────────────────────────────────────
+    Contatto:
+      type: object
+      required: [id, nome, telefono, origine_lead, stato_lead, data_creazione]
+      properties:
+        id:
+          type: string
+        nome:
+          type: string
+        telefono:
+          type: string
+        instagram_username:
+          type: ["string", "null"]
+        origine_lead:
+          type: string
+        tipo_evento:
+          type: ["string", "null"]
+        stato_lead:
+          type: string
+        data_creazione:
+          type: string
+        ultimo_contatto:
+          type: ["string", "null"]
+        operatore_assegnato_id:
+          type: ["string", "null"]
+        operatore_assegnato_nome:
+          type: ["string", "null"]
+
+    ContattoInput:
+      type: object
+      required: [nome, telefono, origine_lead, stato_lead]
+      properties:
+        nome:
+          type: string
+        telefono:
+          type: string
+        instagram_username:
+          type: string
+        origine_lead:
+          type: string
+        tipo_evento:
+          type: string
+        stato_lead:
+          type: string
+        operatore_assegnato_id:
+          type: string
+
+    ContattoUpdate:
+      type: object
+      properties:
+        nome:
+          type: string
+        telefono:
+          type: string
+        instagram_username:
+          type: string
+        origine_lead:
+          type: string
+        tipo_evento:
+          type: string
+        stato_lead:
+          type: string
+        operatore_assegnato_id:
+          type: string
+
+    # ── PREVENTIVO ────────────────────────────────────────────────────────────
+    Preventivo:
+      type: object
+      required: [id, contatto_id, stato_evento, data_creazione]
+      properties:
+        id:
+          type: string
+        contatto_id:
+          type: string
+        contatto_nome:
+          type: ["string", "null"]
+        data_evento_richiesta:
+          type: ["string", "null"]
+        numero_invitati:
+          type: ["integer", "null"]
+        budget_stimato:
+          type: ["number", "null"]
+        note:
+          type: ["string", "null"]
+        stato_evento:
+          type: string
+        data_creazione:
+          type: string
+
+    PreventivoInput:
+      type: object
+      required: [contatto_id, stato_evento]
+      properties:
+        contatto_id:
+          type: string
+        data_evento_richiesta:
+          type: string
+        numero_invitati:
+          type: integer
+        budget_stimato:
+          type: number
+        note:
+          type: string
+        stato_evento:
+          type: string
+
+    PreventivoUpdate:
+      type: object
+      properties:
+        data_evento_richiesta:
+          type: string
+        numero_invitati:
+          type: integer
+        budget_stimato:
+          type: number
+        note:
+          type: string
+        stato_evento:
+          type: string
+
+    # ── AGENDA ────────────────────────────────────────────────────────────────
+    AgendaItem:
+      type: object
+      required: [id, titolo, data_ora_inizio, data_ora_fine, categoria, promemoria_inviato]
+      properties:
+        id:
+          type: string
+        titolo:
+          type: string
+        descrizione:
+          type: ["string", "null"]
+        data_ora_inizio:
+          type: string
+        data_ora_fine:
+          type: string
+        categoria:
+          type: string
+        promemoria_inviato:
+          type: boolean
+
+    AgendaItemInput:
+      type: object
+      required: [titolo, data_ora_inizio, data_ora_fine, categoria]
+      properties:
+        titolo:
+          type: string
+        descrizione:
+          type: string
+        data_ora_inizio:
+          type: string
+        data_ora_fine:
+          type: string
+        categoria:
+          type: string
+
+    AgendaItemUpdate:
+      type: object
+      properties:
+        titolo:
+          type: string
+        descrizione:
+          type: string
+        data_ora_inizio:
+          type: string
+        data_ora_fine:
+          type: string
+        categoria:
+          type: string
+        promemoria_inviato:
+          type: boolean
+
+    # ── MESSAGGI (Unified Chat) ───────────────────────────────────────────────
+    Messaggio:
+      type: object
+      required: [id, contatto_id, canale, direzione, testo, timestamp]
+      properties:
+        id:
+          type: string
+        contatto_id:
+          type: string
+        canale:
+          type: string
+        direzione:
+          type: string
+        testo:
+          type: string
+        timestamp:
+          type: string
+        letto:
+          type: boolean
+        mittente_nome:
+          type: ["string", "null"]
+
+    MessaggioInput:
+      type: object
+      required: [contatto_id, canale, testo]
+      properties:
+        contatto_id:
+          type: string
+        canale:
+          type: string
+        testo:
+          type: string
+
+    InboxEntry:
+      type: object
+      required: [contatto_id, contatto_nome, telefono, canale, ultimo_messaggio, timestamp, non_letti, stato_lead]
+      properties:
+        contatto_id:
+          type: string
+        contatto_nome:
+          type: string
+        telefono:
+          type: string
+        canale:
+          type: string
+        ultimo_messaggio:
+          type: string
+        timestamp:
+          type: string
+        non_letti:
+          type: integer
+        stato_lead:
+          type: string
+        operatore_assegnato_nome:
+          type: ["string", "null"]
+
+    AssignChatInput:
+      type: object
+      required: [contatto_id, operatore_id]
+      properties:
+        contatto_id:
+          type: string
+        operatore_id:
+          type: string
+
+    # ── DASHBOARD ─────────────────────────────────────────────────────────────
+    DashboardStats:
+      type: object
+      required: [totale_contatti, nuovi_oggi, preventivi_attivi, eventi_confermati, budget_totale_confermato, messaggi_non_letti]
+      properties:
+        totale_contatti:
+          type: integer
+        nuovi_oggi:
+          type: integer
+        preventivi_attivi:
+          type: integer
+        eventi_confermati:
+          type: integer
+        budget_totale_confermato:
+          type: number
+        messaggi_non_letti:
+          type: integer
+
+    PipelineCount:
+      type: object
+      required: [stato, count]
+      properties:
+        stato:
+          type: string
+        count:
+          type: integer
+
+    EventiMeseCount:
+      type: object
+      required: [mese, count]
+      properties:
+        mese:
+          type: string
+        count:
+          type: integer
+
+    AttivitaItem:
+      type: object
+      required: [id, tipo, descrizione, timestamp]
+      properties:
+        id:
+          type: string
+        tipo:
+          type: string
+        descrizione:
+          type: string
+        timestamp:
+          type: string
+        contatto_nome:
+          type: ["string", "null"]
+
+    CalendarAvailability:
+      type: object
+      required: [disponibile, date_alternative]
+      properties:
+        disponibile:
+          type: boolean
+        date_alternative:
+          type: array
+          items:
+            type: string
+
+    # ── WEBHOOKS ──────────────────────────────────────────────────────────────
+    WebhookPayload:
+      type: object
+      required: [object]
+      properties:
+        object:
+          type: string
+        entry:
+          type: array
+          items:
+            type: object
+
+    VoiceWebhookPayload:
+      type: object
+      required: [trascrizione]
+      properties:
+        trascrizione:
+          type: string
+        telefono:
+          type: ["string", "null"]
+        durata:
+          type: ["integer", "null"]
+
+    WebhookResponse:
+      type: object
+      required: [success]
+      properties:
+        success:
+          type: boolean
+        message:
+          type: ["string", "null"]

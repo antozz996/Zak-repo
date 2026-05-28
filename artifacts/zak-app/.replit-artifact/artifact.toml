@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "Zak Ecosystem AI"
+version = "1.0.0"
+id = "artifacts/zak-app"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 24571
+
+[services.development]
+run = "pnpm --filter @workspace/zak-app run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/zak-app", "run", "build" ]
+publicDir = "artifacts/zak-app/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "24571"
+BASE_PATH = "/"

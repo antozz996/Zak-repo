@@ -1,0 +1,93 @@
+# Product Requirements Document (PRD): Zak Ecosystem AI
+
+---
+
+## 1. Stack Tecnologico & Architettura
+* **Frontend:** Web Application responsive (ottimizzata per Mobile e Desktop) con accesso multi-utente simultaneo.
+* **Backend:** Server Node.js (Express) o Python (FastAPI) per la gestione della logica di business e delle automazioni.
+* **Database:** Database relazionale (PostgreSQL / Supabase) per la gestione del CRM e dello stato dei lead.
+* **Integrazioni Esterne:**
+  * Meta Cloud API (WhatsApp Business, Instagram Graph API, Facebook Messenger API).
+  * Google Calendar API (Sincronizzazione disponibilità date).
+  * Vapi API / Bland AI API (Integrazione Voice Bot per chiamate vocali VoIP).
+
+---
+
+## 2. Struttura del Database (Schema Relazionale)
+
+### Tabella `utenti` (Staff del locale)
+* `id` (UUID, Primary Key)
+* `nome` (VARCHAR)
+* `ruolo` (VARCHAR: admin, manager, staff)
+* `email` (VARCHAR, Unique)
+
+### Tabella `contatti_crm` (Clienti e Lead)
+* `id` (UUID, Primary Key)
+* `nome` (VARCHAR)
+* `telefono` (VARCHAR, Unique)
+* `instagram_username` (VARCHAR, Nullable)
+* `origine_lead` (VARCHAR: whatsapp, instagram, facebook, manuale)
+* `tipo_evento` (VARCHAR: diciottesimo, laurea, compleanno, matrimonio, aziendale)
+* `stato_lead` (VARCHAR: entrata, in_trattativa, confermato, perso)
+* `data_creazione` (TIMESTAMP)
+* `ultimo_contatto` (TIMESTAMP)
+
+### Tabella `preventivi_eventi`
+* `id` (UUID, Primary Key)
+* `contatto_id` (UUID, Foreign Key -> contatti_crm.id)
+* `data_evento_richiesta` (DATE)
+* `numero_invitati` (INTEGER)
+* `budget_stimato` (NUMERIC)
+* `note` (TEXT)
+* `stato_evento` (VARCHAR: opzionato, confermato, rifiutato)
+
+### Tabella `agenda_personale` (Impegni di Salvatore)
+* `id` (UUID, Primary Key)
+* `titolo` (VARCHAR)
+* `descrizione` (TEXT)
+* `data_ora_inizio` (TIMESTAMP)
+* `data_ora_fine` (TIMESTAMP)
+* `categoria` (VARCHAR: lavoro, personale)
+* `promemoria_inviato` (BOOLEAN, Default: false)
+
+---
+
+## 3. Funzionalità Modulari (Requisiti Funzionali)
+
+### Modulo 1: Dashboard Omnicanale (Pannello Zak)
+* **Unified Chat Inbox:** Interfaccia in tempo reale (WebSocket) che unifica i messaggi in entrata da WhatsApp Business API, Instagram DM e Facebook Messenger.
+* **Multi-Postazione:** Supporto per sessioni contemporanee da più dispositivi, mostrando visivamente quale membro dello staff sta gestendo o leggendo una specifica chat.
+* **Assegnazione Chat:** Possibilità di assegnare una conversazione a un operatore specifico.
+
+### Modulo 2: Agente AI Conversazionale (Booking Assistant)
+* **Intercettazione H24:** L'AI prende in carico le nuove chat esterne quando lo staff è offline o dopo una soglia di inattività.
+* **Qualificazione Lead:** L'AI interroga l'utente per estrarre: Nome, Tipo di Evento, Data desiderata e Numero di invitati, salvando i dati direttamente in `contatti_crm` e `preventivi_eventi`.
+* **Controllo Calendario:** Integrazione con Google Calendar (o calendario interno). L'AI verifica se la data richiesta è libera. Se occupata, propone le date alternative disponibili più vicine (es. i venerdì o le domeniche libere).
+
+### Modulo 3: Automazioni CRM & Trigger Temporali
+* **Recupero Preventivi Persi:** Script/Cron Job che scansiona i preventivi con `stato_lead = 'perso'` e fa partire un webhook verso l'API di WhatsApp per inviare un messaggio di re-engagement preimpostato a distanza di X mesi.
+* **Ricorrenze Annuali:** Trigger automatico che si attiva 10 mesi dopo la data di un evento `confermato` per inviare una proposta di fidelizzazione per l'anno successivo (compleanni/ricorrenze).
+
+### Modulo 4: Pannello Personale Salvatore & Voice Bot
+* **Deviazione Chiamate Vocali:** Endpoint webhook collegato a Vapi/Bland AI. Quando viene ricevuta una chiamata sul numero virtuale, l'agente vocale AI risponde, trascrive la chiamata, estrae l'intento e crea un task o un evento in `agenda_personale`.
+* **Task & Scadenze Vocali:** Interfaccia per inserire promemoria testuali o vocali rapidi nell'agenda personale, con sistema di notifiche push o via messaggio.
+* **Modulo B2B & Competitor:** Sezione per caricare dati di analisi competitor e generare template di testo/presentazioni PDF tramite prompt AI dedicati per il co-branding con scuole e aziende.
+
+---
+
+## 4. Flussi Logici e API Endpoints
+
+### `POST /api/webhook/whatsapp`
+* Riceve il payload da Meta.
+* Verifica se il contatto esiste in `contatti_crm`; se no, lo crea.
+* Se la chat non è presidiata da un operatore umano, inoltra il testo all'LLM (OpenAI API).
+* L'LLM risponde e restituisce un JSON strutturato con le informazioni estratte sul lead per aggiornare il DB.
+
+### `GET /api/calendar/check-availability`
+* Query sui parametri `data` e `slot`.
+* Restituisce un booleano (true/false) e un array di date alternative se lo slot è occupato.
+
+### `POST /api/webhook/voice-assistant`
+* Riceve la trascrizione della telefonata da Vapi.
+* Esegue il parsing dell'intento (es. "Fissa appuntamento", "Ricorda scadenza").
+* Aggiorna la tabella `agenda_personale`.
