@@ -42,6 +42,7 @@ Stack attuale:
 - `package.json`: comandi globali di workspace
 - `pnpm-workspace.yaml`: configurazione monorepo e catalog dipendenze
 - `replit.md`: appunti tecnici e linee guida operative
+- `ROADMAP.md`: roadmap operativa con checkbox di avanzamento
 - `attached_assets/`: materiale allegato, incluso il PRD iniziale
 
 ### Librerie condivise
@@ -477,7 +478,8 @@ Da questo momento, ogni modifica dovrebbe aggiungere o aggiornare:
 
 1. la sezione tecnica interessata, se cambia il comportamento del progetto;
 2. la sezione changelog qui sotto;
-3. eventuali gap tra PRD e implementazione reale.
+3. eventuali gap tra PRD e implementazione reale;
+4. `ROADMAP.md`, spuntando le voci completate o aggiungendo nuove voci se il lavoro introduce una nuova area.
 
 Formato consigliato per nuove voci:
 
@@ -567,3 +569,9 @@ Formato consigliato per nuove voci:
 - collegato l'invio reale ai messaggi manuali staff su canale WhatsApp
 - collegato l'invio reale alle risposte automatiche di Zak AI
 - mantenuto fallback sicuro: i messaggi restano salvati in inbox anche quando le credenziali Meta non sono configurate o l'invio fallisce
+
+### 2026-05-29 - Roadmap operativa con checkbox
+
+- aggiunto `ROADMAP.md` in root come registro operativo delle prossime iterazioni
+- inserite checkbox per moduli completati, lavori parziali e priorita future
+- collegata la roadmap alle regole di aggiornamento del documento operativo
