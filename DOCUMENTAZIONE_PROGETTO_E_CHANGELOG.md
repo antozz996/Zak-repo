@@ -575,3 +575,9 @@ Formato consigliato per nuove voci:
 - aggiunto `ROADMAP.md` in root come registro operativo delle prossime iterazioni
 - inserite checkbox per moduli completati, lavori parziali e priorita future
 - collegata la roadmap alle regole di aggiornamento del documento operativo
+
+### 2026-05-29 - Difficolta e completamento generale roadmap
+
+- aggiunta difficolta stimata `1/5`-`5/5` accanto a ogni task della roadmap
+- aggiunta percentuale di completamento generale del progetto
+- completamento corrente: 45% (54 task completati su 120)
