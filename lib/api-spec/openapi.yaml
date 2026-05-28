@@ -24,6 +24,8 @@ tags:
     description: Dashboard summaries and analytics
   - name: webhooks
     description: External webhook receivers
+  - name: automazioni
+    description: CRM automation jobs and configuration
 
 paths:
   /healthz:
@@ -607,6 +609,90 @@ paths:
                 $ref: "#/components/schemas/CalendarAvailability"
 
   # ── WEBHOOKS ─────────────────────────────────────────────────────────────────
+  # ── AUTOMAZIONI ─────────────────────────────────────────────────────────────
+  /automazioni/log:
+    get:
+      operationId: listAutomazioniLog
+      tags: [automazioni]
+      summary: Get automation execution log
+      parameters:
+        - name: tipo
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AutomazioneLog"
+
+  /automazioni/config:
+    get:
+      operationId: listAutomazioniConfig
+      tags: [automazioni]
+      summary: Get automation configuration settings
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AutomazioneConfig"
+
+  /automazioni/config/{chiave}:
+    patch:
+      operationId: updateAutomazioneConfig
+      tags: [automazioni]
+      summary: Update an automation config value
+      parameters:
+        - name: chiave
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AutomazioneConfigUpdate"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AutomazioneConfig"
+
+  /automazioni/trigger:
+    post:
+      operationId: triggerAutomazione
+      tags: [automazioni]
+      summary: Manually trigger an automation job
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TriggerManualInput"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TriggerManualResponse"
+
   /webhook/whatsapp:
     post:
       operationId: webhookWhatsapp
@@ -1012,6 +1098,64 @@ components:
           type: ["string", "null"]
         durata:
           type: ["integer", "null"]
+
+    # ── AUTOMAZIONI ────────────────────────────────────────────────────────────
+    AutomazioneLog:
+      type: object
+      required: [id, tipo, stato, data_esecuzione]
+      properties:
+        id:
+          type: string
+        tipo:
+          type: string
+        contatto_id:
+          type: ["string", "null"]
+        contatto_nome:
+          type: ["string", "null"]
+        stato:
+          type: string
+        messaggio:
+          type: ["string", "null"]
+        data_esecuzione:
+          type: string
+
+    AutomazioneConfig:
+      type: object
+      required: [chiave, valore, descrizione, aggiornato_il]
+      properties:
+        chiave:
+          type: string
+        valore:
+          type: string
+        descrizione:
+          type: ["string", "null"]
+        aggiornato_il:
+          type: string
+
+    AutomazioneConfigUpdate:
+      type: object
+      required: [valore]
+      properties:
+        valore:
+          type: string
+
+    TriggerManualInput:
+      type: object
+      required: [tipo]
+      properties:
+        tipo:
+          type: string
+
+    TriggerManualResponse:
+      type: object
+      required: [eseguiti]
+      properties:
+        eseguiti:
+          type: integer
+        dettagli:
+          type: array
+          items:
+            type: string
 
     WebhookResponse:
       type: object

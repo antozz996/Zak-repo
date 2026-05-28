@@ -214,6 +214,40 @@ export interface VoiceWebhookPayload {
   durata?: number | null;
 }
 
+export interface AutomazioneLog {
+  id: string;
+  tipo: string;
+  /** @nullable */
+  contatto_id?: string | null;
+  /** @nullable */
+  contatto_nome?: string | null;
+  stato: string;
+  /** @nullable */
+  messaggio?: string | null;
+  data_esecuzione: string;
+}
+
+export interface AutomazioneConfig {
+  chiave: string;
+  valore: string;
+  /** @nullable */
+  descrizione: string | null;
+  aggiornato_il: string;
+}
+
+export interface AutomazioneConfigUpdate {
+  valore: string;
+}
+
+export interface TriggerManualInput {
+  tipo: string;
+}
+
+export interface TriggerManualResponse {
+  eseguiti: number;
+  dettagli?: string[];
+}
+
 export interface WebhookResponse {
   success: boolean;
   /** @nullable */
@@ -245,5 +279,10 @@ contatto_id?: string;
 
 export type CheckCalendarAvailabilityParams = {
 data: string;
+};
+
+export type ListAutomazioniLogParams = {
+tipo?: string;
+limit?: number;
 };
 

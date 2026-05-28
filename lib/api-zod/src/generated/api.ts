@@ -516,6 +516,70 @@ export const CheckCalendarAvailabilityResponse = zod.object({
 
 
 /**
+ * @summary Get automation execution log
+ */
+export const ListAutomazioniLogQueryParams = zod.object({
+  "tipo": zod.coerce.string().optional(),
+  "limit": zod.coerce.number().optional()
+})
+
+export const ListAutomazioniLogResponseItem = zod.object({
+  "id": zod.string(),
+  "tipo": zod.string(),
+  "contatto_id": zod.string().nullish(),
+  "contatto_nome": zod.string().nullish(),
+  "stato": zod.string(),
+  "messaggio": zod.string().nullish(),
+  "data_esecuzione": zod.string()
+})
+export const ListAutomazioniLogResponse = zod.array(ListAutomazioniLogResponseItem)
+
+
+/**
+ * @summary Get automation configuration settings
+ */
+export const ListAutomazioniConfigResponseItem = zod.object({
+  "chiave": zod.string(),
+  "valore": zod.string(),
+  "descrizione": zod.string().nullable(),
+  "aggiornato_il": zod.string()
+})
+export const ListAutomazioniConfigResponse = zod.array(ListAutomazioniConfigResponseItem)
+
+
+/**
+ * @summary Update an automation config value
+ */
+export const UpdateAutomazioneConfigParams = zod.object({
+  "chiave": zod.coerce.string()
+})
+
+export const UpdateAutomazioneConfigBody = zod.object({
+  "valore": zod.string()
+})
+
+export const UpdateAutomazioneConfigResponse = zod.object({
+  "chiave": zod.string(),
+  "valore": zod.string(),
+  "descrizione": zod.string().nullable(),
+  "aggiornato_il": zod.string()
+})
+
+
+/**
+ * @summary Manually trigger an automation job
+ */
+export const TriggerAutomazioneBody = zod.object({
+  "tipo": zod.string()
+})
+
+export const TriggerAutomazioneResponse = zod.object({
+  "eseguiti": zod.number(),
+  "dettagli": zod.array(zod.string()).optional()
+})
+
+
+/**
  * @summary Receive WhatsApp message from Meta
  */
 export const WebhookWhatsappBody = zod.object({

@@ -1,5 +1,5 @@
 import { Link, useLocation } from "wouter";
-import { LayoutDashboard, MessageSquare, Users, FileText, Calendar, Settings } from "lucide-react";
+import { LayoutDashboard, MessageSquare, Users, FileText, Calendar, Settings, Zap } from "lucide-react";
 import { useGetChatInbox } from "@workspace/api-client-react";
 
 export function SidebarLayout({ children }: { children: React.ReactNode }) {
@@ -14,6 +14,7 @@ export function SidebarLayout({ children }: { children: React.ReactNode }) {
     { href: "/contatti", label: "Contatti", icon: Users },
     { href: "/preventivi", label: "Preventivi", icon: FileText },
     { href: "/agenda", label: "Agenda", icon: Calendar },
+    { href: "/automazioni", label: "Automazioni", icon: Zap },
     { href: "/impostazioni", label: "Impostazioni", icon: Settings },
   ];
 

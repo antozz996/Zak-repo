@@ -11,6 +11,7 @@ import ContattiNuovo from "@/pages/contatti-nuovo";
 import Preventivi from "@/pages/preventivi";
 import Agenda from "@/pages/agenda";
 import Impostazioni from "@/pages/impostazioni";
+import Automazioni from "@/pages/automazioni";
 
 const queryClient = new QueryClient();
 
@@ -27,6 +28,7 @@ function Router() {
       <Route path="/preventivi" component={Preventivi} />
       <Route path="/agenda" component={Agenda} />
       <Route path="/impostazioni" component={Impostazioni} />
+      <Route path="/automazioni" component={Automazioni} />
       <Route component={NotFound} />
     </Switch>
   );

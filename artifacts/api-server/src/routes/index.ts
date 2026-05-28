@@ -7,6 +7,7 @@ import agendaRouter from "./agenda";
 import messaggiRouter from "./messaggi";
 import dashboardRouter from "./dashboard";
 import webhooksRouter from "./webhooks";
+import automazioniRouter from "./automazioni";
 
 const router: IRouter = Router();
 
@@ -18,5 +19,6 @@ router.use(agendaRouter);
 router.use(messaggiRouter);
 router.use(dashboardRouter);
 router.use(webhooksRouter);
+router.use(automazioniRouter);
 
 export default router;
