@@ -37,7 +37,10 @@ router.get("/contatti", async (req, res) => {
 
 router.post("/contatti", async (req, res) => {
   const parsed = insertContattoSchema.safeParse(req.body);
-  if (!parsed.success) return res.status(400).json({ error: parsed.error.message });
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.message });
+    return;
+  }
   const [row] = await db.insert(contattiCrmTable).values(parsed.data).returning();
   res.status(201).json({ ...row, operatore_assegnato_nome: null });
 });
@@ -60,15 +63,24 @@ router.get("/contatti/:id", async (req, res) => {
     .from(contattiCrmTable)
     .leftJoin(utentiTable, eq(contattiCrmTable.operatore_assegnato_id, utentiTable.id))
     .where(eq(contattiCrmTable.id, req.params.id));
-  if (!row) return res.status(404).json({ error: "Not found" });
+  if (!row) {
+    res.status(404).json({ error: "Not found" });
+    return;
+  }
   res.json(row);
 });
 
 router.patch("/contatti/:id", async (req, res) => {
   const parsed = updateContattoSchema.safeParse(req.body);
-  if (!parsed.success) return res.status(400).json({ error: parsed.error.message });
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.message });
+    return;
+  }
   const [row] = await db.update(contattiCrmTable).set(parsed.data).where(eq(contattiCrmTable.id, req.params.id)).returning();
-  if (!row) return res.status(404).json({ error: "Not found" });
+  if (!row) {
+    res.status(404).json({ error: "Not found" });
+    return;
+  }
   res.json({ ...row, operatore_assegnato_nome: null });
 });
 

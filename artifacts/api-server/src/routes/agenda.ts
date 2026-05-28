@@ -21,7 +21,10 @@ router.get("/agenda", async (req, res) => {
 
 router.post("/agenda", async (req, res) => {
   const parsed = insertAgendaItemSchema.safeParse(req.body);
-  if (!parsed.success) return res.status(400).json({ error: parsed.error.message });
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.message });
+    return;
+  }
   const data = {
     ...parsed.data,
     data_ora_inizio: new Date(parsed.data.data_ora_inizio as unknown as string),
@@ -33,18 +36,27 @@ router.post("/agenda", async (req, res) => {
 
 router.get("/agenda/:id", async (req, res) => {
   const [row] = await db.select().from(agendaPersonaleTable).where(eq(agendaPersonaleTable.id, req.params.id));
-  if (!row) return res.status(404).json({ error: "Not found" });
+  if (!row) {
+    res.status(404).json({ error: "Not found" });
+    return;
+  }
   res.json(row);
 });
 
 router.patch("/agenda/:id", async (req, res) => {
   const parsed = updateAgendaItemSchema.safeParse(req.body);
-  if (!parsed.success) return res.status(400).json({ error: parsed.error.message });
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.message });
+    return;
+  }
   const data: Record<string, unknown> = { ...parsed.data };
   if (data.data_ora_inizio) data.data_ora_inizio = new Date(data.data_ora_inizio as string);
   if (data.data_ora_fine) data.data_ora_fine = new Date(data.data_ora_fine as string);
   const [row] = await db.update(agendaPersonaleTable).set(data).where(eq(agendaPersonaleTable.id, req.params.id)).returning();
-  if (!row) return res.status(404).json({ error: "Not found" });
+  if (!row) {
+    res.status(404).json({ error: "Not found" });
+    return;
+  }
   res.json(row);
 });
 

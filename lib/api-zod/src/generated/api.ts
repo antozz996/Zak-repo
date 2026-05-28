@@ -428,6 +428,7 @@ export const GetChatInboxResponseItem = zod.object({
   "timestamp": zod.string(),
   "non_letti": zod.number(),
   "stato_lead": zod.string(),
+  "operatore_assegnato_id": zod.string().nullish(),
   "operatore_assegnato_nome": zod.string().nullish()
 })
 export const GetChatInboxResponse = zod.array(GetChatInboxResponseItem)
@@ -438,7 +439,7 @@ export const GetChatInboxResponse = zod.array(GetChatInboxResponseItem)
  */
 export const AssignChatBody = zod.object({
   "contatto_id": zod.string(),
-  "operatore_id": zod.string()
+  "operatore_id": zod.string().nullish()
 })
 
 export const AssignChatResponse = zod.object({

@@ -11,22 +11,34 @@ router.get("/utenti", async (req, res) => {
 
 router.post("/utenti", async (req, res) => {
   const parsed = insertUtenteSchema.safeParse(req.body);
-  if (!parsed.success) return res.status(400).json({ error: parsed.error.message });
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.message });
+    return;
+  }
   const [row] = await db.insert(utentiTable).values(parsed.data).returning();
   res.status(201).json(row);
 });
 
 router.get("/utenti/:id", async (req, res) => {
   const [row] = await db.select().from(utentiTable).where(eq(utentiTable.id, req.params.id));
-  if (!row) return res.status(404).json({ error: "Not found" });
+  if (!row) {
+    res.status(404).json({ error: "Not found" });
+    return;
+  }
   res.json(row);
 });
 
 router.patch("/utenti/:id", async (req, res) => {
   const parsed = updateUtenteSchema.safeParse(req.body);
-  if (!parsed.success) return res.status(400).json({ error: parsed.error.message });
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.message });
+    return;
+  }
   const [row] = await db.update(utentiTable).set(parsed.data).where(eq(utentiTable.id, req.params.id)).returning();
-  if (!row) return res.status(404).json({ error: "Not found" });
+  if (!row) {
+    res.status(404).json({ error: "Not found" });
+    return;
+  }
   res.json(row);
 });
 

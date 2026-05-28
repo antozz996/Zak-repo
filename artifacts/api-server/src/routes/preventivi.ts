@@ -32,7 +32,10 @@ router.get("/preventivi", async (req, res) => {
 
 router.post("/preventivi", async (req, res) => {
   const parsed = insertPreventivoSchema.safeParse(req.body);
-  if (!parsed.success) return res.status(400).json({ error: parsed.error.message });
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.message });
+    return;
+  }
   const [row] = await db.insert(preventiviEventiTable).values(parsed.data).returning();
   res.status(201).json({ ...row, contatto_nome: null });
 });
@@ -53,15 +56,24 @@ router.get("/preventivi/:id", async (req, res) => {
     .from(preventiviEventiTable)
     .leftJoin(contattiCrmTable, eq(preventiviEventiTable.contatto_id, contattiCrmTable.id))
     .where(eq(preventiviEventiTable.id, req.params.id));
-  if (!row) return res.status(404).json({ error: "Not found" });
+  if (!row) {
+    res.status(404).json({ error: "Not found" });
+    return;
+  }
   res.json(row);
 });
 
 router.patch("/preventivi/:id", async (req, res) => {
   const parsed = updatePreventivoSchema.safeParse(req.body);
-  if (!parsed.success) return res.status(400).json({ error: parsed.error.message });
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.message });
+    return;
+  }
   const [row] = await db.update(preventiviEventiTable).set(parsed.data).where(eq(preventiviEventiTable.id, req.params.id)).returning();
-  if (!row) return res.status(404).json({ error: "Not found" });
+  if (!row) {
+    res.status(404).json({ error: "Not found" });
+    return;
+  }
   res.json({ ...row, contatto_nome: null });
 });
 

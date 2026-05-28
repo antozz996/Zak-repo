@@ -92,7 +92,10 @@ router.get("/dashboard/attivita-recente", async (req, res) => {
 
 router.get("/calendar/check-availability", async (req, res) => {
   const { data } = req.query as { data?: string };
-  if (!data) return res.status(400).json({ error: "data parameter required" });
+  if (!data) {
+    res.status(400).json({ error: "data parameter required" });
+    return;
+  }
 
   const [existing] = await db
     .select()

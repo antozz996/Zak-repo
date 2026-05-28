@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { db, contattiCrmTable, messaggiTable, agendaPersonaleTable } from "@workspace/db";
 import { eq } from "drizzle-orm";
+import { processBookingAssistantMessage } from "../lib/booking-assistant";
 
 const router = Router();
 
@@ -35,7 +36,17 @@ router.post("/webhook/whatsapp", async (req, res) => {
             mittente_nome: contatto.nome,
           });
 
-          await db.update(contattiCrmTable).set({ ultimo_contatto: new Date() }).where(eq(contattiCrmTable.id, contatto.id));
+          if (!contatto.operatore_assegnato_id) {
+            await processBookingAssistantMessage({
+              contatto,
+              testo: text,
+            });
+          } else {
+            await db
+              .update(contattiCrmTable)
+              .set({ ultimo_contatto: new Date() })
+              .where(eq(contattiCrmTable.id, contatto.id));
+          }
         }
       }
     }

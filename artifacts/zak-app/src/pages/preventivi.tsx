@@ -53,6 +53,11 @@ const vuoto = {
   stato_evento: "opzionato",
 };
 
+const parseBudget = (value?: number | string | null) => {
+  if (value === null || value === undefined || value === "") return 0;
+  return typeof value === "number" ? value : parseFloat(value);
+};
+
 export default function Preventivi() {
   const qc = useQueryClient();
   const [filtroStato, setFiltroStato] = useState("all");
@@ -125,7 +130,7 @@ export default function Preventivi() {
 
   const budgetTotale = preventivi
     ?.filter((p) => p.stato_evento === "confermato")
-    .reduce((sum, p) => sum + (parseFloat(p.budget_stimato as string) || 0), 0) ?? 0;
+    .reduce((sum, p) => sum + (parseBudget(p.budget_stimato) || 0), 0) ?? 0;
 
   return (
     <SidebarLayout>
@@ -205,7 +210,7 @@ export default function Preventivi() {
                     <TableCell>{p.numero_invitati ?? "-"}</TableCell>
                     <TableCell>
                       {p.budget_stimato
-                        ? parseFloat(p.budget_stimato as string).toLocaleString("it-IT", { style: "currency", currency: "EUR" })
+                        ? parseBudget(p.budget_stimato).toLocaleString("it-IT", { style: "currency", currency: "EUR" })
                         : "-"}
                     </TableCell>
                     <TableCell>

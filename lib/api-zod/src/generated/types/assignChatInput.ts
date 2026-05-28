@@ -8,5 +8,6 @@
 
 export interface AssignChatInput {
   contatto_id: string;
-  operatore_id: string;
+  /** @nullable */
+  operatore_id?: string | null;
 }

@@ -16,5 +16,7 @@ export interface InboxEntry {
   non_letti: number;
   stato_lead: string;
   /** @nullable */
+  operatore_assegnato_id?: string | null;
+  /** @nullable */
   operatore_assegnato_nome?: string | null;
 }

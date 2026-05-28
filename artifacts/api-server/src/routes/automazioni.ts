@@ -144,10 +144,16 @@ router.get("/automazioni/config", async (req, res) => {
 
 router.patch("/automazioni/config/:chiave", async (req, res) => {
   const { valore } = req.body;
-  if (!valore) return res.status(400).json({ error: "valore required" });
+  if (!valore) {
+    res.status(400).json({ error: "valore required" });
+    return;
+  }
 
   const existing = await db.select().from(automazioniConfigTable).where(eq(automazioniConfigTable.chiave, req.params.chiave));
-  if (existing.length === 0) return res.status(404).json({ error: "Config not found" });
+  if (existing.length === 0) {
+    res.status(404).json({ error: "Config not found" });
+    return;
+  }
 
   const [row] = await db
     .update(automazioniConfigTable)
@@ -160,7 +166,10 @@ router.patch("/automazioni/config/:chiave", async (req, res) => {
 
 router.post("/automazioni/trigger", async (req, res) => {
   const { tipo } = req.body;
-  if (!tipo) return res.status(400).json({ error: "tipo required" });
+  if (!tipo) {
+    res.status(400).json({ error: "tipo required" });
+    return;
+  }
 
   let result: { eseguiti: number; dettagli: string[] };
 
@@ -169,7 +178,8 @@ router.post("/automazioni/trigger", async (req, res) => {
   } else if (tipo === "ricorrenza") {
     result = await runRicorrenze();
   } else {
-    return res.status(400).json({ error: `Tipo sconosciuto: ${tipo}` });
+    res.status(400).json({ error: `Tipo sconosciuto: ${tipo}` });
+    return;
   }
 
   res.json(result);

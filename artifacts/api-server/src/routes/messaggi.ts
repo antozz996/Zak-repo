@@ -20,7 +20,10 @@ router.get("/messaggi", async (req, res) => {
 
 router.post("/messaggi", async (req, res) => {
   const parsed = insertMessaggioSchema.safeParse(req.body);
-  if (!parsed.success) return res.status(400).json({ error: parsed.error.message });
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.message });
+    return;
+  }
   const [row] = await db.insert(messaggiTable).values({
     ...parsed.data,
     direzione: "outbound",
@@ -42,6 +45,7 @@ router.get("/chat/inbox", async (req, res) => {
       c.nome as contatto_nome,
       c.telefono,
       c.stato_lead,
+      c.operatore_assegnato_id,
       u.nome as operatore_assegnato_nome,
       m.canale,
       m.testo as ultimo_messaggio,
@@ -53,7 +57,7 @@ router.get("/chat/inbox", async (req, res) => {
     ) m ON true
     LEFT JOIN messaggi m2 ON m2.contatto_id = c.id
     LEFT JOIN utenti u ON u.id = c.operatore_assegnato_id
-    GROUP BY c.id, c.nome, c.telefono, c.stato_lead, u.nome, m.canale, m.testo, m.timestamp
+    GROUP BY c.id, c.nome, c.telefono, c.stato_lead, c.operatore_assegnato_id, u.nome, m.canale, m.testo, m.timestamp
     ORDER BY m.timestamp DESC
   `);
   res.json(inbox.rows);
@@ -61,13 +65,24 @@ router.get("/chat/inbox", async (req, res) => {
 
 router.post("/chat/assign", async (req, res) => {
   const { contatto_id, operatore_id } = req.body;
-  if (!contatto_id || !operatore_id) return res.status(400).json({ error: "contatto_id and operatore_id required" });
+  if (!contatto_id) {
+    res.status(400).json({ error: "contatto_id required" });
+    return;
+  }
   const [row] = await db
     .update(contattiCrmTable)
-    .set({ operatore_assegnato_id: operatore_id })
+    .set({ operatore_assegnato_id: operatore_id || null })
     .where(eq(contattiCrmTable.id, contatto_id))
     .returning();
-  if (!row) return res.status(404).json({ error: "Not found" });
+  if (!row) {
+    res.status(404).json({ error: "Not found" });
+    return;
+  }
+
+  if (!operatore_id) {
+    res.json({ ...row, operatore_assegnato_nome: null });
+    return;
+  }
 
   const [operatore] = await db.select().from(utentiTable).where(eq(utentiTable.id, operatore_id));
   res.json({ ...row, operatore_assegnato_nome: operatore?.nome ?? null });

@@ -1002,17 +1002,19 @@ components:
           type: integer
         stato_lead:
           type: string
+        operatore_assegnato_id:
+          type: ["string", "null"]
         operatore_assegnato_nome:
           type: ["string", "null"]
 
     AssignChatInput:
       type: object
-      required: [contatto_id, operatore_id]
+      required: [contatto_id]
       properties:
         contatto_id:
           type: string
         operatore_id:
-          type: string
+          type: ["string", "null"]
 
     # ── DASHBOARD ─────────────────────────────────────────────────────────────
     DashboardStats:
