@@ -27,8 +27,8 @@ export default function ContattiNuovo() {
   const crea = useCreateContatto();
 
   const salva = async () => {
-    if (!form.nome.trim()) { setErrore("Il nome è obbligatorio."); return; }
-    if (!form.telefono.trim()) { setErrore("Il telefono è obbligatorio."); return; }
+    if (!form.nome.trim()) { setErrore("Il nome e' obbligatorio."); return; }
+    if (!form.telefono.trim()) { setErrore("Il telefono e' obbligatorio."); return; }
     try {
       await crea.mutateAsync({
         data: {
@@ -43,7 +43,7 @@ export default function ContattiNuovo() {
       await qc.invalidateQueries({ queryKey: getListContattiQueryKey() });
       navigate("/contatti");
     } catch {
-      setErrore("Errore durante il salvataggio. Il numero potrebbe essere già registrato.");
+      setErrore("Errore durante il salvataggio. Il numero potrebbe essere gia' registrato.");
     }
   };
 

@@ -15,6 +15,7 @@ export interface InboxEntry {
   timestamp: string;
   non_letti: number;
   stato_lead: string;
+  handoff_richiesto: boolean;
   /** @nullable */
   operatore_assegnato_id?: string | null;
   /** @nullable */

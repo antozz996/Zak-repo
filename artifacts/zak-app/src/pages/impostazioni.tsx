@@ -16,14 +16,26 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from "@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
-import { Plus, Pencil, Trash2, ShieldCheck, User, Users } from "lucide-react";
+import { Plus, Pencil, Trash2, ShieldCheck, User, Users, UserCheck, UserX } from "lucide-react";
+
+type RuoloUtente = "admin" | "manager" | "staff";
+type StatoUtente = "attivo" | "disattivato";
 
 type Utente = {
   id: string;
   nome: string;
-  ruolo: string;
+  ruolo: RuoloUtente;
   email: string;
+  stato: StatoUtente;
   data_creazione: string;
+};
+
+type UtenteForm = {
+  nome: string;
+  ruolo: RuoloUtente;
+  email: string;
+  stato: StatoUtente;
+  password: string;
 };
 
 const ruoloLabel: Record<string, string> = {
@@ -38,13 +50,23 @@ const ruoloColore: Record<string, string> = {
   staff: "bg-blue-100 text-blue-800",
 };
 
+const statoLabel: Record<StatoUtente, string> = {
+  attivo: "Attivo",
+  disattivato: "Disattivato",
+};
+
+const statoColore: Record<StatoUtente, string> = {
+  attivo: "bg-emerald-100 text-emerald-800",
+  disattivato: "bg-slate-100 text-slate-700",
+};
+
 const RuoloIcon = ({ ruolo }: { ruolo: string }) => {
   if (ruolo === "admin") return <ShieldCheck className="w-3.5 h-3.5" />;
   if (ruolo === "manager") return <Users className="w-3.5 h-3.5" />;
   return <User className="w-3.5 h-3.5" />;
 };
 
-const vuoto = { nome: "", ruolo: "staff", email: "" };
+const vuoto: UtenteForm = { nome: "", ruolo: "staff", email: "", stato: "attivo", password: "" };
 
 export default function Impostazioni() {
   const qc = useQueryClient();
@@ -57,6 +79,8 @@ export default function Impostazioni() {
   const crea = useCreateUtente();
   const aggiorna = useUpdateUtente();
   const elimina = useDeleteUtente();
+  const utentiAttivi = utenti?.filter((utente) => utente.stato === "attivo").length ?? 0;
+  const utentiDisattivati = utenti?.filter((utente) => utente.stato === "disattivato").length ?? 0;
 
   const invalida = () => qc.invalidateQueries({ queryKey: getListUtentiQueryKey() });
 
@@ -69,30 +93,44 @@ export default function Impostazioni() {
 
   const apriModifica = (u: Utente) => {
     setSelezionato(u);
-    setForm({ nome: u.nome, ruolo: u.ruolo, email: u.email });
+    setForm({ nome: u.nome, ruolo: u.ruolo, email: u.email, stato: u.stato, password: "" });
     setErrore("");
     setDrawerAperto(true);
   };
 
   const salva = async () => {
-    if (!form.nome.trim()) { setErrore("Il nome è obbligatorio."); return; }
-    if (!form.email.trim()) { setErrore("L'email è obbligatoria."); return; }
+    if (!form.nome.trim()) { setErrore("Il nome e' obbligatorio."); return; }
+    if (!form.email.trim()) { setErrore("L'email e' obbligatoria."); return; }
+    if (!selezionato && form.password.length < 8) { setErrore("La password iniziale deve avere almeno 8 caratteri."); return; }
     try {
+      const payload = {
+        nome: form.nome,
+        ruolo: form.ruolo,
+        email: form.email,
+        stato: form.stato,
+        ...(form.password ? { password: form.password } : {}),
+      };
       if (selezionato) {
-        await aggiorna.mutateAsync({ id: selezionato.id, data: form });
+        await aggiorna.mutateAsync({ id: selezionato.id, data: payload });
       } else {
-        await crea.mutateAsync({ data: form });
+        await crea.mutateAsync({ data: payload });
       }
       await invalida();
       setDrawerAperto(false);
     } catch {
-      setErrore("Errore durante il salvataggio. L'email potrebbe essere già in uso.");
+      setErrore("Errore durante il salvataggio. L'email potrebbe essere gia' in uso.");
     }
   };
 
   const rimuovi = async (id: string) => {
     if (!confirm("Eliminare questo membro dello staff?")) return;
     await elimina.mutateAsync({ id });
+    await invalida();
+  };
+
+  const cambiaStato = async (utente: Utente) => {
+    const nuovoStato: StatoUtente = utente.stato === "attivo" ? "disattivato" : "attivo";
+    await aggiorna.mutateAsync({ id: utente.id, data: { stato: nuovoStato } });
     await invalida();
   };
 
@@ -109,7 +147,7 @@ export default function Impostazioni() {
             <div>
               <h2 className="text-lg font-semibold">Team Staff</h2>
               <p className="text-sm text-muted-foreground">
-                {utenti?.length || 0} {utenti?.length === 1 ? "membro" : "membri"} del team
+                {utenti?.length || 0} {utenti?.length === 1 ? "membro" : "membri"} del team - {utentiAttivi} attivi, {utentiDisattivati} disattivati
               </p>
             </div>
             <Button onClick={apriNuovo}>
@@ -124,6 +162,7 @@ export default function Impostazioni() {
                   <TableHead>Nome</TableHead>
                   <TableHead>Email</TableHead>
                   <TableHead>Ruolo</TableHead>
+                  <TableHead>Stato</TableHead>
                   <TableHead>Aggiunto il</TableHead>
                   <TableHead></TableHead>
                 </TableRow>
@@ -131,11 +170,11 @@ export default function Impostazioni() {
               <TableBody>
                 {isLoading ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center py-8">Caricamento...</TableCell>
+                    <TableCell colSpan={6} className="text-center py-8">Caricamento...</TableCell>
                   </TableRow>
                 ) : utenti?.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center py-8">Nessun membro trovato.</TableCell>
+                    <TableCell colSpan={6} className="text-center py-8">Nessun membro trovato.</TableCell>
                   </TableRow>
                 ) : (
                   utenti?.map((u) => (
@@ -148,6 +187,12 @@ export default function Impostazioni() {
                           {ruoloLabel[u.ruolo] || u.ruolo}
                         </span>
                       </TableCell>
+                      <TableCell>
+                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold ${statoColore[u.stato as StatoUtente] || "bg-muted"}`}>
+                          {u.stato === "attivo" ? <UserCheck className="w-3.5 h-3.5" /> : <UserX className="w-3.5 h-3.5" />}
+                          {statoLabel[u.stato as StatoUtente] || u.stato}
+                        </span>
+                      </TableCell>
                       <TableCell className="text-muted-foreground">
                         {format(new Date(u.data_creazione), "d MMM yyyy", { locale: it })}
                       </TableCell>
@@ -155,6 +200,14 @@ export default function Impostazioni() {
                         <div className="flex gap-1 justify-end">
                           <Button size="icon" variant="ghost" onClick={() => apriModifica(u as Utente)}>
                             <Pencil className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            onClick={() => cambiaStato(u as Utente)}
+                            title={u.stato === "attivo" ? "Disattiva account" : "Riattiva account"}
+                          >
+                            {u.stato === "attivo" ? <UserX className="w-4 h-4" /> : <UserCheck className="w-4 h-4" />}
                           </Button>
                           <Button size="icon" variant="ghost" className="text-destructive" onClick={() => rimuovi(u.id)}>
                             <Trash2 className="w-4 h-4" />
@@ -194,8 +247,18 @@ export default function Impostazioni() {
               />
             </div>
             <div className="space-y-1.5">
+              <Label>{selezionato ? "Reset password opzionale" : "Password iniziale"}</Label>
+              <Input
+                type="password"
+                placeholder={selezionato ? "Lascia vuoto per non cambiarla" : "Minimo 8 caratteri"}
+                value={form.password}
+                minLength={selezionato ? undefined : 8}
+                onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
+              />
+            </div>
+            <div className="space-y-1.5">
               <Label>Ruolo</Label>
-              <Select value={form.ruolo} onValueChange={(v) => setForm((f) => ({ ...f, ruolo: v }))}>
+              <Select value={form.ruolo} onValueChange={(v) => setForm((f) => ({ ...f, ruolo: v as RuoloUtente }))}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="admin">Amministratore</SelectItem>
@@ -203,6 +266,19 @@ export default function Impostazioni() {
                   <SelectItem value="staff">Staff</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+            <div className="space-y-1.5">
+              <Label>Stato account</Label>
+              <Select value={form.stato} onValueChange={(v) => setForm((f) => ({ ...f, stato: v as StatoUtente }))}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="attivo">Attivo</SelectItem>
+                  <SelectItem value="disattivato">Disattivato</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                Gli account disattivati restano nello storico staff ma non dovranno poter accedere quando l'autenticazione reale sara' attiva.
+              </p>
             </div>
             {errore && <p className="text-sm text-destructive">{errore}</p>}
           </div>

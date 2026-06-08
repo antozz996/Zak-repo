@@ -5,8 +5,17 @@
  * Zak Ecosystem AI - CRM Omnicanale API
  * OpenAPI spec version: 0.1.0
  */
+import type { CalendarAvailabilityProvider } from './calendarAvailabilityProvider';
+import type { CalendarAvailabilitySlotDisponibiliItem } from './calendarAvailabilitySlotDisponibiliItem';
+import type { CalendarAvailabilitySlotRichiesto } from './calendarAvailabilitySlotRichiesto';
 
 export interface CalendarAvailability {
   disponibile: boolean;
+  provider: CalendarAvailabilityProvider;
+  /** @nullable */
+  motivo?: string | null;
+  /** @nullable */
+  slot_richiesto?: CalendarAvailabilitySlotRichiesto;
+  slot_disponibili: CalendarAvailabilitySlotDisponibiliItem[];
   date_alternative: string[];
 }

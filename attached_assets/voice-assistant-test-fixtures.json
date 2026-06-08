@@ -1,0 +1,119 @@
+{
+  "crea_evento_agenda": {
+    "transcript": "Ciao, voglio fissare un sopralluogo per vedere la sala eventi martedi' prossimo alle 15:30.",
+    "phone": "+393339988776",
+    "expected_parsed_intent": {
+      "intent": "create_event",
+      "event_details": {
+        "title": "Sopralluogo Cliente",
+        "date_relative": "martedi' prossimo",
+        "time": "15:30",
+        "type": "visit"
+      },
+      "confidence": 0.94
+    }
+  },
+  "crea_task_staff": {
+    "transcript": "Ricordami di inviare la brochure dei prezzi a Rossi domani mattina appena arrivo in ufficio.",
+    "phone": "+393471122334",
+    "expected_parsed_intent": {
+      "intent": "create_task",
+      "task_details": {
+        "title": "Inviare brochure prezzi a Rossi",
+        "due_relative": "domani mattina",
+        "priority": "normal"
+      },
+      "confidence": 0.91
+    }
+  },
+  "associa_contatto_telefono": {
+    "transcript": "Salve sono Giovanni Verdi. Vorrei essere richiamato per il preventivo.",
+    "phone": "+393397766554",
+    "expected_parsed_intent": {
+      "intent": "match_contact",
+      "contact_details": {
+        "nome": "Giovanni Verdi",
+        "telefono": "+393397766554"
+      },
+      "confidence": 0.96
+    }
+  },
+  "data_domani": {
+    "transcript": "Ci vediamo domani alle ore 10:00 per firmare il contratto di noleggio.",
+    "phone": "+393335544332",
+    "expected_parsed_intent": {
+      "intent": "create_event",
+      "event_details": {
+        "title": "Firma Contratto Noleggio",
+        "date_relative": "domani",
+        "time": "10:00",
+        "type": "signature_meeting"
+      },
+      "confidence": 0.95
+    }
+  },
+  "data_dopodomani": {
+    "transcript": "Possiamo rimandare la visita a dopodomani pomeriggio alle 15?",
+    "phone": "+393335544332",
+    "expected_parsed_intent": {
+      "intent": "update_event",
+      "event_details": {
+        "title": "Sopralluogo Villa",
+        "date_relative": "dopodomani",
+        "time": "15:00",
+        "type": "visit"
+      },
+      "confidence": 0.92
+    }
+  },
+  "orario_alle_15": {
+    "transcript": "Ok segna pure l'appuntamento alle 15 di mercoledi'.",
+    "phone": "+393381122334",
+    "expected_parsed_intent": {
+      "intent": "create_event",
+      "event_details": {
+        "title": "Appuntamento Cliente",
+        "date_relative": "mercoledi'",
+        "time": "15:00",
+        "type": "generic_meeting"
+      },
+      "confidence": 0.89
+    }
+  },
+  "priorita_urgente": {
+    "transcript": "E' urgentissimo, ho bisogno che mi contattiate subito perche' il catering non risponde!",
+    "phone": "+393395544332",
+    "expected_parsed_intent": {
+      "intent": "create_task",
+      "task_details": {
+        "title": "Contattare cliente per emergenza catering",
+        "due_relative": "immediatamente",
+        "priority": "high"
+      },
+      "confidence": 0.97
+    }
+  },
+  "transcript_ambiguo": {
+    "transcript": "Eh non so... forse ci sentiamo piu' in la'...",
+    "phone": "+393334445556",
+    "expected_parsed_intent": {
+      "intent": "unknown",
+      "confidence": 0.25
+    },
+    "action": "human_escalation"
+  },
+  "transcript_senza_telefono": {
+    "transcript": "Vorrei fissare una visita alla villa martedi' prossimo.",
+    "phone": null,
+    "expected_parsed_intent": {
+      "intent": "create_event",
+      "event_details": {
+        "title": "Visita Villa",
+        "date_relative": "martedi' prossimo",
+        "time": null
+      },
+      "confidence": 0.75
+    },
+    "action": "require_phone_identification"
+  }
+}

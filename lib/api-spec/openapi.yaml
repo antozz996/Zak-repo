@@ -10,6 +10,8 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: auth
+    description: Staff authentication and authorization
   - name: utenti
     description: Staff users
   - name: contatti
@@ -18,14 +20,22 @@ tags:
     description: Event quotes
   - name: agenda
     description: Personal agenda
+  - name: task
+    description: Personal tasks separated from calendar events
   - name: chat
     description: Unified chat messages
   - name: dashboard
     description: Dashboard summaries and analytics
+  - name: calendar
+    description: Calendar availability and Google Calendar synchronization
   - name: webhooks
     description: External webhook receivers
   - name: automazioni
     description: CRM automation jobs and configuration
+  - name: audit
+    description: Staff action audit log
+  - name: production
+    description: Production readiness and go-live checks
 
 paths:
   /healthz:
@@ -43,6 +53,77 @@ paths:
                 $ref: "#/components/schemas/HealthStatus"
 
   # ── UTENTI ──────────────────────────────────────────────────────────────────
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Authenticate a staff user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AuthLoginInput"
+      responses:
+        "200":
+          description: Authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthSession"
+        "401":
+          description: Invalid credentials
+
+  /auth/logout:
+    post:
+      operationId: logout
+      tags: [auth]
+      summary: End current client session
+      responses:
+        "200":
+          description: Session closed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthLogoutResponse"
+
+  /auth/me:
+    get:
+      operationId: getCurrentUser
+      tags: [auth]
+      summary: Get current authenticated staff user
+      responses:
+        "200":
+          description: Authenticated user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthUser"
+        "401":
+          description: Missing or invalid session
+
+  /auth/bootstrap-admin:
+    post:
+      operationId: bootstrapAdmin
+      tags: [auth]
+      summary: Create or secure the first admin account
+      description: Creates the first admin when no users exist, or sets password for an existing admin when guarded by ZAK_BOOTSTRAP_ADMIN_TOKEN.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BootstrapAdminInput"
+      responses:
+        "201":
+          description: Bootstrap admin ready
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthUser"
+        "403":
+          description: Bootstrap not allowed
+
   /utenti:
     get:
       operationId: listUtenti
@@ -130,6 +211,124 @@ paths:
         "204":
           description: Deleted
 
+  /preventivi/{id}/versioni:
+    get:
+      operationId: listPreventivoVersioni
+      tags: [preventivi]
+      summary: List quote versions
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/PreventivoVersione"
+    post:
+      operationId: createPreventivoVersione
+      tags: [preventivi]
+      summary: Create a quote version snapshot
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PreventivoVersioneInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PreventivoVersione"
+        "404":
+          description: Quote not found
+
+  /preventivi/{id}/invia-whatsapp:
+    post:
+      operationId: sendPreventivoWhatsApp
+      tags: [preventivi]
+      summary: Send quote summary to the contact via WhatsApp
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PreventivoWhatsAppSendResult"
+        "404":
+          description: Quote not found
+
+  /preventivi/{id}/pdf:
+    get:
+      operationId: downloadPreventivoPdf
+      tags: [preventivi]
+      summary: Download an event quote PDF
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: PDF file
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        "404":
+          description: Quote not found
+
+  /preventivi/{id}/conferma-digitale:
+    post:
+      operationId: confirmPreventivoDigitale
+      tags: [preventivi]
+      summary: Digitally confirm an event quote
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PreventivoConfermaDigitaleInput"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PreventivoConfermaDigitaleResult"
+        "404":
+          description: Quote not found
+        "409":
+          description: Requested event date is already confirmed for another quote
+
   # ── CONTATTI CRM ─────────────────────────────────────────────────────────────
   /contatti:
     get:
@@ -179,6 +378,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Contatto"
+        "409":
+          description: Contact already exists with the same normalized phone or Instagram username
 
   /contatti/{id}:
     get:
@@ -221,6 +422,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Contatto"
+        "409":
+          description: Contact already exists with the same normalized phone or Instagram username
     delete:
       operationId: deleteContatto
       tags: [contatti]
@@ -235,11 +438,51 @@ paths:
         "204":
           description: Deleted
 
+  /contatti/import-csv:
+    post:
+      operationId: importContattiCsv
+      tags: [contatti]
+      summary: Import CRM contacts from CSV text with phone/social deduplication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ImportContattiCsvInput"
+      responses:
+        "200":
+          description: Import result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ImportContattiCsvResult"
+
   /contatti/{id}/messaggi:
     get:
       operationId: getContattoMessaggi
       tags: [contatti]
       summary: Get chat messages for a contact
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+          "200":
+            description: OK
+            content:
+              application/json:
+                schema:
+                  type: array
+                  items:
+                    $ref: "#/components/schemas/Messaggio"
+
+  /contatti/{id}/storico-stato:
+    get:
+      operationId: getContattoStoricoStato
+      tags: [contatti]
+      summary: Get lead status history for a contact
       parameters:
         - name: id
           in: path
@@ -254,7 +497,26 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/Messaggio"
+                  $ref: "#/components/schemas/StatoLeadStoricoItem"
+
+  /messaggi/{id}/read:
+    patch:
+      operationId: markMessaggioRead
+      tags: [chat]
+      summary: Mark a message as read
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Messaggio"
 
   # ── PREVENTIVI EVENTI ────────────────────────────────────────────────────────
   /preventivi:
@@ -297,6 +559,29 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Preventivo"
+        "409":
+          description: Requested event date is already confirmed for another quote
+
+  /preventivi/calcola-prezzo:
+    post:
+      operationId: calculatePreventivoPricing
+      tags: [preventivi]
+      summary: Calculate quote pricing from package, guests and extras
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PreventivoPricingInput"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PreventivoPricingResult"
+        "400":
+          description: Invalid pricing request
 
   /preventivi/{id}:
     get:
@@ -339,6 +624,8 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Preventivo"
+        "409":
+          description: Requested event date is already confirmed for another quote
     delete:
       operationId: deletePreventivo
       tags: [preventivi]
@@ -455,6 +742,402 @@ paths:
           description: Deleted
 
   # ── CHAT MESSAGES (Unified Inbox) ─────────────────────────────────────────────
+  /task-personali:
+    get:
+      operationId: listTaskPersonali
+      tags: [task]
+      summary: List personal tasks separated from agenda events
+      parameters:
+        - name: stato
+          in: query
+          schema:
+            type: string
+        - name: priorita
+          in: query
+          schema:
+            type: string
+        - name: contatto_id
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TaskPersonale"
+    post:
+      operationId: createTaskPersonale
+      tags: [task]
+      summary: Create a personal task
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TaskPersonaleInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TaskPersonale"
+
+  /task-personali/{id}:
+    get:
+      operationId: getTaskPersonale
+      tags: [task]
+      summary: Get a personal task
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TaskPersonale"
+    patch:
+      operationId: updateTaskPersonale
+      tags: [task]
+      summary: Update a personal task
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TaskPersonaleUpdate"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TaskPersonale"
+    delete:
+      operationId: deleteTaskPersonale
+      tags: [task]
+      summary: Delete a personal task
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
+
+  /b2b/competitor:
+    get:
+      operationId: listB2BCompetitor
+      tags: [b2b]
+      summary: List B2B competitor archive entries
+      parameters:
+        - name: search
+          in: query
+          schema:
+            type: string
+        - name: categoria
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/B2BCompetitor"
+    post:
+      operationId: createB2BCompetitor
+      tags: [b2b]
+      summary: Create a B2B competitor archive entry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/B2BCompetitorInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/B2BCompetitor"
+
+  /b2b/competitor/{id}:
+    get:
+      operationId: getB2BCompetitor
+      tags: [b2b]
+      summary: Get a B2B competitor archive entry
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/B2BCompetitor"
+        "404":
+          description: Competitor not found
+    patch:
+      operationId: updateB2BCompetitor
+      tags: [b2b]
+      summary: Update a B2B competitor archive entry
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/B2BCompetitorUpdate"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/B2BCompetitor"
+        "404":
+          description: Competitor not found
+    delete:
+      operationId: deleteB2BCompetitor
+      tags: [b2b]
+      summary: Delete a B2B competitor archive entry
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
+
+  /b2b/materiali:
+    get:
+      operationId: listB2BMateriali
+      tags: [b2b]
+      summary: List B2B competitor materials metadata
+      parameters:
+        - name: competitor_id
+          in: query
+          schema:
+            type: string
+        - name: stato
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/B2BMateriale"
+    post:
+      operationId: createB2BMateriale
+      tags: [b2b]
+      summary: Register competitor material metadata
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/B2BMaterialeInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/B2BMateriale"
+
+  /b2b/materiali/{id}:
+    patch:
+      operationId: updateB2BMateriale
+      tags: [b2b]
+      summary: Update competitor material metadata
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/B2BMaterialeUpdate"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/B2BMateriale"
+        "404":
+          description: Material not found
+    delete:
+      operationId: deleteB2BMateriale
+      tags: [b2b]
+      summary: Delete competitor material metadata
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
+
+  /b2b/template:
+    get:
+      operationId: listB2BTemplate
+      tags: [b2b]
+      summary: List B2B co-branding templates
+      parameters:
+        - name: target_tipo
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/B2BTemplate"
+    post:
+      operationId: createB2BTemplate
+      tags: [b2b]
+      summary: Create a B2B co-branding template
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/B2BTemplateInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/B2BTemplate"
+
+  /b2b/template/{id}:
+    patch:
+      operationId: updateB2BTemplate
+      tags: [b2b]
+      summary: Update a B2B co-branding template
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/B2BTemplateUpdate"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/B2BTemplate"
+        "404":
+          description: Template not found
+    delete:
+      operationId: deleteB2BTemplate
+      tags: [b2b]
+      summary: Delete a B2B co-branding template
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
+
+  /b2b/analisi-competitor:
+    post:
+      operationId: analyzeB2BCompetitor
+      tags: [b2b]
+      summary: Generate a structured competitor analysis
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/B2BCompetitorAnalysisInput"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/B2BCompetitorAnalysisResult"
+
+  /b2b/export:
+    post:
+      operationId: exportB2BPitch
+      tags: [b2b]
+      summary: Export a B2B pitch as PDF or presentation outline
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/B2BExportInput"
+      responses:
+        "200":
+          description: Export generated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/B2BExportResult"
+
   /messaggi:
     get:
       operationId: listMessaggi
@@ -466,6 +1149,18 @@ paths:
           schema:
             type: string
         - name: contatto_id
+          in: query
+          schema:
+            type: string
+        - name: letto
+          in: query
+          schema:
+            type: boolean
+        - name: stato_lead
+          in: query
+          schema:
+            type: string
+        - name: operatore_id
           in: query
           schema:
             type: string
@@ -495,12 +1190,27 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Messaggio"
+        "409":
+          description: WhatsApp 24-hour conversation window is closed for free-form messages
 
   /chat/inbox:
     get:
       operationId: getChatInbox
       tags: [chat]
       summary: Get unified inbox - one entry per contact with last message
+      parameters:
+        - name: canale
+          in: query
+          schema:
+            type: string
+        - name: stato_lead
+          in: query
+          schema:
+            type: string
+        - name: operatore_id
+          in: query
+          schema:
+            type: string
       responses:
         "200":
           description: OK
@@ -530,12 +1240,112 @@ paths:
               schema:
                 $ref: "#/components/schemas/Contatto"
 
+  /chat/events:
+    get:
+      operationId: streamChatEvents
+      tags: [chat]
+      summary: Stream realtime chat events with Server-Sent Events
+      description: Server-Sent Events stream for multi-operator inbox updates, read receipts, chat assignment and presence changes.
+      responses:
+        "200":
+          description: SSE stream opened
+          content:
+            text/event-stream:
+              schema:
+                type: string
+
+  /chat/typing:
+    get:
+      operationId: listChatTyping
+      tags: [chat]
+      summary: List active typing operators for a chat
+      parameters:
+        - name: contatto_id
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: canale
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ChatTypingStatus"
+    post:
+      operationId: updateChatTyping
+      tags: [chat]
+      summary: Update operator typing status for a chat
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChatTypingInput"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatTypingStatus"
+
   # ── DASHBOARD & ANALYTICS ────────────────────────────────────────────────────
+  /chat/presence:
+    get:
+      operationId: listChatPresence
+      tags: [chat]
+      summary: List online/offline operator presence
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/OperatorPresence"
+
+  /chat/presence/heartbeat:
+    post:
+      operationId: heartbeatChatPresence
+      tags: [chat]
+      summary: Update operator online heartbeat
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OperatorPresenceHeartbeatInput"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OperatorPresence"
+
   /dashboard/stats:
     get:
       operationId: getDashboardStats
       tags: [dashboard]
       summary: Get dashboard summary stats
+      parameters:
+        - name: data_da
+          in: query
+          schema:
+            type: string
+        - name: data_a
+          in: query
+          schema:
+            type: string
       responses:
         "200":
           description: OK
@@ -549,6 +1359,15 @@ paths:
       operationId: getLeadPipeline
       tags: [dashboard]
       summary: Get lead counts by status
+      parameters:
+        - name: data_da
+          in: query
+          schema:
+            type: string
+        - name: data_a
+          in: query
+          schema:
+            type: string
       responses:
         "200":
           description: OK
@@ -564,6 +1383,15 @@ paths:
       operationId: getEventiMese
       tags: [dashboard]
       summary: Get confirmed events by month for the current year
+      parameters:
+        - name: data_da
+          in: query
+          schema:
+            type: string
+        - name: data_a
+          in: query
+          schema:
+            type: string
       responses:
         "200":
           description: OK
@@ -579,6 +1407,15 @@ paths:
       operationId: getAttivitaRecente
       tags: [dashboard]
       summary: Get recent activity feed
+      parameters:
+        - name: data_da
+          in: query
+          schema:
+            type: string
+        - name: data_a
+          in: query
+          schema:
+            type: string
       responses:
         "200":
           description: OK
@@ -592,14 +1429,20 @@ paths:
   /calendar/check-availability:
     get:
       operationId: checkCalendarAvailability
-      tags: [dashboard]
-      summary: Check if a date is available for events
+      tags: [calendar]
+      summary: Check if a date is available for events using internal data and Google Calendar when configured
       parameters:
         - name: data
           in: query
           required: true
           schema:
             type: string
+        - name: slot
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [pranzo, pomeriggio, sera, intera_giornata]
       responses:
         "200":
           description: OK
@@ -607,6 +1450,51 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/CalendarAvailability"
+
+  /calendar/google/status:
+    get:
+      operationId: getGoogleCalendarStatus
+      tags: [calendar]
+      summary: Get Google Calendar integration status
+      responses:
+        "200":
+          description: Google Calendar integration status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GoogleCalendarStatus"
+
+  /calendar/google/sync:
+    post:
+      operationId: syncGoogleCalendar
+      tags: [calendar]
+      summary: Run Google Calendar synchronization
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GoogleCalendarSyncInput"
+      responses:
+        "200":
+          description: Synchronization result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GoogleCalendarSyncResult"
+
+  /production/readiness:
+    get:
+      operationId: getProductionReadiness
+      tags: [production]
+      summary: Get production go-live readiness checks
+      responses:
+        "200":
+          description: Production readiness report
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductionReadiness"
 
   # ── WEBHOOKS ─────────────────────────────────────────────────────────────────
   # ── AUTOMAZIONI ─────────────────────────────────────────────────────────────
@@ -634,11 +1522,24 @@ paths:
                 items:
                   $ref: "#/components/schemas/AutomazioneLog"
 
+  /automazioni/performance:
+    get:
+      operationId: getAutomazioniPerformance
+      tags: [automazioni]
+      summary: Get automation performance metrics from execution logs
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AutomazioniPerformance"
+
   /automazioni/config:
     get:
       operationId: listAutomazioniConfig
       tags: [automazioni]
-      summary: Get automation configuration settings
+      summary: Get automation configuration settings, including event-type segmentation
       responses:
         "200":
           description: OK
@@ -653,7 +1554,7 @@ paths:
     patch:
       operationId: updateAutomazioneConfig
       tags: [automazioni]
-      summary: Update an automation config value
+      summary: Update an automation config value such as timing, toggles, or event-type segments
       parameters:
         - name: chiave
           in: path
@@ -678,7 +1579,7 @@ paths:
     post:
       operationId: triggerAutomazione
       tags: [automazioni]
-      summary: Manually trigger an automation job
+      summary: Manually trigger an automation job using the current segmentation config
       requestBody:
         required: true
         content:
@@ -693,7 +1594,64 @@ paths:
               schema:
                 $ref: "#/components/schemas/TriggerManualResponse"
 
+  /audit-log:
+    get:
+      operationId: listAuditLog
+      tags: [audit]
+      summary: List staff action audit log entries
+      parameters:
+        - name: azione
+          in: query
+          schema:
+            type: string
+        - name: entita
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/AuditLogItem"
+
   /webhook/whatsapp:
+    get:
+      operationId: webhookWhatsappChallenge
+      tags: [webhooks]
+      summary: Verify Meta WhatsApp webhook challenge
+      parameters:
+        - name: hub.mode
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: hub.verify_token
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: hub.challenge
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Challenge accepted
+          content:
+            text/plain:
+              schema:
+                type: string
+        "403":
+          description: Invalid verify token
     post:
       operationId: webhookWhatsapp
       tags: [webhooks]
@@ -716,7 +1674,7 @@ paths:
     post:
       operationId: webhookVoiceAssistant
       tags: [webhooks]
-      summary: Receive voice call transcription from Vapi
+      summary: Receive generic, Vapi, or Bland voice call transcription webhook
       requestBody:
         required: true
         content:
@@ -731,6 +1689,21 @@ paths:
               schema:
                 $ref: "#/components/schemas/WebhookResponse"
 
+  /webhook/google-calendar:
+    post:
+      operationId: webhookGoogleCalendar
+      tags: [webhooks]
+      summary: Receive Google Calendar push notification and trigger incremental sync
+      responses:
+        "200":
+          description: Notification accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WebhookResponse"
+        "401":
+          description: Invalid Google channel token
+
 components:
   schemas:
     HealthStatus:
@@ -742,9 +1715,9 @@ components:
         - status
 
     # ── UTENTE ────────────────────────────────────────────────────────────────
-    Utente:
+    AuthUser:
       type: object
-      required: [id, nome, ruolo, email, data_creazione]
+      required: [id, nome, ruolo, email, stato]
       properties:
         id:
           type: string
@@ -752,8 +1725,80 @@ components:
           type: string
         ruolo:
           type: string
+          enum: [admin, manager, staff]
         email:
           type: string
+          format: email
+        stato:
+          type: string
+          enum: [attivo, disattivato]
+
+    AuthLoginInput:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 8
+        remember:
+          type: boolean
+          default: false
+
+    AuthSession:
+      type: object
+      required: [token, expires_at, utente]
+      properties:
+        token:
+          type: string
+        expires_at:
+          type: string
+        utente:
+          $ref: "#/components/schemas/AuthUser"
+
+    AuthLogoutResponse:
+      type: object
+      required: [success]
+      properties:
+        success:
+          type: boolean
+
+    BootstrapAdminInput:
+      type: object
+      required: [nome, email, password]
+      properties:
+        nome:
+          type: string
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 8
+        bootstrap_token:
+          type: string
+          description: Required when users already exist and ZAK_BOOTSTRAP_ADMIN_TOKEN is configured.
+
+    Utente:
+      type: object
+      required: [id, nome, ruolo, email, stato, data_creazione]
+      properties:
+        id:
+          type: string
+        nome:
+          type: string
+        ruolo:
+          type: string
+          enum: [admin, manager, staff]
+        email:
+          type: string
+          format: email
+        stato:
+          type: string
+          enum: [attivo, disattivato]
+          description: Stato operativo account staff. Gli account disattivati non devono poter accedere quando verra implementata l'autenticazione.
         data_creazione:
           type: string
 
@@ -765,8 +1810,18 @@ components:
           type: string
         ruolo:
           type: string
+          enum: [admin, manager, staff]
         email:
           type: string
+          format: email
+        stato:
+          type: string
+          enum: [attivo, disattivato]
+          default: attivo
+        password:
+          type: string
+          minLength: 8
+          description: Optional initial password. Never returned by the API.
 
     UtenteUpdate:
       type: object
@@ -775,13 +1830,22 @@ components:
           type: string
         ruolo:
           type: string
+          enum: [admin, manager, staff]
         email:
           type: string
+          format: email
+        stato:
+          type: string
+          enum: [attivo, disattivato]
+        password:
+          type: string
+          minLength: 8
+          description: Optional password reset. Never returned by the API.
 
     # ── CONTATTO ──────────────────────────────────────────────────────────────
     Contatto:
       type: object
-      required: [id, nome, telefono, origine_lead, stato_lead, data_creazione]
+      required: [id, nome, telefono, origine_lead, stato_lead, handoff_richiesto, data_creazione]
       properties:
         id:
           type: string
@@ -795,8 +1859,12 @@ components:
           type: string
         tipo_evento:
           type: ["string", "null"]
+        note_interna:
+          type: ["string", "null"]
         stato_lead:
           type: string
+        handoff_richiesto:
+          type: boolean
         data_creazione:
           type: string
         ultimo_contatto:
@@ -820,10 +1888,42 @@ components:
           type: string
         tipo_evento:
           type: string
+        note_interna:
+          type: string
         stato_lead:
           type: string
+        handoff_richiesto:
+          type: boolean
         operatore_assegnato_id:
           type: string
+
+    ImportContattiCsvInput:
+      type: object
+      required: [csv]
+      properties:
+        csv:
+          type: string
+
+    ImportContattiCsvResult:
+      type: object
+      required: [totale_righe, creati, saltati, errori]
+      properties:
+        totale_righe:
+          type: integer
+        creati:
+          type: integer
+        saltati:
+          type: integer
+        errori:
+          type: array
+          items:
+            type: object
+            required: [riga, motivo]
+            properties:
+              riga:
+                type: integer
+              motivo:
+                type: string
 
     ContattoUpdate:
       type: object
@@ -838,8 +1938,12 @@ components:
           type: string
         tipo_evento:
           type: string
+        note_interna:
+          type: string
         stato_lead:
           type: string
+        handoff_richiesto:
+          type: boolean
         operatore_assegnato_id:
           type: string
 
@@ -866,6 +1970,15 @@ components:
           type: string
         data_creazione:
           type: string
+        google_calendar_id:
+          type: ["string", "null"]
+        google_event_id:
+          type: ["string", "null"]
+        google_sync_status:
+          type: ["string", "null"]
+          enum: [non_configurato, pending, synced, conflict, error, null]
+        google_last_synced_at:
+          type: ["string", "null"]
 
     PreventivoInput:
       type: object
@@ -883,6 +1996,13 @@ components:
           type: string
         stato_evento:
           type: string
+        google_calendar_id:
+          type: string
+        google_event_id:
+          type: string
+        google_sync_status:
+          type: string
+          enum: [non_configurato, pending, synced, conflict, error]
 
     PreventivoUpdate:
       type: object
@@ -897,8 +2017,128 @@ components:
           type: string
         stato_evento:
           type: string
+        google_calendar_id:
+          type: string
+        google_event_id:
+          type: string
+        google_sync_status:
+          type: string
+          enum: [non_configurato, pending, synced, conflict, error]
 
     # ── AGENDA ────────────────────────────────────────────────────────────────
+    PreventivoPricingInput:
+      type: object
+      required: [pacchetto, numero_invitati]
+      properties:
+        pacchetto:
+          type: string
+          enum: [essenziale, standard, premium]
+        numero_invitati:
+          type: integer
+        tipo_evento:
+          type: string
+        extra:
+          type: array
+          items:
+            type: string
+            enum: [open_bar, dj_set, fotografo, allestimento, torta, sicurezza]
+
+    PreventivoPricingVoce:
+      type: object
+      required: [codice, descrizione, quantita, prezzo_unitario, totale]
+      properties:
+        codice:
+          type: string
+        descrizione:
+          type: string
+        quantita:
+          type: number
+        prezzo_unitario:
+          type: number
+        totale:
+          type: number
+
+    PreventivoPricingResult:
+      type: object
+      required: [pacchetto, numero_invitati, voci, totale, totale_formattato]
+      properties:
+        pacchetto:
+          type: string
+          enum: [essenziale, standard, premium]
+        numero_invitati:
+          type: integer
+        voci:
+          type: array
+          items:
+            $ref: "#/components/schemas/PreventivoPricingVoce"
+        totale:
+          type: number
+        totale_formattato:
+          type: string
+        note:
+          type: string
+
+    PreventivoVersione:
+      type: object
+      required: [id, preventivo_id, numero_versione, snapshot, data_creazione]
+      properties:
+        id:
+          type: string
+        preventivo_id:
+          type: string
+        numero_versione:
+          type: integer
+        snapshot:
+          type: object
+          additionalProperties: true
+        nota:
+          type: ["string", "null"]
+        data_creazione:
+          type: string
+
+    PreventivoVersioneInput:
+      type: object
+      properties:
+        nota:
+          type: string
+
+    PreventivoWhatsAppSendResult:
+      type: object
+      required: [success, status, message]
+      properties:
+        success:
+          type: boolean
+        status:
+          type: string
+          enum: [sent, skipped, failed]
+        message:
+          type: string
+        provider_message_id:
+          type: ["string", "null"]
+
+    PreventivoConfermaDigitaleInput:
+      type: object
+      required: [firmatario_nome, metodo]
+      properties:
+        firmatario_nome:
+          type: string
+        firmatario_telefono:
+          type: string
+        metodo:
+          type: string
+          enum: [firma_digitale, conferma_whatsapp, conferma_manuale]
+        note:
+          type: string
+
+    PreventivoConfermaDigitaleResult:
+      type: object
+      required: [preventivo, message]
+      properties:
+        preventivo:
+          $ref: "#/components/schemas/Preventivo"
+        message:
+          type: string
+
     AgendaItem:
       type: object
       required: [id, titolo, data_ora_inizio, data_ora_fine, categoria, promemoria_inviato]
@@ -915,8 +2155,26 @@ components:
           type: string
         categoria:
           type: string
+        contatto_id:
+          type: ["string", "null"]
+        contatto_nome:
+          type: ["string", "null"]
         promemoria_inviato:
           type: boolean
+        google_calendar_id:
+          type: ["string", "null"]
+        google_event_id:
+          type: ["string", "null"]
+        google_sync_status:
+          type: ["string", "null"]
+          enum: [non_configurato, pending, synced, conflict, error, null]
+        google_sync_direction:
+          type: ["string", "null"]
+          enum: [zak, google, bidirectional, null]
+        google_last_synced_at:
+          type: ["string", "null"]
+        google_updated_at:
+          type: ["string", "null"]
 
     AgendaItemInput:
       type: object
@@ -932,6 +2190,18 @@ components:
           type: string
         categoria:
           type: string
+        contatto_id:
+          type: string
+        google_calendar_id:
+          type: string
+        google_event_id:
+          type: string
+        google_sync_status:
+          type: string
+          enum: [non_configurato, pending, synced, conflict, error]
+        google_sync_direction:
+          type: string
+          enum: [zak, google, bidirectional]
 
     AgendaItemUpdate:
       type: object
@@ -946,10 +2216,377 @@ components:
           type: string
         categoria:
           type: string
+        contatto_id:
+          type: string
         promemoria_inviato:
           type: boolean
+        google_calendar_id:
+          type: string
+        google_event_id:
+          type: string
+        google_sync_status:
+          type: string
+          enum: [non_configurato, pending, synced, conflict, error]
+        google_sync_direction:
+          type: string
+          enum: [zak, google, bidirectional]
 
     # ── MESSAGGI (Unified Chat) ───────────────────────────────────────────────
+    TaskPersonale:
+      type: object
+      required: [id, titolo, stato, priorita, fonte, data_creazione]
+      properties:
+        id:
+          type: string
+        titolo:
+          type: string
+        descrizione:
+          type: ["string", "null"]
+        stato:
+          type: string
+        priorita:
+          type: string
+        scadenza:
+          type: ["string", "null"]
+        contatto_id:
+          type: ["string", "null"]
+        contatto_nome:
+          type: ["string", "null"]
+        fonte:
+          type: string
+        data_creazione:
+          type: string
+        completato_il:
+          type: ["string", "null"]
+
+    TaskPersonaleInput:
+      type: object
+      required: [titolo]
+      properties:
+        titolo:
+          type: string
+        descrizione:
+          type: string
+        stato:
+          type: string
+        priorita:
+          type: string
+        scadenza:
+          type: string
+        contatto_id:
+          type: string
+        fonte:
+          type: string
+
+    TaskPersonaleUpdate:
+      type: object
+      properties:
+        titolo:
+          type: string
+        descrizione:
+          type: string
+        stato:
+          type: string
+        priorita:
+          type: string
+        scadenza:
+          type: string
+        contatto_id:
+          type: string
+        fonte:
+          type: string
+        completato_il:
+          type: string
+
+    B2BCompetitor:
+      type: object
+      required: [id, nome, categoria, data_creazione, data_aggiornamento]
+      properties:
+        id:
+          type: string
+        nome:
+          type: string
+        categoria:
+          type: string
+        citta:
+          type: ["string", "null"]
+        zona:
+          type: ["string", "null"]
+        target:
+          type: ["string", "null"]
+        prezzo_medio:
+          type: ["integer", "null"]
+        rating:
+          type: ["integer", "null"]
+        punti_forza:
+          type: ["string", "null"]
+        punti_deboli:
+          type: ["string", "null"]
+        sito:
+          type: ["string", "null"]
+        instagram:
+          type: ["string", "null"]
+        note:
+          type: ["string", "null"]
+        data_creazione:
+          type: string
+        data_aggiornamento:
+          type: string
+
+    B2BCompetitorInput:
+      type: object
+      required: [nome]
+      properties:
+        nome:
+          type: string
+        categoria:
+          type: string
+        citta:
+          type: string
+        zona:
+          type: string
+        target:
+          type: string
+        prezzo_medio:
+          type: integer
+        rating:
+          type: integer
+        punti_forza:
+          type: string
+        punti_deboli:
+          type: string
+        sito:
+          type: string
+        instagram:
+          type: string
+        note:
+          type: string
+
+    B2BCompetitorUpdate:
+      type: object
+      properties:
+        nome:
+          type: string
+        categoria:
+          type: string
+        citta:
+          type: string
+        zona:
+          type: string
+        target:
+          type: string
+        prezzo_medio:
+          type: integer
+        rating:
+          type: integer
+        punti_forza:
+          type: string
+        punti_deboli:
+          type: string
+        sito:
+          type: string
+        instagram:
+          type: string
+        note:
+          type: string
+
+    B2BMateriale:
+      type: object
+      required: [id, nome_file, tipo_materiale, stato, data_creazione]
+      properties:
+        id:
+          type: string
+        competitor_id:
+          type: ["string", "null"]
+        competitor_nome:
+          type: ["string", "null"]
+        nome_file:
+          type: string
+        tipo_materiale:
+          type: string
+        url:
+          type: ["string", "null"]
+        stato:
+          type: string
+        note:
+          type: ["string", "null"]
+        data_creazione:
+          type: string
+
+    B2BMaterialeInput:
+      type: object
+      required: [nome_file]
+      properties:
+        competitor_id:
+          type: string
+        nome_file:
+          type: string
+        tipo_materiale:
+          type: string
+        url:
+          type: string
+        stato:
+          type: string
+        note:
+          type: string
+
+    B2BMaterialeUpdate:
+      type: object
+      properties:
+        competitor_id:
+          type: string
+        nome_file:
+          type: string
+        tipo_materiale:
+          type: string
+        url:
+          type: string
+        stato:
+          type: string
+        note:
+          type: string
+
+    B2BTemplate:
+      type: object
+      required: [id, titolo, target_tipo, messaggio, utilizzi, data_creazione, data_aggiornamento]
+      properties:
+        id:
+          type: string
+        titolo:
+          type: string
+        target_tipo:
+          type: string
+        target_descrizione:
+          type: ["string", "null"]
+        messaggio:
+          type: string
+        vantaggi:
+          type: ["string", "null"]
+        cta:
+          type: ["string", "null"]
+        utilizzi:
+          type: integer
+        data_creazione:
+          type: string
+        data_aggiornamento:
+          type: string
+
+    B2BTemplateInput:
+      type: object
+      required: [titolo, messaggio]
+      properties:
+        titolo:
+          type: string
+        target_tipo:
+          type: string
+        target_descrizione:
+          type: string
+        messaggio:
+          type: string
+        vantaggi:
+          type: string
+        cta:
+          type: string
+        utilizzi:
+          type: integer
+
+    B2BTemplateUpdate:
+      type: object
+      properties:
+        titolo:
+          type: string
+        target_tipo:
+          type: string
+        target_descrizione:
+          type: string
+        messaggio:
+          type: string
+        vantaggi:
+          type: string
+        cta:
+          type: string
+        utilizzi:
+          type: integer
+
+    B2BCompetitorAnalysisInput:
+      type: object
+      required: [prompt]
+      properties:
+        competitor_id:
+          type: string
+        prompt:
+          type: string
+        focus:
+          type: string
+          enum: [prezzo, proposta, debolezze, generale]
+
+    B2BCompetitorAnalysisResult:
+      type: object
+      required: [titolo, sintesi, punti_forza, punti_deboli, opportunita, azioni_consigliate]
+      properties:
+        titolo:
+          type: string
+        sintesi:
+          type: string
+        punti_forza:
+          type: array
+          items:
+            type: string
+        punti_deboli:
+          type: array
+          items:
+            type: string
+        opportunita:
+          type: array
+          items:
+            type: string
+        azioni_consigliate:
+          type: array
+          items:
+            type: string
+        confidence:
+          type: string
+
+    B2BExportInput:
+      type: object
+      required: [titolo, target, formato]
+      properties:
+        titolo:
+          type: string
+        target:
+          type: string
+        messaggio:
+          type: string
+        budget:
+          type: number
+        formato:
+          type: string
+          enum: [pdf, presentazione]
+
+    B2BExportResult:
+      type: object
+      required: [formato, titolo, contenuto, slides]
+      properties:
+        formato:
+          type: string
+          enum: [pdf, presentazione]
+        titolo:
+          type: string
+        contenuto:
+          type: string
+        download_filename:
+          type: string
+        slides:
+          type: array
+          items:
+            type: object
+            required: [titolo, contenuto]
+            properties:
+              titolo:
+                type: string
+              contenuto:
+                type: string
+
     Messaggio:
       type: object
       required: [id, contatto_id, canale, direzione, testo, timestamp]
@@ -964,6 +2601,16 @@ components:
           type: string
         testo:
           type: string
+        media_id:
+          type: ["string", "null"]
+        media_tipo:
+          type: ["string", "null"]
+        media_mime_type:
+          type: ["string", "null"]
+        media_sha256:
+          type: ["string", "null"]
+        media_filename:
+          type: ["string", "null"]
         timestamp:
           type: string
         letto:
@@ -982,9 +2629,82 @@ components:
         testo:
           type: string
 
+    StatoLeadStoricoItem:
+      type: object
+      required: [id, contatto_id, stato_successivo, origine, data_cambio]
+      properties:
+        id:
+          type: string
+        contatto_id:
+          type: string
+        stato_precedente:
+          type: ["string", "null"]
+        stato_successivo:
+          type: string
+        origine:
+          type: string
+        nota:
+          type: ["string", "null"]
+        data_cambio:
+          type: string
+
+    OperatorPresence:
+      type: object
+      required: [utente_id, nome, ruolo, online, ultimo_heartbeat]
+      properties:
+        utente_id:
+          type: string
+        nome:
+          type: string
+        ruolo:
+          type: string
+        online:
+          type: boolean
+        ultimo_heartbeat:
+          type: string
+
+    OperatorPresenceHeartbeatInput:
+      type: object
+      required: [utente_id]
+      properties:
+        utente_id:
+          type: string
+
+    ChatTypingStatus:
+      type: object
+      required: [contatto_id, canale, utente_id, utente_nome, is_typing, updated_at]
+      properties:
+        contatto_id:
+          type: string
+        canale:
+          type: string
+        utente_id:
+          type: string
+        utente_nome:
+          type: string
+        is_typing:
+          type: boolean
+        updated_at:
+          type: string
+        expires_at:
+          type: ["string", "null"]
+
+    ChatTypingInput:
+      type: object
+      required: [contatto_id, canale, utente_id, is_typing]
+      properties:
+        contatto_id:
+          type: string
+        canale:
+          type: string
+        utente_id:
+          type: string
+        is_typing:
+          type: boolean
+
     InboxEntry:
       type: object
-      required: [contatto_id, contatto_nome, telefono, canale, ultimo_messaggio, timestamp, non_letti, stato_lead]
+      required: [contatto_id, contatto_nome, telefono, canale, ultimo_messaggio, timestamp, non_letti, stato_lead, handoff_richiesto]
       properties:
         contatto_id:
           type: string
@@ -1002,6 +2722,8 @@ components:
           type: integer
         stato_lead:
           type: string
+        handoff_richiesto:
+          type: boolean
         operatore_assegnato_id:
           type: ["string", "null"]
         operatore_assegnato_nome:
@@ -1019,7 +2741,7 @@ components:
     # ── DASHBOARD ─────────────────────────────────────────────────────────────
     DashboardStats:
       type: object
-      required: [totale_contatti, nuovi_oggi, preventivi_attivi, eventi_confermati, budget_totale_confermato, messaggi_non_letti]
+      required: [totale_contatti, nuovi_oggi, preventivi_attivi, eventi_confermati, budget_totale_confermato, messaggi_non_letti, lead_con_preventivo, lead_confermati, conversione_lead_preventivo, conversione_preventivo_confermato, conversione_lead_confermato]
       properties:
         totale_contatti:
           type: integer
@@ -1033,6 +2755,16 @@ components:
           type: number
         messaggi_non_letti:
           type: integer
+        lead_con_preventivo:
+          type: integer
+        lead_confermati:
+          type: integer
+        conversione_lead_preventivo:
+          type: number
+        conversione_preventivo_confermato:
+          type: number
+        conversione_lead_confermato:
+          type: number
 
     PipelineCount:
       type: object
@@ -1069,14 +2801,113 @@ components:
 
     CalendarAvailability:
       type: object
-      required: [disponibile, date_alternative]
+      required: [disponibile, date_alternative, slot_disponibili, provider]
       properties:
         disponibile:
           type: boolean
+        provider:
+          type: string
+          enum: [internal, google, combined]
+        motivo:
+          type: ["string", "null"]
+        slot_richiesto:
+          type: ["string", "null"]
+          enum: [pranzo, pomeriggio, sera, intera_giornata, null]
+        slot_disponibili:
+          type: array
+          items:
+            type: string
+            enum: [pranzo, pomeriggio, sera, intera_giornata]
         date_alternative:
           type: array
           items:
             type: string
+
+    GoogleCalendarStatus:
+      type: object
+      required: [configured, enabled, calendar_id, mode]
+      properties:
+        configured:
+          type: boolean
+        enabled:
+          type: boolean
+        calendar_id:
+          type: string
+        mode:
+          type: string
+          enum: [env_refresh_token, non_configurato]
+        last_full_sync_at:
+          type: ["string", "null"]
+        last_incremental_sync_at:
+          type: ["string", "null"]
+        sync_token_available:
+          type: boolean
+        last_error:
+          type: ["string", "null"]
+        required_env:
+          type: array
+          items:
+            type: string
+
+    GoogleCalendarSyncInput:
+      type: object
+      properties:
+        direction:
+          type: string
+          enum: [zak_to_google, google_to_zak, bidirectional]
+          default: bidirectional
+        full_sync:
+          type: boolean
+          default: false
+        days_ahead:
+          type: integer
+          default: 180
+
+    GoogleCalendarSyncResult:
+      type: object
+      required: [configured, direction, pushed, pulled, skipped, conflicts, errors]
+      properties:
+        configured:
+          type: boolean
+        direction:
+          type: string
+        pushed:
+          type: integer
+        pulled:
+          type: integer
+        skipped:
+          type: integer
+        conflicts:
+          type: integer
+        errors:
+          type: array
+          items:
+            type: string
+        message:
+          type: string
+
+    ProductionReadinessCheck:
+      type: object
+      required: [key, status, message]
+      properties:
+        key:
+          type: string
+        status:
+          type: string
+          enum: [ok, warning, missing]
+        message:
+          type: string
+
+    ProductionReadiness:
+      type: object
+      required: [ready, checks]
+      properties:
+        ready:
+          type: boolean
+        checks:
+          type: array
+          items:
+            $ref: "#/components/schemas/ProductionReadinessCheck"
 
     # ── WEBHOOKS ──────────────────────────────────────────────────────────────
     WebhookPayload:
@@ -1092,14 +2923,35 @@ components:
 
     VoiceWebhookPayload:
       type: object
-      required: [trascrizione]
       properties:
+        provider:
+          type: string
+          enum: [generic, vapi, bland]
         trascrizione:
           type: string
         telefono:
           type: ["string", "null"]
+          description: If present, the webhook links the call to an existing CRM contact with the same normalized phone
         durata:
           type: ["integer", "null"]
+        call_id:
+          type: ["string", "null"]
+        recording_url:
+          type: ["string", "null"]
+        summary:
+          type: ["string", "null"]
+        message:
+          type: object
+          description: Raw Vapi webhook message payload.
+        call:
+          type: object
+          description: Raw Bland or generic call payload.
+        data:
+          type: object
+          description: Raw provider-specific payload wrapper.
+        analysis:
+          type: object
+          description: Provider intent analysis or extracted variables.
 
     # ── AUTOMAZIONI ────────────────────────────────────────────────────────────
     AutomazioneLog:
@@ -1141,6 +2993,39 @@ components:
         valore:
           type: string
 
+    AutomazioniPerformance:
+      type: object
+      required: [totale, eseguiti, saltati, errori, tasso_successo, ultimi_30_giorni, per_tipo]
+      properties:
+        totale:
+          type: integer
+        eseguiti:
+          type: integer
+        saltati:
+          type: integer
+        errori:
+          type: integer
+        tasso_successo:
+          type: number
+        ultimi_30_giorni:
+          type: integer
+        per_tipo:
+          type: array
+          items:
+            type: object
+            required: [tipo, totale, eseguiti, saltati, errori]
+            properties:
+              tipo:
+                type: string
+              totale:
+                type: integer
+              eseguiti:
+                type: integer
+              saltati:
+                type: integer
+              errori:
+                type: integer
+
     TriggerManualInput:
       type: object
       required: [tipo]
@@ -1158,6 +3043,31 @@ components:
           type: array
           items:
             type: string
+
+    AuditLogItem:
+      type: object
+      required: [id, azione, entita, data_creazione]
+      properties:
+        id:
+          type: string
+        utente_id:
+          type: ["string", "null"]
+        utente_nome:
+          type: ["string", "null"]
+        azione:
+          type: string
+        entita:
+          type: string
+        entita_id:
+          type: ["string", "null"]
+        dettagli:
+          type: ["string", "null"]
+        ip_address:
+          type: ["string", "null"]
+        user_agent:
+          type: ["string", "null"]
+        data_creazione:
+          type: string
 
     WebhookResponse:
       type: object

@@ -5,9 +5,17 @@
  * Zak Ecosystem AI - CRM Omnicanale API
  * OpenAPI spec version: 0.1.0
  */
+import type { UtenteUpdateRuolo } from './utenteUpdateRuolo';
+import type { UtenteUpdateStato } from './utenteUpdateStato';
 
 export interface UtenteUpdate {
   nome?: string;
-  ruolo?: string;
+  ruolo?: UtenteUpdateRuolo;
   email?: string;
+  stato?: UtenteUpdateStato;
+  /**
+     * Optional password reset. Never returned by the API.
+     * @minLength 8
+     */
+  password?: string;
 }

@@ -25,6 +25,8 @@ type AgendaItem = {
   data_ora_inizio: string;
   data_ora_fine: string;
   categoria: string;
+  contatto_id?: string | null;
+  contatto_nome?: string | null;
   promemoria_inviato: boolean;
 };
 
@@ -180,6 +182,9 @@ export default function Agenda() {
                     {item.descrizione && (
                       <p className="text-sm opacity-80 mb-1 truncate">{item.descrizione}</p>
                     )}
+                    {item.contatto_nome && (
+                      <p className="text-xs font-medium opacity-80 mb-1">Cliente CRM: {item.contatto_nome}</p>
+                    )}
                     <p className="text-xs opacity-70">
                       {format(new Date(item.data_ora_inizio), "d MMM yyyy, HH:mm", { locale: it })}
                       {" — "}
@@ -240,6 +245,7 @@ export default function Agenda() {
                           className={`text-xs px-1.5 py-0.5 rounded truncate border ${categoriaColore[ev.categoria] || "bg-muted"} cursor-pointer`}
                         >
                           {ev.titolo}
+                          {ev.contatto_nome ? ` - ${ev.contatto_nome}` : ""}
                         </div>
                       ))}
                       {eventi.length > 3 && (

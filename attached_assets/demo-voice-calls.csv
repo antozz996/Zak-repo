@@ -1,0 +1,21 @@
+caller_name,caller_phone,transcript,intent,confidence,output_type,created_task_title,created_agenda_title,provider,call_started_at
+Giovanni Rossi,+393339876543,Vorrei fare una visita della villa martedi' alle sedici.,schedule_visit,0.92,agenda,,Sopralluogo Giovanni Rossi,vapi,2026-06-02T16:00:00Z
+Maria Bianchi,+393471112222,Avete disponibilita' per un matrimonio il 12 settembre?,check_availability,0.95,none,,,bland,2026-06-02T16:15:00Z
+Stefano Verdi,+393334445555,Potete inviarmi il listino prezzi del catering?,commercial_info,0.88,task,Inviare listino catering a Stefano Verdi,,vapi,2026-06-02T17:00:00Z
+Laura Gallo,+393402223333,Vorrei spostare la visita a giovedi' mattina.,reschedule_visit,0.72,task,Verificare spostamento sopralluogo Laura Gallo,,vapi,2026-06-02T18:00:00Z
+Sconosciuto,+393389990000,Pronto? Non sento bene... c'e' nessuno?,,0.30,none,,,bland,2026-06-02T18:30:00Z
+Paolo Barbera,+393284443333,Ricordatevi che siamo vegetariani per il buffet.,create_reminder,0.86,task,Nota buffet vegetariano Paolo Barbera,,vapi,2026-06-03T09:00:00Z
+Anna Esposito,+393336667777,Vorrei fare la cresima di mio figlio a fine mese.,schedule_visit,0.64,task,Contattare Anna Esposito per cresima,,vapi,2026-06-03T10:15:00Z
+Roberto Ferrari,+393498889999,Volevo confermare la data del compleanno.,confirm_booking,0.90,task,Confermare compleanno Roberto Ferrari,,bland,2026-06-03T11:00:00Z
+Giuseppe Russo,+393332221111,Vorrei annullare l'appuntamento di oggi pomeriggio.,cancel_visit,0.89,task,Cancellare sopralluogo Giuseppe Russo,,vapi,2026-06-03T12:30:00Z
+Sconosciuto,+393457778888,Offerta incredibile per voi elettricita' conveniente,,0.45,none,,,bland,2026-06-03T14:00:00Z
+Fabio Ricci,+393475554444,Vorrei organizzare una festa a sorpresa il 5 luglio.,schedule_visit,0.91,agenda,,Sopralluogo Fabio Ricci,vapi,2026-06-03T15:00:00Z
+Francesca Bruno,+393403334444,Avrei bisogno di sapere se avete un parcheggio custodito.,commercial_info,0.87,task,Rispondere a info parcheggio Francesca Bruno,,vapi,2026-06-03T16:30:00Z
+Marco Romano,+393335556666,Vorrei fare il sopralluogo dopodomani alle undici.,schedule_visit,0.85,agenda,,Sopralluogo Marco Romano,bland,2026-06-03T17:00:00Z
+Elena Colombo,+393297776666,Potete mettermi in contatto con l'amministratore?,other,0.78,task,Ricontattare Elena Colombo,,vapi,2026-06-03T18:00:00Z
+Sconosciuto,+393380001111,Rumore di sottofondo e chiamata interrotta,,0.20,none,,,bland,2026-06-03T18:45:00Z
+Antonio Marino,+393478882222,Vorrei fissare una telefonata conoscitiva domani alle 15.,schedule_visit,0.88,agenda,,Chiamata Antonio Marino,vapi,2026-06-04T09:30:00Z
+Chiara Greco,+393334441111,Mi serve un preventivo urgente per una laurea con 40 pax.,commercial_info,0.93,task,Creare preventivo laurea Chiara Greco,,vapi,2026-06-04T10:00:00Z
+Davide Lodi,+393492225555,Avete un menu bambini per il catering?,commercial_info,0.85,task,Inviare menu bambini Davide Lodi,,bland,2026-06-04T11:30:00Z
+Giorgio Villa,+393408884444,Vorrei sapere se avete il pianoforte in sala.,commercial_info,0.89,task,Info pianoforte Giorgio Villa,,vapi,2026-06-04T12:00:00Z
+Silvia Ranieri,+393339998888,Vorrei fare un sopralluogo sabato mattina alle dieci.,schedule_visit,0.90,agenda,,Sopralluogo Silvia Ranieri,bland,2026-06-04T14:15:00Z

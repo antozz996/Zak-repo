@@ -1,5 +1,6 @@
 import { Router, type IRouter } from "express";
 import healthRouter from "./health";
+import authRouter from "./auth";
 import utentiRouter from "./utenti";
 import contattiRouter from "./contatti";
 import preventiviRouter from "./preventivi";
@@ -8,17 +9,30 @@ import messaggiRouter from "./messaggi";
 import dashboardRouter from "./dashboard";
 import webhooksRouter from "./webhooks";
 import automazioniRouter from "./automazioni";
+import auditLogRouter from "./audit-log";
+import taskPersonaliRouter from "./task-personali";
+import b2bRouter from "./b2b";
+import calendarRouter from "./calendar";
+import productionRouter from "./production";
+import { requireAuth, requireRole } from "../lib/auth";
 
 const router: IRouter = Router();
 
 router.use(healthRouter);
+router.use(authRouter);
+router.use(webhooksRouter);
+router.use(requireAuth);
 router.use(utentiRouter);
 router.use(contattiRouter);
 router.use(preventiviRouter);
 router.use(agendaRouter);
+router.use(requireRole("manager"), calendarRouter);
 router.use(messaggiRouter);
 router.use(dashboardRouter);
-router.use(webhooksRouter);
-router.use(automazioniRouter);
+router.use(requireRole("manager"), automazioniRouter);
+router.use(requireRole("admin"), auditLogRouter);
+router.use(taskPersonaliRouter);
+router.use(requireRole("manager"), b2bRouter);
+router.use(requireRole("admin"), productionRouter);
 
 export default router;

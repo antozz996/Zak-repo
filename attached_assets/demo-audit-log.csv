@@ -1,0 +1,41 @@
+timestamp,utente_email,ruolo,azione,entita,id_entita,ip_address,dettagli
+2026-06-02T18:15:22+02:00,alessandro.rossi@villazak.com,admin,USER_LOGIN,utenti,1,192.168.1.45,Accesso riuscito per amministratore
+2026-06-02T18:12:05+02:00,ignoto@host.com,sconosciuto,LOGIN_FAILED,utenti,0,89.24.112.5,Tentativo di accesso fallito (password non corretta)
+2026-06-02T17:55:10+02:00,alessandro.rossi@villazak.com,admin,USER_ROLE_UPDATED,utenti,3,192.168.1.45,Cambiato ruolo utente 'Chiara Ferrari' da staff a manager
+2026-06-02T17:42:15+02:00,roberto.martini@villazak.com,staff,ACCESS_DENIED,audit_log,0,192.168.1.50,Tentativo non autorizzato di visualizzazione audit log
+2026-06-02T16:30:00+02:00,giuseppe.esposito@villazak.com,manager,DATA_EXPORT,contatti_crm,0,192.168.1.48,Esportazione manuale di 120 contatti CRM in formato CSV
+2026-06-02T15:22:45+02:00,alessandro.rossi@villazak.com,admin,USER_STATUS_CHANGE,utenti,5,192.168.1.45,Account utente 'Valeria Conte' impostato a disattivato
+2026-06-02T14:15:30+02:00,giuseppe.esposito@villazak.com,manager,ACCESS_DENIED,settings,0,192.168.1.48,Tentato accesso alle impostazioni integrazioni di sistema
+2026-06-02T11:20:00+02:00,alessandro.rossi@villazak.com,admin,DATA_EXPORT,preventivi_eventi,0,192.168.1.45,Esportati preventivi attivi del mese di maggio in CSV
+2026-06-02T10:15:00+02:00,giuseppe.esposito@villazak.com,manager,AUTOMATION_TRIGGER,automazioni_log,8,192.168.1.48,Esecuzione manuale job di re-engagement lead persi
+2026-06-02T09:30:10+02:00,chiara.ferrari@villazak.com,staff,CHAT_ASSIGN,messaggi,12,192.168.1.52,Assegnata conversazione cliente 'Filippo Carli' all'operatore
+2026-06-02T09:05:15+02:00,chiara.ferrari@villazak.com,staff,AI_PAUSED,messaggi,12,192.168.1.52,Messa in pausa l'assistenza automatica Zak AI sulla chat
+2026-06-02T09:00:22+02:00,chiara.ferrari@villazak.com,staff,USER_LOGIN,utenti,3,192.168.1.52,Accesso riuscito per operatore staff
+2026-06-02T08:55:00+02:00,roberto.martini@villazak.com,staff,TASK_COMPLETED,task_personali,15,192.168.1.50,Task completato: Sopralluogo allestimento per compleanno
+2026-06-01T18:45:10+02:00,giuseppe.esposito@villazak.com,manager,QUOTE_APPROVED,preventivi_eventi,4,192.168.1.48,Preventivo 'ZAK-PREV-2026-004' modificato a confermato
+2026-06-01T16:22:15+02:00,chiara.ferrari@villazak.com,staff,CONTACT_CREATED,contatti_crm,22,192.168.1.52,Creato contatto 'Filippo Carli' da form manuale in CRM
+2026-06-01T15:10:05+02:00,roberto.martini@villazak.com,staff,TASK_CREATED,task_personali,18,192.168.1.50,Creato nuovo task per ordine forniture allestimento
+2026-06-01T11:40:00+02:00,giuseppe.esposito@villazak.com,manager,QUOTE_CREATED,preventivi_eventi,6,192.168.1.48,Creato preventivo per compleanno 50 persone Rossi Marco
+2026-06-01T10:00:30+02:00,sistema@villazak.com,sistema,AUTOMATION_CRON,automazioni_log,7,127.0.0.1,Esecuzione automatica pianificata job ricorrenze annuali
+2026-06-01T09:00:45+02:00,sistema@villazak.com,sistema,AUTOMATION_CRON,automazioni_log,6,127.0.0.1,Esecuzione automatica pianificata job re-engagement
+2026-06-01T08:45:00+02:00,alessandro.rossi@villazak.com,admin,USER_STATUS_CHANGE,utenti,4,192.168.1.45,Account utente 'Roberto Martini' impostato a attivo
+2026-05-31T17:10:15+02:00,giuseppe.esposito@villazak.com,manager,CONTACT_UPDATED,contatti_crm,15,192.168.1.48,Modificato stato lead in 'qualificato' per Giulia Bianchi
+2026-05-31T16:00:00+02:00,alessandro.rossi@villazak.com,admin,SETTINGS_UPDATED,settings,2,192.168.1.45,Modificato verify token webhook Meta WhatsApp API
+2026-05-31T14:22:10+02:00,chiara.ferrari@villazak.com,staff,CHAT_RELEASE,messaggi,8,192.168.1.52,Rilasciata conversazione 'Giulia Bianchi' (AI riattivata)
+2026-05-31T11:45:00+02:00,giuseppe.esposito@villazak.com,manager,QUOTE_UPDATED,preventivi_eventi,2,192.168.1.48,Modificato budget stimato preventivo a 4500.00 EUR
+2026-05-31T10:30:15+02:00,sistema@villazak.com,sistema,AUTOMATION_CRON,automazioni_log,5,127.0.0.1,Esecuzione automatica pianificata job ricorrenze
+2026-05-31T09:00:12+02:00,sistema@villazak.com,sistema,AUTOMATION_CRON,automazioni_log,4,127.0.0.1,Esecuzione automatica pianificata job re-engagement
+2026-05-30T16:30:45+02:00,giuseppe.esposito@villazak.com,manager,CONTACT_IMPORTED,contatti_crm,0,192.168.1.48,Importati 15 contatti staff da file CSV
+2026-05-30T15:12:00+02:00,alessandro.rossi@villazak.com,admin,USER_CREATED,utenti,6,192.168.1.45,Creato nuovo account operatore staff 'Elena Gallo'
+2026-05-30T14:40:22+02:00,roberto.martini@villazak.com,staff,AGENDA_CREATED,agenda_personale,8,192.168.1.50,Creato appuntamento a calendario: Sopralluogo sala
+2026-05-30T11:20:10+02:00,giuseppe.esposito@villazak.com,manager,QUOTE_REJECTED,preventivi_eventi,1,192.168.1.48,Preventivo 'ZAK-PREV-2026-001' rifiutato dal cliente
+2026-05-30T10:00:45+02:00,sistema@villazak.com,sistema,AUTOMATION_CRON,automazioni_log,3,127.0.0.1,Esecuzione automatica pianificata job ricorrenze
+2026-05-30T09:00:15+02:00,sistema@villazak.com,sistema,AUTOMATION_CRON,automazioni_log,2,127.0.0.1,Esecuzione automatica pianificata job re-engagement
+2026-05-29T18:10:00+02:00,alessandro.rossi@villazak.com,admin,SETTINGS_UPDATED,settings,1,192.168.1.45,Configurate credenziali Meta WhatsApp Business API
+2026-05-29T16:42:30+02:00,giuseppe.esposito@villazak.com,manager,QUOTE_APPROVED,preventivi_eventi,3,192.168.1.48,Confermato preventivo festa di laurea Marco Rossi
+2026-05-29T14:22:15+02:00,chiara.ferrari@villazak.com,staff,CONTACT_CREATED,contatti_crm,12,192.168.1.52,Creato contatto 'Giulia Bianchi' da chat WhatsApp
+2026-05-29T11:00:22+02:00,roberto.martini@villazak.com,staff,USER_LOGIN,utenti,4,192.168.1.50,Accesso riuscito per operatore staff
+2026-05-29T10:00:10+02:00,sistema@villazak.com,sistema,AUTOMATION_CRON,automazioni_log,1,127.0.0.1,Esecuzione automatica pianificata job ricorrenze
+2026-05-29T09:00:11+02:00,sistema@villazak.com,sistema,AUTOMATION_CRON,automazioni_log,0,127.0.0.1,Esecuzione automatica pianificata job re-engagement
+2026-05-28T15:22:00+02:00,alessandro.rossi@villazak.com,admin,USER_CREATED,utenti,5,192.168.1.45,Creato nuovo account operatore staff 'Valeria Conte'
+2026-05-28T15:10:00+02:00,alessandro.rossi@villazak.com,admin,USER_CREATED,utenti,4,192.168.1.45,Creato nuovo account operatore staff 'Roberto Martini'

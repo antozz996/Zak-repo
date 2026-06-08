@@ -1,10 +1,14 @@
 {
   "name": "workspace",
   "version": "0.0.0",
+  "packageManager": "pnpm@10.22.0",
   "license": "MIT",
   "scripts": {
     "preinstall": "node ./scripts/enforce-pnpm.cjs",
     "build": "corepack pnpm run typecheck && corepack pnpm -r --if-present run build",
+    "format": "corepack pnpm exec prettier --write .",
+    "format:check": "corepack pnpm exec prettier --check .",
+    "test:frontend-critical": "corepack pnpm --filter @workspace/zak-app run test:critical",
     "typecheck:libs": "tsc --build",
     "typecheck": "corepack pnpm run typecheck:libs && corepack pnpm -r --filter \"./artifacts/**\" --filter \"./scripts\" --if-present run typecheck"
   },

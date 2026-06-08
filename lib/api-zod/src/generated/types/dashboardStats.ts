@@ -13,4 +13,9 @@ export interface DashboardStats {
   eventi_confermati: number;
   budget_totale_confermato: number;
   messaggi_non_letti: number;
+  lead_con_preventivo: number;
+  lead_confermati: number;
+  conversione_lead_preventivo: number;
+  conversione_preventivo_confermato: number;
+  conversione_lead_confermato: number;
 }

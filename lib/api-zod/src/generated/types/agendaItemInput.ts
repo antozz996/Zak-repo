@@ -5,6 +5,8 @@
  * Zak Ecosystem AI - CRM Omnicanale API
  * OpenAPI spec version: 0.1.0
  */
+import type { AgendaItemInputGoogleSyncDirection } from './agendaItemInputGoogleSyncDirection';
+import type { AgendaItemInputGoogleSyncStatus } from './agendaItemInputGoogleSyncStatus';
 
 export interface AgendaItemInput {
   titolo: string;
@@ -12,4 +14,9 @@ export interface AgendaItemInput {
   data_ora_inizio: string;
   data_ora_fine: string;
   categoria: string;
+  contatto_id?: string;
+  google_calendar_id?: string;
+  google_event_id?: string;
+  google_sync_status?: AgendaItemInputGoogleSyncStatus;
+  google_sync_direction?: AgendaItemInputGoogleSyncDirection;
 }

@@ -1,0 +1,16 @@
+nome,email,ruolo,stato,ultimo_accesso_demo,note
+Alessandro Rossi,alessandro.rossi@villazak.com,admin,attivo,Oggi 14:15,Proprietario principale e amministratore del sistema
+Giuseppe Esposito,giuseppe.esposito@villazak.com,manager,attivo,Oggi 11:30,Direttore commerciale della venue
+Chiara Ferrari,chiara.ferrari@villazak.com,staff,attivo,Ieri 18:22,Operatore accoglienza e gestione WhatsApp
+Roberto Martini,roberto.martini@villazak.com,staff,attivo,30 Mag,Operatore allestimenti e coordinamento sala
+Valeria Conte,valeria.conte@villazak.com,staff,disattivato,25 Mag,Ex-collaboratrice a chiamata stagionale
+Marco Bianchi,marco.bianchi@villazak.com,manager,attivo,Oggi 09:15,Coordinatore eventi e relazioni esterne B2B
+Giulia Romano,giulia.romano@villazak.com,staff,attivo,Ieri 15:45,Operatore segreteria e qualificazione lead
+Luca Moretti,luca.moretti@villazak.com,staff,attivo,28 Mag,Addetto sopralluoghi e preventivi fisici
+Francesca Ricci,francesca.ricci@villazak.com,staff,disattivato,10 Mag,Disattivato per fine contratto di stage
+Stefano Bruno,stefano.bruno@villazak.com,admin,attivo,Oggi 10:00,Responsabile IT e configurazioni webhook
+Elena Gallo,elena.gallo@villazak.com,staff,attivo,Ieri 19:10,Operatore CRM e follow-up automazioni
+Fabio Messina,fabio.messina@villazak.com,staff,attivo,29 Mag,Addetto logistica e allestimento luci
+Davide Barbieri,davide.barbieri@villazak.com,staff,disattivato,15 Apr,Rimosso temporaneamente per inattivita' prolungata
+Alice De Luca,alice.deluca@villazak.com,manager,attivo,Oggi 16:30,Responsabile catering e banqueting
+Silvia Fontana,silvia.fontana@villazak.com,staff,attivo,Ieri 12:45,Addetta marketing e supporto social

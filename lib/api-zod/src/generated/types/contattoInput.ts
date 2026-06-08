@@ -12,6 +12,8 @@ export interface ContattoInput {
   instagram_username?: string;
   origine_lead: string;
   tipo_evento?: string;
+  note_interna?: string;
   stato_lead: string;
+  handoff_richiesto?: boolean;
   operatore_assegnato_id?: string;
 }

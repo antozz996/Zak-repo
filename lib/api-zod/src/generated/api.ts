@@ -18,13 +18,76 @@ export const HealthCheckResponse = zod.object({
 
 
 /**
+ * @summary Authenticate a staff user
+ */
+export const loginBodyPasswordMin = 8;
+
+export const loginBodyRememberDefault = false;
+
+export const LoginBody = zod.object({
+  "email": zod.string().email(),
+  "password": zod.string().min(loginBodyPasswordMin),
+  "remember": zod.boolean().default(loginBodyRememberDefault)
+})
+
+export const LoginResponse = zod.object({
+  "token": zod.string(),
+  "expires_at": zod.string(),
+  "utente": zod.object({
+  "id": zod.string(),
+  "nome": zod.string(),
+  "ruolo": zod.enum(['admin', 'manager', 'staff']),
+  "email": zod.string().email(),
+  "stato": zod.enum(['attivo', 'disattivato'])
+})
+})
+
+
+/**
+ * @summary End current client session
+ */
+export const LogoutResponse = zod.object({
+  "success": zod.boolean()
+})
+
+
+/**
+ * @summary Get current authenticated staff user
+ */
+export const GetCurrentUserResponse = zod.object({
+  "id": zod.string(),
+  "nome": zod.string(),
+  "ruolo": zod.enum(['admin', 'manager', 'staff']),
+  "email": zod.string().email(),
+  "stato": zod.enum(['attivo', 'disattivato'])
+})
+
+
+/**
+ * Creates the first admin when no users exist, or sets password for an existing admin when guarded by ZAK_BOOTSTRAP_ADMIN_TOKEN.
+ * @summary Create or secure the first admin account
+ */
+export const bootstrapAdminBodyPasswordMin = 8;
+
+
+
+export const BootstrapAdminBody = zod.object({
+  "nome": zod.string(),
+  "email": zod.string().email(),
+  "password": zod.string().min(bootstrapAdminBodyPasswordMin),
+  "bootstrap_token": zod.string().optional().describe('Required when users already exist and ZAK_BOOTSTRAP_ADMIN_TOKEN is configured.')
+})
+
+
+/**
  * @summary List all staff users
  */
 export const ListUtentiResponseItem = zod.object({
   "id": zod.string(),
   "nome": zod.string(),
-  "ruolo": zod.string(),
-  "email": zod.string(),
+  "ruolo": zod.enum(['admin', 'manager', 'staff']),
+  "email": zod.string().email(),
+  "stato": zod.enum(['attivo', 'disattivato']).describe('Stato operativo account staff. Gli account disattivati non devono poter accedere quando verra implementata l\'autenticazione.'),
   "data_creazione": zod.string()
 })
 export const ListUtentiResponse = zod.array(ListUtentiResponseItem)
@@ -33,10 +96,17 @@ export const ListUtentiResponse = zod.array(ListUtentiResponseItem)
 /**
  * @summary Create a staff user
  */
+export const createUtenteBodyStatoDefault = `attivo`;
+export const createUtenteBodyPasswordMin = 8;
+
+
+
 export const CreateUtenteBody = zod.object({
   "nome": zod.string(),
-  "ruolo": zod.string(),
-  "email": zod.string()
+  "ruolo": zod.enum(['admin', 'manager', 'staff']),
+  "email": zod.string().email(),
+  "stato": zod.enum(['attivo', 'disattivato']).default(createUtenteBodyStatoDefault),
+  "password": zod.string().min(createUtenteBodyPasswordMin).optional().describe('Optional initial password. Never returned by the API.')
 })
 
 
@@ -50,8 +120,9 @@ export const GetUtenteParams = zod.object({
 export const GetUtenteResponse = zod.object({
   "id": zod.string(),
   "nome": zod.string(),
-  "ruolo": zod.string(),
-  "email": zod.string(),
+  "ruolo": zod.enum(['admin', 'manager', 'staff']),
+  "email": zod.string().email(),
+  "stato": zod.enum(['attivo', 'disattivato']).describe('Stato operativo account staff. Gli account disattivati non devono poter accedere quando verra implementata l\'autenticazione.'),
   "data_creazione": zod.string()
 })
 
@@ -63,17 +134,24 @@ export const UpdateUtenteParams = zod.object({
   "id": zod.coerce.string()
 })
 
+export const updateUtenteBodyPasswordMin = 8;
+
+
+
 export const UpdateUtenteBody = zod.object({
   "nome": zod.string().optional(),
-  "ruolo": zod.string().optional(),
-  "email": zod.string().optional()
+  "ruolo": zod.enum(['admin', 'manager', 'staff']).optional(),
+  "email": zod.string().email().optional(),
+  "stato": zod.enum(['attivo', 'disattivato']).optional(),
+  "password": zod.string().min(updateUtenteBodyPasswordMin).optional().describe('Optional password reset. Never returned by the API.')
 })
 
 export const UpdateUtenteResponse = zod.object({
   "id": zod.string(),
   "nome": zod.string(),
-  "ruolo": zod.string(),
-  "email": zod.string(),
+  "ruolo": zod.enum(['admin', 'manager', 'staff']),
+  "email": zod.string().email(),
+  "stato": zod.enum(['attivo', 'disattivato']).describe('Stato operativo account staff. Gli account disattivati non devono poter accedere quando verra implementata l\'autenticazione.'),
   "data_creazione": zod.string()
 })
 
@@ -83,6 +161,93 @@ export const UpdateUtenteResponse = zod.object({
  */
 export const DeleteUtenteParams = zod.object({
   "id": zod.coerce.string()
+})
+
+
+/**
+ * @summary List quote versions
+ */
+export const ListPreventivoVersioniParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+export const ListPreventivoVersioniResponseItem = zod.object({
+  "id": zod.string(),
+  "preventivo_id": zod.string(),
+  "numero_versione": zod.number(),
+  "snapshot": zod.record(zod.string(), zod.unknown()),
+  "nota": zod.string().nullish(),
+  "data_creazione": zod.string()
+})
+export const ListPreventivoVersioniResponse = zod.array(ListPreventivoVersioniResponseItem)
+
+
+/**
+ * @summary Create a quote version snapshot
+ */
+export const CreatePreventivoVersioneParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+export const CreatePreventivoVersioneBody = zod.object({
+  "nota": zod.string().optional()
+})
+
+
+/**
+ * @summary Send quote summary to the contact via WhatsApp
+ */
+export const SendPreventivoWhatsAppParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+export const SendPreventivoWhatsAppResponse = zod.object({
+  "success": zod.boolean(),
+  "status": zod.enum(['sent', 'skipped', 'failed']),
+  "message": zod.string(),
+  "provider_message_id": zod.string().nullish()
+})
+
+
+/**
+ * @summary Download an event quote PDF
+ */
+export const DownloadPreventivoPdfParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+
+/**
+ * @summary Digitally confirm an event quote
+ */
+export const ConfirmPreventivoDigitaleParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+export const ConfirmPreventivoDigitaleBody = zod.object({
+  "firmatario_nome": zod.string(),
+  "firmatario_telefono": zod.string().optional(),
+  "metodo": zod.enum(['firma_digitale', 'conferma_whatsapp', 'conferma_manuale']),
+  "note": zod.string().optional()
+})
+
+export const ConfirmPreventivoDigitaleResponse = zod.object({
+  "preventivo": zod.object({
+  "id": zod.string(),
+  "contatto_id": zod.string(),
+  "contatto_nome": zod.string().nullish(),
+  "data_evento_richiesta": zod.string().nullish(),
+  "numero_invitati": zod.number().nullish(),
+  "budget_stimato": zod.number().nullish(),
+  "note": zod.string().nullish(),
+  "stato_evento": zod.string(),
+  "data_creazione": zod.string(),
+  "google_calendar_id": zod.string().nullish(),
+  "google_event_id": zod.string().nullish(),
+  "google_sync_status": zod.union([zod.literal('non_configurato'),zod.literal('pending'),zod.literal('synced'),zod.literal('conflict'),zod.literal('error'),zod.literal(null)]).nullish(),
+  "google_last_synced_at": zod.string().nullish()
+}),
+  "message": zod.string()
 })
 
 
@@ -103,7 +268,9 @@ export const ListContattiResponseItem = zod.object({
   "instagram_username": zod.string().nullish(),
   "origine_lead": zod.string(),
   "tipo_evento": zod.string().nullish(),
+  "note_interna": zod.string().nullish(),
   "stato_lead": zod.string(),
+  "handoff_richiesto": zod.boolean(),
   "data_creazione": zod.string(),
   "ultimo_contatto": zod.string().nullish(),
   "operatore_assegnato_id": zod.string().nullish(),
@@ -121,7 +288,9 @@ export const CreateContattoBody = zod.object({
   "instagram_username": zod.string().optional(),
   "origine_lead": zod.string(),
   "tipo_evento": zod.string().optional(),
+  "note_interna": zod.string().optional(),
   "stato_lead": zod.string(),
+  "handoff_richiesto": zod.boolean().optional(),
   "operatore_assegnato_id": zod.string().optional()
 })
 
@@ -140,7 +309,9 @@ export const GetContattoResponse = zod.object({
   "instagram_username": zod.string().nullish(),
   "origine_lead": zod.string(),
   "tipo_evento": zod.string().nullish(),
+  "note_interna": zod.string().nullish(),
   "stato_lead": zod.string(),
+  "handoff_richiesto": zod.boolean(),
   "data_creazione": zod.string(),
   "ultimo_contatto": zod.string().nullish(),
   "operatore_assegnato_id": zod.string().nullish(),
@@ -161,7 +332,9 @@ export const UpdateContattoBody = zod.object({
   "instagram_username": zod.string().optional(),
   "origine_lead": zod.string().optional(),
   "tipo_evento": zod.string().optional(),
+  "note_interna": zod.string().optional(),
   "stato_lead": zod.string().optional(),
+  "handoff_richiesto": zod.boolean().optional(),
   "operatore_assegnato_id": zod.string().optional()
 })
 
@@ -172,7 +345,9 @@ export const UpdateContattoResponse = zod.object({
   "instagram_username": zod.string().nullish(),
   "origine_lead": zod.string(),
   "tipo_evento": zod.string().nullish(),
+  "note_interna": zod.string().nullish(),
   "stato_lead": zod.string(),
+  "handoff_richiesto": zod.boolean(),
   "data_creazione": zod.string(),
   "ultimo_contatto": zod.string().nullish(),
   "operatore_assegnato_id": zod.string().nullish(),
@@ -189,6 +364,24 @@ export const DeleteContattoParams = zod.object({
 
 
 /**
+ * @summary Import CRM contacts from CSV text with phone/social deduplication
+ */
+export const ImportContattiCsvBody = zod.object({
+  "csv": zod.string()
+})
+
+export const ImportContattiCsvResponse = zod.object({
+  "totale_righe": zod.number(),
+  "creati": zod.number(),
+  "saltati": zod.number(),
+  "errori": zod.array(zod.object({
+  "riga": zod.number(),
+  "motivo": zod.string()
+}))
+})
+
+
+/**
  * @summary Get chat messages for a contact
  */
 export const GetContattoMessaggiParams = zod.object({
@@ -201,11 +394,59 @@ export const GetContattoMessaggiResponseItem = zod.object({
   "canale": zod.string(),
   "direzione": zod.string(),
   "testo": zod.string(),
+  "media_id": zod.string().nullish(),
+  "media_tipo": zod.string().nullish(),
+  "media_mime_type": zod.string().nullish(),
+  "media_sha256": zod.string().nullish(),
+  "media_filename": zod.string().nullish(),
   "timestamp": zod.string(),
   "letto": zod.boolean().optional(),
   "mittente_nome": zod.string().nullish()
 })
 export const GetContattoMessaggiResponse = zod.array(GetContattoMessaggiResponseItem)
+
+
+/**
+ * @summary Get lead status history for a contact
+ */
+export const GetContattoStoricoStatoParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+export const GetContattoStoricoStatoResponseItem = zod.object({
+  "id": zod.string(),
+  "contatto_id": zod.string(),
+  "stato_precedente": zod.string().nullish(),
+  "stato_successivo": zod.string(),
+  "origine": zod.string(),
+  "nota": zod.string().nullish(),
+  "data_cambio": zod.string()
+})
+export const GetContattoStoricoStatoResponse = zod.array(GetContattoStoricoStatoResponseItem)
+
+
+/**
+ * @summary Mark a message as read
+ */
+export const MarkMessaggioReadParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+export const MarkMessaggioReadResponse = zod.object({
+  "id": zod.string(),
+  "contatto_id": zod.string(),
+  "canale": zod.string(),
+  "direzione": zod.string(),
+  "testo": zod.string(),
+  "media_id": zod.string().nullish(),
+  "media_tipo": zod.string().nullish(),
+  "media_mime_type": zod.string().nullish(),
+  "media_sha256": zod.string().nullish(),
+  "media_filename": zod.string().nullish(),
+  "timestamp": zod.string(),
+  "letto": zod.boolean().optional(),
+  "mittente_nome": zod.string().nullish()
+})
 
 
 /**
@@ -225,7 +466,11 @@ export const ListPreventiviResponseItem = zod.object({
   "budget_stimato": zod.number().nullish(),
   "note": zod.string().nullish(),
   "stato_evento": zod.string(),
-  "data_creazione": zod.string()
+  "data_creazione": zod.string(),
+  "google_calendar_id": zod.string().nullish(),
+  "google_event_id": zod.string().nullish(),
+  "google_sync_status": zod.union([zod.literal('non_configurato'),zod.literal('pending'),zod.literal('synced'),zod.literal('conflict'),zod.literal('error'),zod.literal(null)]).nullish(),
+  "google_last_synced_at": zod.string().nullish()
 })
 export const ListPreventiviResponse = zod.array(ListPreventiviResponseItem)
 
@@ -239,7 +484,36 @@ export const CreatePreventivoBody = zod.object({
   "numero_invitati": zod.number().optional(),
   "budget_stimato": zod.number().optional(),
   "note": zod.string().optional(),
-  "stato_evento": zod.string()
+  "stato_evento": zod.string(),
+  "google_calendar_id": zod.string().optional(),
+  "google_event_id": zod.string().optional(),
+  "google_sync_status": zod.enum(['non_configurato', 'pending', 'synced', 'conflict', 'error']).optional()
+})
+
+
+/**
+ * @summary Calculate quote pricing from package, guests and extras
+ */
+export const CalculatePreventivoPricingBody = zod.object({
+  "pacchetto": zod.enum(['essenziale', 'standard', 'premium']),
+  "numero_invitati": zod.number(),
+  "tipo_evento": zod.string().optional(),
+  "extra": zod.array(zod.enum(['open_bar', 'dj_set', 'fotografo', 'allestimento', 'torta', 'sicurezza'])).optional()
+})
+
+export const CalculatePreventivoPricingResponse = zod.object({
+  "pacchetto": zod.enum(['essenziale', 'standard', 'premium']),
+  "numero_invitati": zod.number(),
+  "voci": zod.array(zod.object({
+  "codice": zod.string(),
+  "descrizione": zod.string(),
+  "quantita": zod.number(),
+  "prezzo_unitario": zod.number(),
+  "totale": zod.number()
+})),
+  "totale": zod.number(),
+  "totale_formattato": zod.string(),
+  "note": zod.string().optional()
 })
 
 
@@ -259,7 +533,11 @@ export const GetPreventivoResponse = zod.object({
   "budget_stimato": zod.number().nullish(),
   "note": zod.string().nullish(),
   "stato_evento": zod.string(),
-  "data_creazione": zod.string()
+  "data_creazione": zod.string(),
+  "google_calendar_id": zod.string().nullish(),
+  "google_event_id": zod.string().nullish(),
+  "google_sync_status": zod.union([zod.literal('non_configurato'),zod.literal('pending'),zod.literal('synced'),zod.literal('conflict'),zod.literal('error'),zod.literal(null)]).nullish(),
+  "google_last_synced_at": zod.string().nullish()
 })
 
 
@@ -275,7 +553,10 @@ export const UpdatePreventivoBody = zod.object({
   "numero_invitati": zod.number().optional(),
   "budget_stimato": zod.number().optional(),
   "note": zod.string().optional(),
-  "stato_evento": zod.string().optional()
+  "stato_evento": zod.string().optional(),
+  "google_calendar_id": zod.string().optional(),
+  "google_event_id": zod.string().optional(),
+  "google_sync_status": zod.enum(['non_configurato', 'pending', 'synced', 'conflict', 'error']).optional()
 })
 
 export const UpdatePreventivoResponse = zod.object({
@@ -287,7 +568,11 @@ export const UpdatePreventivoResponse = zod.object({
   "budget_stimato": zod.number().nullish(),
   "note": zod.string().nullish(),
   "stato_evento": zod.string(),
-  "data_creazione": zod.string()
+  "data_creazione": zod.string(),
+  "google_calendar_id": zod.string().nullish(),
+  "google_event_id": zod.string().nullish(),
+  "google_sync_status": zod.union([zod.literal('non_configurato'),zod.literal('pending'),zod.literal('synced'),zod.literal('conflict'),zod.literal('error'),zod.literal(null)]).nullish(),
+  "google_last_synced_at": zod.string().nullish()
 })
 
 
@@ -315,7 +600,15 @@ export const ListAgendaResponseItem = zod.object({
   "data_ora_inizio": zod.string(),
   "data_ora_fine": zod.string(),
   "categoria": zod.string(),
-  "promemoria_inviato": zod.boolean()
+  "contatto_id": zod.string().nullish(),
+  "contatto_nome": zod.string().nullish(),
+  "promemoria_inviato": zod.boolean(),
+  "google_calendar_id": zod.string().nullish(),
+  "google_event_id": zod.string().nullish(),
+  "google_sync_status": zod.union([zod.literal('non_configurato'),zod.literal('pending'),zod.literal('synced'),zod.literal('conflict'),zod.literal('error'),zod.literal(null)]).nullish(),
+  "google_sync_direction": zod.union([zod.literal('zak'),zod.literal('google'),zod.literal('bidirectional'),zod.literal(null)]).nullish(),
+  "google_last_synced_at": zod.string().nullish(),
+  "google_updated_at": zod.string().nullish()
 })
 export const ListAgendaResponse = zod.array(ListAgendaResponseItem)
 
@@ -328,7 +621,12 @@ export const CreateAgendaItemBody = zod.object({
   "descrizione": zod.string().optional(),
   "data_ora_inizio": zod.string(),
   "data_ora_fine": zod.string(),
-  "categoria": zod.string()
+  "categoria": zod.string(),
+  "contatto_id": zod.string().optional(),
+  "google_calendar_id": zod.string().optional(),
+  "google_event_id": zod.string().optional(),
+  "google_sync_status": zod.enum(['non_configurato', 'pending', 'synced', 'conflict', 'error']).optional(),
+  "google_sync_direction": zod.enum(['zak', 'google', 'bidirectional']).optional()
 })
 
 
@@ -346,7 +644,15 @@ export const GetAgendaItemResponse = zod.object({
   "data_ora_inizio": zod.string(),
   "data_ora_fine": zod.string(),
   "categoria": zod.string(),
-  "promemoria_inviato": zod.boolean()
+  "contatto_id": zod.string().nullish(),
+  "contatto_nome": zod.string().nullish(),
+  "promemoria_inviato": zod.boolean(),
+  "google_calendar_id": zod.string().nullish(),
+  "google_event_id": zod.string().nullish(),
+  "google_sync_status": zod.union([zod.literal('non_configurato'),zod.literal('pending'),zod.literal('synced'),zod.literal('conflict'),zod.literal('error'),zod.literal(null)]).nullish(),
+  "google_sync_direction": zod.union([zod.literal('zak'),zod.literal('google'),zod.literal('bidirectional'),zod.literal(null)]).nullish(),
+  "google_last_synced_at": zod.string().nullish(),
+  "google_updated_at": zod.string().nullish()
 })
 
 
@@ -363,7 +669,12 @@ export const UpdateAgendaItemBody = zod.object({
   "data_ora_inizio": zod.string().optional(),
   "data_ora_fine": zod.string().optional(),
   "categoria": zod.string().optional(),
-  "promemoria_inviato": zod.boolean().optional()
+  "contatto_id": zod.string().optional(),
+  "promemoria_inviato": zod.boolean().optional(),
+  "google_calendar_id": zod.string().optional(),
+  "google_event_id": zod.string().optional(),
+  "google_sync_status": zod.enum(['non_configurato', 'pending', 'synced', 'conflict', 'error']).optional(),
+  "google_sync_direction": zod.enum(['zak', 'google', 'bidirectional']).optional()
 })
 
 export const UpdateAgendaItemResponse = zod.object({
@@ -373,7 +684,15 @@ export const UpdateAgendaItemResponse = zod.object({
   "data_ora_inizio": zod.string(),
   "data_ora_fine": zod.string(),
   "categoria": zod.string(),
-  "promemoria_inviato": zod.boolean()
+  "contatto_id": zod.string().nullish(),
+  "contatto_nome": zod.string().nullish(),
+  "promemoria_inviato": zod.boolean(),
+  "google_calendar_id": zod.string().nullish(),
+  "google_event_id": zod.string().nullish(),
+  "google_sync_status": zod.union([zod.literal('non_configurato'),zod.literal('pending'),zod.literal('synced'),zod.literal('conflict'),zod.literal('error'),zod.literal(null)]).nullish(),
+  "google_sync_direction": zod.union([zod.literal('zak'),zod.literal('google'),zod.literal('bidirectional'),zod.literal(null)]).nullish(),
+  "google_last_synced_at": zod.string().nullish(),
+  "google_updated_at": zod.string().nullish()
 })
 
 
@@ -386,11 +705,428 @@ export const DeleteAgendaItemParams = zod.object({
 
 
 /**
+ * @summary List personal tasks separated from agenda events
+ */
+export const ListTaskPersonaliQueryParams = zod.object({
+  "stato": zod.coerce.string().optional(),
+  "priorita": zod.coerce.string().optional(),
+  "contatto_id": zod.coerce.string().optional()
+})
+
+export const ListTaskPersonaliResponseItem = zod.object({
+  "id": zod.string(),
+  "titolo": zod.string(),
+  "descrizione": zod.string().nullish(),
+  "stato": zod.string(),
+  "priorita": zod.string(),
+  "scadenza": zod.string().nullish(),
+  "contatto_id": zod.string().nullish(),
+  "contatto_nome": zod.string().nullish(),
+  "fonte": zod.string(),
+  "data_creazione": zod.string(),
+  "completato_il": zod.string().nullish()
+})
+export const ListTaskPersonaliResponse = zod.array(ListTaskPersonaliResponseItem)
+
+
+/**
+ * @summary Create a personal task
+ */
+export const CreateTaskPersonaleBody = zod.object({
+  "titolo": zod.string(),
+  "descrizione": zod.string().optional(),
+  "stato": zod.string().optional(),
+  "priorita": zod.string().optional(),
+  "scadenza": zod.string().optional(),
+  "contatto_id": zod.string().optional(),
+  "fonte": zod.string().optional()
+})
+
+
+/**
+ * @summary Get a personal task
+ */
+export const GetTaskPersonaleParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+export const GetTaskPersonaleResponse = zod.object({
+  "id": zod.string(),
+  "titolo": zod.string(),
+  "descrizione": zod.string().nullish(),
+  "stato": zod.string(),
+  "priorita": zod.string(),
+  "scadenza": zod.string().nullish(),
+  "contatto_id": zod.string().nullish(),
+  "contatto_nome": zod.string().nullish(),
+  "fonte": zod.string(),
+  "data_creazione": zod.string(),
+  "completato_il": zod.string().nullish()
+})
+
+
+/**
+ * @summary Update a personal task
+ */
+export const UpdateTaskPersonaleParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+export const UpdateTaskPersonaleBody = zod.object({
+  "titolo": zod.string().optional(),
+  "descrizione": zod.string().optional(),
+  "stato": zod.string().optional(),
+  "priorita": zod.string().optional(),
+  "scadenza": zod.string().optional(),
+  "contatto_id": zod.string().optional(),
+  "fonte": zod.string().optional(),
+  "completato_il": zod.string().optional()
+})
+
+export const UpdateTaskPersonaleResponse = zod.object({
+  "id": zod.string(),
+  "titolo": zod.string(),
+  "descrizione": zod.string().nullish(),
+  "stato": zod.string(),
+  "priorita": zod.string(),
+  "scadenza": zod.string().nullish(),
+  "contatto_id": zod.string().nullish(),
+  "contatto_nome": zod.string().nullish(),
+  "fonte": zod.string(),
+  "data_creazione": zod.string(),
+  "completato_il": zod.string().nullish()
+})
+
+
+/**
+ * @summary Delete a personal task
+ */
+export const DeleteTaskPersonaleParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+
+/**
+ * @summary List B2B competitor archive entries
+ */
+export const ListB2BCompetitorQueryParams = zod.object({
+  "search": zod.coerce.string().optional(),
+  "categoria": zod.coerce.string().optional()
+})
+
+export const ListB2BCompetitorResponseItem = zod.object({
+  "id": zod.string(),
+  "nome": zod.string(),
+  "categoria": zod.string(),
+  "citta": zod.string().nullish(),
+  "zona": zod.string().nullish(),
+  "target": zod.string().nullish(),
+  "prezzo_medio": zod.number().nullish(),
+  "rating": zod.number().nullish(),
+  "punti_forza": zod.string().nullish(),
+  "punti_deboli": zod.string().nullish(),
+  "sito": zod.string().nullish(),
+  "instagram": zod.string().nullish(),
+  "note": zod.string().nullish(),
+  "data_creazione": zod.string(),
+  "data_aggiornamento": zod.string()
+})
+export const ListB2BCompetitorResponse = zod.array(ListB2BCompetitorResponseItem)
+
+
+/**
+ * @summary Create a B2B competitor archive entry
+ */
+export const CreateB2BCompetitorBody = zod.object({
+  "nome": zod.string(),
+  "categoria": zod.string().optional(),
+  "citta": zod.string().optional(),
+  "zona": zod.string().optional(),
+  "target": zod.string().optional(),
+  "prezzo_medio": zod.number().optional(),
+  "rating": zod.number().optional(),
+  "punti_forza": zod.string().optional(),
+  "punti_deboli": zod.string().optional(),
+  "sito": zod.string().optional(),
+  "instagram": zod.string().optional(),
+  "note": zod.string().optional()
+})
+
+
+/**
+ * @summary Get a B2B competitor archive entry
+ */
+export const GetB2BCompetitorParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+export const GetB2BCompetitorResponse = zod.object({
+  "id": zod.string(),
+  "nome": zod.string(),
+  "categoria": zod.string(),
+  "citta": zod.string().nullish(),
+  "zona": zod.string().nullish(),
+  "target": zod.string().nullish(),
+  "prezzo_medio": zod.number().nullish(),
+  "rating": zod.number().nullish(),
+  "punti_forza": zod.string().nullish(),
+  "punti_deboli": zod.string().nullish(),
+  "sito": zod.string().nullish(),
+  "instagram": zod.string().nullish(),
+  "note": zod.string().nullish(),
+  "data_creazione": zod.string(),
+  "data_aggiornamento": zod.string()
+})
+
+
+/**
+ * @summary Update a B2B competitor archive entry
+ */
+export const UpdateB2BCompetitorParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+export const UpdateB2BCompetitorBody = zod.object({
+  "nome": zod.string().optional(),
+  "categoria": zod.string().optional(),
+  "citta": zod.string().optional(),
+  "zona": zod.string().optional(),
+  "target": zod.string().optional(),
+  "prezzo_medio": zod.number().optional(),
+  "rating": zod.number().optional(),
+  "punti_forza": zod.string().optional(),
+  "punti_deboli": zod.string().optional(),
+  "sito": zod.string().optional(),
+  "instagram": zod.string().optional(),
+  "note": zod.string().optional()
+})
+
+export const UpdateB2BCompetitorResponse = zod.object({
+  "id": zod.string(),
+  "nome": zod.string(),
+  "categoria": zod.string(),
+  "citta": zod.string().nullish(),
+  "zona": zod.string().nullish(),
+  "target": zod.string().nullish(),
+  "prezzo_medio": zod.number().nullish(),
+  "rating": zod.number().nullish(),
+  "punti_forza": zod.string().nullish(),
+  "punti_deboli": zod.string().nullish(),
+  "sito": zod.string().nullish(),
+  "instagram": zod.string().nullish(),
+  "note": zod.string().nullish(),
+  "data_creazione": zod.string(),
+  "data_aggiornamento": zod.string()
+})
+
+
+/**
+ * @summary Delete a B2B competitor archive entry
+ */
+export const DeleteB2BCompetitorParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+
+/**
+ * @summary List B2B competitor materials metadata
+ */
+export const ListB2BMaterialiQueryParams = zod.object({
+  "competitor_id": zod.coerce.string().optional(),
+  "stato": zod.coerce.string().optional()
+})
+
+export const ListB2BMaterialiResponseItem = zod.object({
+  "id": zod.string(),
+  "competitor_id": zod.string().nullish(),
+  "competitor_nome": zod.string().nullish(),
+  "nome_file": zod.string(),
+  "tipo_materiale": zod.string(),
+  "url": zod.string().nullish(),
+  "stato": zod.string(),
+  "note": zod.string().nullish(),
+  "data_creazione": zod.string()
+})
+export const ListB2BMaterialiResponse = zod.array(ListB2BMaterialiResponseItem)
+
+
+/**
+ * @summary Register competitor material metadata
+ */
+export const CreateB2BMaterialeBody = zod.object({
+  "competitor_id": zod.string().optional(),
+  "nome_file": zod.string(),
+  "tipo_materiale": zod.string().optional(),
+  "url": zod.string().optional(),
+  "stato": zod.string().optional(),
+  "note": zod.string().optional()
+})
+
+
+/**
+ * @summary Update competitor material metadata
+ */
+export const UpdateB2BMaterialeParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+export const UpdateB2BMaterialeBody = zod.object({
+  "competitor_id": zod.string().optional(),
+  "nome_file": zod.string().optional(),
+  "tipo_materiale": zod.string().optional(),
+  "url": zod.string().optional(),
+  "stato": zod.string().optional(),
+  "note": zod.string().optional()
+})
+
+export const UpdateB2BMaterialeResponse = zod.object({
+  "id": zod.string(),
+  "competitor_id": zod.string().nullish(),
+  "competitor_nome": zod.string().nullish(),
+  "nome_file": zod.string(),
+  "tipo_materiale": zod.string(),
+  "url": zod.string().nullish(),
+  "stato": zod.string(),
+  "note": zod.string().nullish(),
+  "data_creazione": zod.string()
+})
+
+
+/**
+ * @summary Delete competitor material metadata
+ */
+export const DeleteB2BMaterialeParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+
+/**
+ * @summary List B2B co-branding templates
+ */
+export const ListB2BTemplateQueryParams = zod.object({
+  "target_tipo": zod.coerce.string().optional()
+})
+
+export const ListB2BTemplateResponseItem = zod.object({
+  "id": zod.string(),
+  "titolo": zod.string(),
+  "target_tipo": zod.string(),
+  "target_descrizione": zod.string().nullish(),
+  "messaggio": zod.string(),
+  "vantaggi": zod.string().nullish(),
+  "cta": zod.string().nullish(),
+  "utilizzi": zod.number(),
+  "data_creazione": zod.string(),
+  "data_aggiornamento": zod.string()
+})
+export const ListB2BTemplateResponse = zod.array(ListB2BTemplateResponseItem)
+
+
+/**
+ * @summary Create a B2B co-branding template
+ */
+export const CreateB2BTemplateBody = zod.object({
+  "titolo": zod.string(),
+  "target_tipo": zod.string().optional(),
+  "target_descrizione": zod.string().optional(),
+  "messaggio": zod.string(),
+  "vantaggi": zod.string().optional(),
+  "cta": zod.string().optional(),
+  "utilizzi": zod.number().optional()
+})
+
+
+/**
+ * @summary Update a B2B co-branding template
+ */
+export const UpdateB2BTemplateParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+export const UpdateB2BTemplateBody = zod.object({
+  "titolo": zod.string().optional(),
+  "target_tipo": zod.string().optional(),
+  "target_descrizione": zod.string().optional(),
+  "messaggio": zod.string().optional(),
+  "vantaggi": zod.string().optional(),
+  "cta": zod.string().optional(),
+  "utilizzi": zod.number().optional()
+})
+
+export const UpdateB2BTemplateResponse = zod.object({
+  "id": zod.string(),
+  "titolo": zod.string(),
+  "target_tipo": zod.string(),
+  "target_descrizione": zod.string().nullish(),
+  "messaggio": zod.string(),
+  "vantaggi": zod.string().nullish(),
+  "cta": zod.string().nullish(),
+  "utilizzi": zod.number(),
+  "data_creazione": zod.string(),
+  "data_aggiornamento": zod.string()
+})
+
+
+/**
+ * @summary Delete a B2B co-branding template
+ */
+export const DeleteB2BTemplateParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+
+/**
+ * @summary Generate a structured competitor analysis
+ */
+export const AnalyzeB2BCompetitorBody = zod.object({
+  "competitor_id": zod.string().optional(),
+  "prompt": zod.string(),
+  "focus": zod.enum(['prezzo', 'proposta', 'debolezze', 'generale']).optional()
+})
+
+export const AnalyzeB2BCompetitorResponse = zod.object({
+  "titolo": zod.string(),
+  "sintesi": zod.string(),
+  "punti_forza": zod.array(zod.string()),
+  "punti_deboli": zod.array(zod.string()),
+  "opportunita": zod.array(zod.string()),
+  "azioni_consigliate": zod.array(zod.string()),
+  "confidence": zod.string().optional()
+})
+
+
+/**
+ * @summary Export a B2B pitch as PDF or presentation outline
+ */
+export const ExportB2BPitchBody = zod.object({
+  "titolo": zod.string(),
+  "target": zod.string(),
+  "messaggio": zod.string().optional(),
+  "budget": zod.number().optional(),
+  "formato": zod.enum(['pdf', 'presentazione'])
+})
+
+export const ExportB2BPitchResponse = zod.object({
+  "formato": zod.enum(['pdf', 'presentazione']),
+  "titolo": zod.string(),
+  "contenuto": zod.string(),
+  "download_filename": zod.string().optional(),
+  "slides": zod.array(zod.object({
+  "titolo": zod.string(),
+  "contenuto": zod.string()
+}))
+})
+
+
+/**
  * @summary List all chat messages across channels
  */
 export const ListMessaggiQueryParams = zod.object({
   "canale": zod.coerce.string().optional(),
-  "contatto_id": zod.coerce.string().optional()
+  "contatto_id": zod.coerce.string().optional(),
+  "letto": zod.coerce.boolean().optional(),
+  "stato_lead": zod.coerce.string().optional(),
+  "operatore_id": zod.coerce.string().optional()
 })
 
 export const ListMessaggiResponseItem = zod.object({
@@ -399,6 +1135,11 @@ export const ListMessaggiResponseItem = zod.object({
   "canale": zod.string(),
   "direzione": zod.string(),
   "testo": zod.string(),
+  "media_id": zod.string().nullish(),
+  "media_tipo": zod.string().nullish(),
+  "media_mime_type": zod.string().nullish(),
+  "media_sha256": zod.string().nullish(),
+  "media_filename": zod.string().nullish(),
   "timestamp": zod.string(),
   "letto": zod.boolean().optional(),
   "mittente_nome": zod.string().nullish()
@@ -419,6 +1160,12 @@ export const SendMessaggioBody = zod.object({
 /**
  * @summary Get unified inbox - one entry per contact with last message
  */
+export const GetChatInboxQueryParams = zod.object({
+  "canale": zod.coerce.string().optional(),
+  "stato_lead": zod.coerce.string().optional(),
+  "operatore_id": zod.coerce.string().optional()
+})
+
 export const GetChatInboxResponseItem = zod.object({
   "contatto_id": zod.string(),
   "contatto_nome": zod.string(),
@@ -428,6 +1175,7 @@ export const GetChatInboxResponseItem = zod.object({
   "timestamp": zod.string(),
   "non_letti": zod.number(),
   "stato_lead": zod.string(),
+  "handoff_richiesto": zod.boolean(),
   "operatore_assegnato_id": zod.string().nullish(),
   "operatore_assegnato_nome": zod.string().nullish()
 })
@@ -449,7 +1197,9 @@ export const AssignChatResponse = zod.object({
   "instagram_username": zod.string().nullish(),
   "origine_lead": zod.string(),
   "tipo_evento": zod.string().nullish(),
+  "note_interna": zod.string().nullish(),
   "stato_lead": zod.string(),
+  "handoff_richiesto": zod.boolean(),
   "data_creazione": zod.string(),
   "ultimo_contatto": zod.string().nullish(),
   "operatore_assegnato_id": zod.string().nullish(),
@@ -458,21 +1208,106 @@ export const AssignChatResponse = zod.object({
 
 
 /**
+ * @summary List active typing operators for a chat
+ */
+export const ListChatTypingQueryParams = zod.object({
+  "contatto_id": zod.coerce.string(),
+  "canale": zod.coerce.string()
+})
+
+export const ListChatTypingResponseItem = zod.object({
+  "contatto_id": zod.string(),
+  "canale": zod.string(),
+  "utente_id": zod.string(),
+  "utente_nome": zod.string(),
+  "is_typing": zod.boolean(),
+  "updated_at": zod.string(),
+  "expires_at": zod.string().nullish()
+})
+export const ListChatTypingResponse = zod.array(ListChatTypingResponseItem)
+
+
+/**
+ * @summary Update operator typing status for a chat
+ */
+export const UpdateChatTypingBody = zod.object({
+  "contatto_id": zod.string(),
+  "canale": zod.string(),
+  "utente_id": zod.string(),
+  "is_typing": zod.boolean()
+})
+
+export const UpdateChatTypingResponse = zod.object({
+  "contatto_id": zod.string(),
+  "canale": zod.string(),
+  "utente_id": zod.string(),
+  "utente_nome": zod.string(),
+  "is_typing": zod.boolean(),
+  "updated_at": zod.string(),
+  "expires_at": zod.string().nullish()
+})
+
+
+/**
+ * @summary List online/offline operator presence
+ */
+export const ListChatPresenceResponseItem = zod.object({
+  "utente_id": zod.string(),
+  "nome": zod.string(),
+  "ruolo": zod.string(),
+  "online": zod.boolean(),
+  "ultimo_heartbeat": zod.string()
+})
+export const ListChatPresenceResponse = zod.array(ListChatPresenceResponseItem)
+
+
+/**
+ * @summary Update operator online heartbeat
+ */
+export const HeartbeatChatPresenceBody = zod.object({
+  "utente_id": zod.string()
+})
+
+export const HeartbeatChatPresenceResponse = zod.object({
+  "utente_id": zod.string(),
+  "nome": zod.string(),
+  "ruolo": zod.string(),
+  "online": zod.boolean(),
+  "ultimo_heartbeat": zod.string()
+})
+
+
+/**
  * @summary Get dashboard summary stats
  */
+export const GetDashboardStatsQueryParams = zod.object({
+  "data_da": zod.coerce.string().optional(),
+  "data_a": zod.coerce.string().optional()
+})
+
 export const GetDashboardStatsResponse = zod.object({
   "totale_contatti": zod.number(),
   "nuovi_oggi": zod.number(),
   "preventivi_attivi": zod.number(),
   "eventi_confermati": zod.number(),
   "budget_totale_confermato": zod.number(),
-  "messaggi_non_letti": zod.number()
+  "messaggi_non_letti": zod.number(),
+  "lead_con_preventivo": zod.number(),
+  "lead_confermati": zod.number(),
+  "conversione_lead_preventivo": zod.number(),
+  "conversione_preventivo_confermato": zod.number(),
+  "conversione_lead_confermato": zod.number()
 })
 
 
 /**
  * @summary Get lead counts by status
  */
+export const GetLeadPipelineQueryParams = zod.object({
+  "data_da": zod.coerce.string().optional(),
+  "data_a": zod.coerce.string().optional()
+})
+
 export const GetLeadPipelineResponseItem = zod.object({
   "stato": zod.string(),
   "count": zod.number()
@@ -483,6 +1318,11 @@ export const GetLeadPipelineResponse = zod.array(GetLeadPipelineResponseItem)
 /**
  * @summary Get confirmed events by month for the current year
  */
+export const GetEventiMeseQueryParams = zod.object({
+  "data_da": zod.coerce.string().optional(),
+  "data_a": zod.coerce.string().optional()
+})
+
 export const GetEventiMeseResponseItem = zod.object({
   "mese": zod.string(),
   "count": zod.number()
@@ -493,6 +1333,11 @@ export const GetEventiMeseResponse = zod.array(GetEventiMeseResponseItem)
 /**
  * @summary Get recent activity feed
  */
+export const GetAttivitaRecenteQueryParams = zod.object({
+  "data_da": zod.coerce.string().optional(),
+  "data_a": zod.coerce.string().optional()
+})
+
 export const GetAttivitaRecenteResponseItem = zod.object({
   "id": zod.string(),
   "tipo": zod.string(),
@@ -504,15 +1349,74 @@ export const GetAttivitaRecenteResponse = zod.array(GetAttivitaRecenteResponseIt
 
 
 /**
- * @summary Check if a date is available for events
+ * @summary Check if a date is available for events using internal data and Google Calendar when configured
  */
 export const CheckCalendarAvailabilityQueryParams = zod.object({
-  "data": zod.coerce.string()
+  "data": zod.coerce.string(),
+  "slot": zod.enum(['pranzo', 'pomeriggio', 'sera', 'intera_giornata']).optional()
 })
 
 export const CheckCalendarAvailabilityResponse = zod.object({
   "disponibile": zod.boolean(),
+  "provider": zod.enum(['internal', 'google', 'combined']),
+  "motivo": zod.string().nullish(),
+  "slot_richiesto": zod.union([zod.literal('pranzo'),zod.literal('pomeriggio'),zod.literal('sera'),zod.literal('intera_giornata'),zod.literal(null)]).nullish(),
+  "slot_disponibili": zod.array(zod.enum(['pranzo', 'pomeriggio', 'sera', 'intera_giornata'])),
   "date_alternative": zod.array(zod.string())
+})
+
+
+/**
+ * @summary Get Google Calendar integration status
+ */
+export const GetGoogleCalendarStatusResponse = zod.object({
+  "configured": zod.boolean(),
+  "enabled": zod.boolean(),
+  "calendar_id": zod.string(),
+  "mode": zod.enum(['env_refresh_token', 'non_configurato']),
+  "last_full_sync_at": zod.string().nullish(),
+  "last_incremental_sync_at": zod.string().nullish(),
+  "sync_token_available": zod.boolean().optional(),
+  "last_error": zod.string().nullish(),
+  "required_env": zod.array(zod.string()).optional()
+})
+
+
+/**
+ * @summary Run Google Calendar synchronization
+ */
+export const syncGoogleCalendarBodyDirectionDefault = `bidirectional`;
+export const syncGoogleCalendarBodyFullSyncDefault = false;
+export const syncGoogleCalendarBodyDaysAheadDefault = 180;
+
+export const SyncGoogleCalendarBody = zod.object({
+  "direction": zod.enum(['zak_to_google', 'google_to_zak', 'bidirectional']).default(syncGoogleCalendarBodyDirectionDefault),
+  "full_sync": zod.boolean().default(syncGoogleCalendarBodyFullSyncDefault),
+  "days_ahead": zod.number().default(syncGoogleCalendarBodyDaysAheadDefault)
+})
+
+export const SyncGoogleCalendarResponse = zod.object({
+  "configured": zod.boolean(),
+  "direction": zod.string(),
+  "pushed": zod.number(),
+  "pulled": zod.number(),
+  "skipped": zod.number(),
+  "conflicts": zod.number(),
+  "errors": zod.array(zod.string()),
+  "message": zod.string().optional()
+})
+
+
+/**
+ * @summary Get production go-live readiness checks
+ */
+export const GetProductionReadinessResponse = zod.object({
+  "ready": zod.boolean(),
+  "checks": zod.array(zod.object({
+  "key": zod.string(),
+  "status": zod.enum(['ok', 'warning', 'missing']),
+  "message": zod.string()
+}))
 })
 
 
@@ -537,7 +1441,27 @@ export const ListAutomazioniLogResponse = zod.array(ListAutomazioniLogResponseIt
 
 
 /**
- * @summary Get automation configuration settings
+ * @summary Get automation performance metrics from execution logs
+ */
+export const GetAutomazioniPerformanceResponse = zod.object({
+  "totale": zod.number(),
+  "eseguiti": zod.number(),
+  "saltati": zod.number(),
+  "errori": zod.number(),
+  "tasso_successo": zod.number(),
+  "ultimi_30_giorni": zod.number(),
+  "per_tipo": zod.array(zod.object({
+  "tipo": zod.string(),
+  "totale": zod.number(),
+  "eseguiti": zod.number(),
+  "saltati": zod.number(),
+  "errori": zod.number()
+}))
+})
+
+
+/**
+ * @summary Get automation configuration settings, including event-type segmentation
  */
 export const ListAutomazioniConfigResponseItem = zod.object({
   "chiave": zod.string(),
@@ -549,7 +1473,7 @@ export const ListAutomazioniConfigResponse = zod.array(ListAutomazioniConfigResp
 
 
 /**
- * @summary Update an automation config value
+ * @summary Update an automation config value such as timing, toggles, or event-type segments
  */
 export const UpdateAutomazioneConfigParams = zod.object({
   "chiave": zod.coerce.string()
@@ -568,7 +1492,7 @@ export const UpdateAutomazioneConfigResponse = zod.object({
 
 
 /**
- * @summary Manually trigger an automation job
+ * @summary Manually trigger an automation job using the current segmentation config
  */
 export const TriggerAutomazioneBody = zod.object({
   "tipo": zod.string()
@@ -577,6 +1501,40 @@ export const TriggerAutomazioneBody = zod.object({
 export const TriggerAutomazioneResponse = zod.object({
   "eseguiti": zod.number(),
   "dettagli": zod.array(zod.string()).optional()
+})
+
+
+/**
+ * @summary List staff action audit log entries
+ */
+export const ListAuditLogQueryParams = zod.object({
+  "azione": zod.coerce.string().optional(),
+  "entita": zod.coerce.string().optional(),
+  "limit": zod.coerce.number().optional()
+})
+
+export const ListAuditLogResponseItem = zod.object({
+  "id": zod.string(),
+  "utente_id": zod.string().nullish(),
+  "utente_nome": zod.string().nullish(),
+  "azione": zod.string(),
+  "entita": zod.string(),
+  "entita_id": zod.string().nullish(),
+  "dettagli": zod.string().nullish(),
+  "ip_address": zod.string().nullish(),
+  "user_agent": zod.string().nullish(),
+  "data_creazione": zod.string()
+})
+export const ListAuditLogResponse = zod.array(ListAuditLogResponseItem)
+
+
+/**
+ * @summary Verify Meta WhatsApp webhook challenge
+ */
+export const WebhookWhatsappChallengeQueryParams = zod.object({
+  "hub.mode": zod.coerce.string(),
+  "hub.verify_token": zod.coerce.string(),
+  "hub.challenge": zod.coerce.string()
 })
 
 
@@ -597,15 +1555,40 @@ export const WebhookWhatsappResponse = zod.object({
 
 
 /**
- * @summary Receive voice call transcription from Vapi
+ * @summary Receive generic, Vapi, or Bland voice call transcription webhook
  */
 export const WebhookVoiceAssistantBody = zod.object({
-  "trascrizione": zod.string(),
-  "telefono": zod.string().nullish(),
-  "durata": zod.number().nullish()
+  "provider": zod.enum(['generic', 'vapi', 'bland']).optional(),
+  "trascrizione": zod.string().optional(),
+  "telefono": zod.string().nullish().describe('If present, the webhook links the call to an existing CRM contact with the same normalized phone'),
+  "durata": zod.number().nullish(),
+  "call_id": zod.string().nullish(),
+  "recording_url": zod.string().nullish(),
+  "summary": zod.string().nullish(),
+  "message": zod.object({
+
+}).passthrough().optional().describe('Raw Vapi webhook message payload.'),
+  "call": zod.object({
+
+}).passthrough().optional().describe('Raw Bland or generic call payload.'),
+  "data": zod.object({
+
+}).passthrough().optional().describe('Raw provider-specific payload wrapper.'),
+  "analysis": zod.object({
+
+}).passthrough().optional().describe('Provider intent analysis or extracted variables.')
 })
 
 export const WebhookVoiceAssistantResponse = zod.object({
+  "success": zod.boolean(),
+  "message": zod.string().nullish()
+})
+
+
+/**
+ * @summary Receive Google Calendar push notification and trigger incremental sync
+ */
+export const WebhookGoogleCalendarResponse = zod.object({
   "success": zod.boolean(),
   "message": zod.string().nullish()
 })

@@ -5,11 +5,15 @@
  * Zak Ecosystem AI - CRM Omnicanale API
  * OpenAPI spec version: 0.1.0
  */
+import type { UtenteRuolo } from './utenteRuolo';
+import type { UtenteStato } from './utenteStato';
 
 export interface Utente {
   id: string;
   nome: string;
-  ruolo: string;
+  ruolo: UtenteRuolo;
   email: string;
+  /** Stato operativo account staff. Gli account disattivati non devono poter accedere quando verra implementata l'autenticazione. */
+  stato: UtenteStato;
   data_creazione: string;
 }

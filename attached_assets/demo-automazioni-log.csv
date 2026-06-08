@@ -1,0 +1,41 @@
+timestamp,tipo,esito,contatto_nome,messaggio,dettagli
+2026-06-02T09:00:15+02:00,reengagement,eseguito,Marco Rossi,Ciao Marco! Volevamo sapere se fossi ancora interessato a completare il preventivo per la tua festa.,Messaggio inviato correttamente via Meta WhatsApp API
+2026-06-02T09:00:18+02:00,reengagement,saltato,Giulia Bianchi,,Contatto inattivo da solo 2 giorni (limite impostato a 5 giorni)
+2026-06-02T10:00:05+02:00,ricorrenza,eseguito,Roberto Martini,Buon anniversario da Villa ZAK! Speriamo che il ricordo del tuo evento sia ancora vivo.,Messaggio inviato correttamente via Meta WhatsApp API
+2026-06-02T10:00:08+02:00,ricorrenza,saltato,Valeria Conte,,Nessun evento confermato l'anno precedente per questo contatto
+2026-06-01T09:00:12+02:00,reengagement,eseguito,Luca Moretti,Ciao Luca! Ti scriviamo per ricordarti il preventivo aperto per il sopralluogo del locale.,Messaggio salvato in inbox (Meta non configurato)
+2026-06-01T09:00:14+02:00,reengagement,errore,Giuseppe Esposito,,Errore API Meta: 400 Bad Request (formato telefono non corretto)
+2026-06-01T10:00:03+02:00,ricorrenza,eseguito,Francesca Ricci,Buon compleanno da tutto lo staff di Villa ZAK!,Messaggio inviato correttamente via Meta WhatsApp API
+2026-06-01T10:00:05+02:00,ricorrenza,saltato,Davide Barbieri,,Contatto disattivato o escluso dalle automazioni CRM
+2026-05-31T09:00:10+02:00,reengagement,eseguito,Elena Gallo,Ciao Elena! Ci sono novita' riguardo la tua richiesta per la sala eventi?,Messaggio inviato correttamente via Meta WhatsApp API
+2026-05-31T09:00:12+02:00,reengagement,saltato,Fabio Messina,,Contatto gia' contrassegnato come lead 'confermato'
+2026-05-31T10:00:02+02:00,ricorrenza,eseguito,Alice De Luca,Tanti auguri di buon compleanno da Villa ZAK!,Messaggio inviato correttamente via Meta WhatsApp API
+2026-05-30T09:00:08+02:00,reengagement,eseguito,Silvia Fontana,Ciao Silvia! Ricordati che l'offerta per la tua festa scade tra 3 giorni.,Messaggio salvato in inbox (Meta non configurato)
+2026-05-30T09:00:11+02:00,reengagement,saltato,Alessandro Rossi,,Utente con ruolo amministratore escluso da automazioni
+2026-05-30T10:00:05+02:00,ricorrenza,saltato,Chiara Ferrari,,Nessuna ricorrenza compleanno registrata per oggi
+2026-05-29T09:00:05+02:00,reengagement,eseguito,Valeria Conte,Ciao Valeria! Ti andrebbe di fare due chiacchiere per definire il menu'?,Messaggio inviato correttamente via Meta WhatsApp API
+2026-05-29T09:00:08+02:00,reengagement,saltato,Roberto Martini,,Contatto escluso da reengagement (tipo evento non incluso)
+2026-05-29T10:00:03+02:00,ricorrenza,eseguito,Giuseppe Esposito,Buon anniversario da Villa ZAK!,Messaggio inviato correttamente via Meta WhatsApp API
+2026-05-28T09:00:05+02:00,reengagement,eseguito,Chiara Ferrari,Ciao Chiara! Vorremmo invitarti a fare un sopralluogo gratuito dei Loft.,Messaggio salvato in inbox (Meta non configurato)
+2026-05-28T09:00:07+02:00,reengagement,saltato,Marco Rossi,,Contatto gia' contattato nelle ultime 24 ore
+2026-05-28T10:00:02+02:00,ricorrenza,saltato,Giulia Bianchi,,Nessuna ricorrenza attiva per la data odierna
+2026-05-27T09:00:12+02:00,reengagement,eseguito,Giulia Bianchi,Ciao Giulia! Volevamo informarti sulle nuove date disponibili per la laurea.,Messaggio inviato correttamente via Meta WhatsApp API
+2026-05-27T09:00:15+02:00,reengagement,saltato,Roberto Martini,,Contatto inattivo da meno di 5 giorni
+2026-05-27T10:00:05+02:00,ricorrenza,eseguito,Valeria Conte,Buon compleanno da Villa ZAK!,Messaggio inviato correttamente via Meta WhatsApp API
+2026-05-26T09:00:10+02:00,reengagement,eseguito,Roberto Martini,Ciao Roberto! C'e' ancora interesse per la sala Loft del locale?,Messaggio salvato in inbox (Meta non configurato)
+2026-05-26T09:00:12+02:00,reengagement,errore,Valeria Conte,,Errore di rete Meta API: 504 Gateway Timeout
+2026-05-26T10:00:04+02:00,ricorrenza,saltato,Marco Rossi,,Nessun evento confermato l'anno precedente
+2026-05-25T09:00:05+02:00,reengagement,eseguito,Giuseppe Esposito,Ciao Giuseppe! Ti scriviamo per sapere se la proposta rientra nel tuo budget.,Messaggio inviato correttamente via Meta WhatsApp API
+2026-05-25T10:00:02+02:00,ricorrenza,eseguito,Chiara Ferrari,Tanti auguri di buon compleanno da Villa ZAK!,Messaggio inviato correttamente via Meta WhatsApp API
+2026-05-24T09:00:05+02:00,reengagement,eseguito,Marco Rossi,Ciao Marco! Hai novita' per l'affitto della console per la festa?,Messaggio salvato in inbox (Meta non configurato)
+2026-05-24T10:00:02+02:00,ricorrenza,saltato,Giulia Bianchi,,Nessuna ricorrenza attiva per oggi
+2026-05-23T09:00:10+02:00,reengagement,eseguito,Giulia Bianchi,Ciao Giulia! Ricordati di confermare il menu' vegetariano entro oggi.,Messaggio inviato correttamente via Meta WhatsApp API
+2026-05-23T10:00:05+02:00,ricorrenza,eseguito,Giuseppe Esposito,Buon anniversario da Villa ZAK!,Messaggio inviato correttamente via Meta WhatsApp API
+2026-05-22T09:00:05+02:00,reengagement,eseguito,Valeria Conte,Ciao Valeria! Ti andrebbe di fare un sopralluogo questo fine settimana?,Messaggio salvato in inbox (Meta non configurato)
+2026-05-22T10:00:02+02:00,ricorrenza,saltato,Roberto Martini,,Nessuna ricorrenza compleanno registrata per oggi
+2026-05-21T09:00:05+02:00,reengagement,eseguito,Roberto Martini,Ciao Roberto! Abbiamo allestito le luci colorate richieste, vieni a vederle?,Messaggio inviato correttamente via Meta WhatsApp API
+2026-05-21T10:00:02+02:00,ricorrenza,eseguito,Valeria Conte,Tanti auguri di buon compleanno da Villa ZAK!,Messaggio inviato correttamente via Meta WhatsApp API
+2026-05-20T09:00:08+02:00,reengagement,eseguito,Chiara Ferrari,Ciao Chiara! Ti ricordiamo la scadenza dell'offerta per la sala Loft.,Messaggio salvato in inbox (Meta non configurato)
+2026-05-20T10:00:03+02:00,ricorrenza,saltato,Giuseppe Esposito,,Nessuna ricorrenza compleanno registrata per oggi
+2026-05-19T09:00:05+02:00,reengagement,eseguito,Giuseppe Esposito,Ciao Giuseppe! Ti andrebbe di definire il numero di invitati per la festa?,Messaggio inviato correttamente via Meta WhatsApp API
+2026-05-19T10:00:02+02:00,ricorrenza,eseguito,Chiara Ferrari,Buon anniversario da Villa ZAK!,Messaggio inviato correttamente via Meta WhatsApp API

@@ -12,6 +12,10 @@ export const preventiviEventiTable = pgTable("preventivi_eventi", {
   note: text("note"),
   stato_evento: text("stato_evento").notNull().default("opzionato"),
   data_creazione: timestamp("data_creazione").notNull().defaultNow(),
+  google_calendar_id: text("google_calendar_id"),
+  google_event_id: text("google_event_id"),
+  google_sync_status: text("google_sync_status").notNull().default("non_configurato"),
+  google_last_synced_at: timestamp("google_last_synced_at"),
 });
 
 export const insertPreventivoSchema = createInsertSchema(preventiviEventiTable).omit({ id: true, data_creazione: true });

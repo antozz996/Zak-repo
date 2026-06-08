@@ -1,0 +1,41 @@
+contatto_nome,timestamp,mittente,canale,contenuto,stato_lettura
+Marco Rossi,2026-06-02T09:00:00+02:00,cliente,whatsapp,Ciao! Vorrei informazioni per organizzare una festa per i miei 30 anni.,letto
+Marco Rossi,2026-06-02T09:02:00+02:00,ai,whatsapp,Ciao Marco! Auguri in anticipo per i tuoi 30 anni. Certo ti posso aiutare. Quanti invitati prevedi e per quale periodo?,letto
+Marco Rossi,2026-06-02T09:05:00+02:00,cliente,whatsapp,Saremo circa 50 persone a metà giugno. Avete disponibilità per il weekend del 20?,letto
+Marco Rossi,2026-06-02T09:07:00+02:00,ai,whatsapp,Sì il 20 giugno è attualmente disponibile. Desideri un pacchetto con open bar o solo affitto sala?,letto
+Marco Rossi,2026-06-02T09:10:00+02:00,cliente,whatsapp,Vorrei capire i prezzi per entrambe le opzioni se possibile.,letto
+Marco Rossi,2026-06-02T09:12:00+02:00,ai,whatsapp,Certamente! Sto preparando le proposte. Ti invio a breve un link con il preventivo dettagliato.,letto
+Marco Rossi,2026-06-02T09:15:00+02:00,staff,whatsapp,Ciao Marco sono Giuseppe dello staff. Ho appena associato la proposta da 1200 euro al tuo profilo. Puoi vederla qui: https://zak.com/q/marco-30,letto
+Giulia Bianchi,2026-06-02T09:30:00+02:00,cliente,instagram,Salve! Ho visto le vostre storie. Fate anche feste di laurea?,letto
+Giulia Bianchi,2026-06-02T09:32:00+02:00,ai,instagram,Ciao Giulia! Certamente organizziamo splendide feste di laurea con buffet e DJ set. Per quante persone pensavi?,letto
+Giulia Bianchi,2026-06-02T09:35:00+02:00,cliente,instagram,Saremo circa 80 persone. Vorrei fare un open bar con catering a buffet a fine mese.,letto
+Giulia Bianchi,2026-06-02T09:40:00+02:00,ai,instagram,Perfetto per 80 persone abbiamo la nostra sala Loft con impianto audio dedicato. Posso avere un recapito telefonico per mandarti i dettagli?,letto
+Giulia Bianchi,2026-06-02T09:42:00+02:00,cliente,instagram,Sì certo, il mio numero è +39 348 9876543.,letto
+Giulia Bianchi,2026-06-02T09:45:00+02:00,ai,whatsapp,Ciao Giulia! Ti ho scritto qui su WhatsApp. Il nostro staff sta preparando l'offerta per la tua laurea.,letto
+Luca Verdi,2026-06-02T08:15:00+02:00,cliente,voice,[Chiamata Voice In entrata] Cliente chiede info su matrimonio per settembre 2026. Dice che il budget è flessibile e vuole un catering di alto livello per 100 invitati.,letto
+Luca Verdi,2026-06-02T08:30:00+02:00,staff,whatsapp,Gentile Luca, grazie per la chiamata di stamattina. Le ho inviato la bozza di preventivo per il matrimonio via email e WhatsApp.,letto
+Luca Verdi,2026-06-02T08:45:00+02:00,cliente,whatsapp,Grazie mille Giuseppe. Ho visto il preventivo. Possiamo fare una degustazione dei piatti del menu prima di confermare?,letto
+Anna Ferrari,2026-06-02T10:00:00+02:00,cliente,whatsapp,Buongiorno, vorrei organizzare la festa dei 18 anni di mia figlia Anna ad agosto.,letto
+Anna Ferrari,2026-06-02T10:02:00+02:00,ai,whatsapp,Buongiorno! Che bella ricorrenza. Preferite una festa con DJ e area ballo o un aperitivo più formale?,letto
+Anna Ferrari,2026-06-02T10:05:00+02:00,cliente,whatsapp,Sicuramente con DJ, saranno circa 120 ragazzi. Vogliono divertirsi.,letto
+Anna Ferrari,2026-06-02T10:08:00+02:00,ai,whatsapp,Capito! Abbiamo il pacchetto 'Sweet 18' con DJ incluso e buffet rinforzato a partire da 2500 euro. Ti interessa?,letto
+Anna Ferrari,2026-06-02T10:10:00+02:00,cliente,whatsapp,Sì, mi interessa molto. Posso venire a vedere la sala questa settimana?,letto
+Roberto Esposito,2026-06-01T15:00:00+02:00,cliente,whatsapp,Vi confermo che abbiamo effettuato il bonifico per l'acconto del team building aziendale del 15 ottobre.,letto
+Roberto Esposito,2026-06-01T15:10:00+02:00,staff,whatsapp,Perfetto Roberto! Ricevuto. Abbiamo bloccato la data e assegnato il tutor per il vostro evento. A presto!,letto
+Valentina Conte,2026-06-02T11:00:00+02:00,cliente,whatsapp,Ciao! Mi potete dire se l'open bar include anche cocktail pestati come il mojito?,letto
+Valentina Conte,2026-06-02T11:02:00+02:00,ai,whatsapp,Ciao Valentina! Sì, il nostro open bar premium include mojito, caipirinha e una selezione di cocktail pestati preparati da barman professionisti.,letto
+Valentina Conte,2026-06-02T11:05:00+02:00,cliente,whatsapp,Ottimo, allora inviami pure la proposta aggiornata con open bar premium.,letto
+Chiara Romano,2026-06-02T11:15:00+02:00,cliente,whatsapp,Avete opzioni per invitati vegani e celiaci? Sarà un matrimonio con circa 15 persone con restrizioni alimentari.,letto
+Chiara Romano,2026-06-02T11:18:00+02:00,ai,whatsapp,Assolutamente sì. Abbiamo un menu vegano dedicato e piatti certificati senza glutine preparati in cucine separate per evitare contaminazioni.,letto
+Chiara Romano,2026-06-02T11:20:00+02:00,cliente,whatsapp,Perfetto, questo mi rassicura molto. Quando possiamo concordare i dettagli del menu?,letto
+Davide Moretti,2026-06-02T12:00:00+02:00,cliente,voice,[Chiamata Voice In entrata] Davide chiede preventivo per cena aziendale di Natale per 40 persone. Ha bisogno di un proiettore per presentare i risultati dell'anno.,non_letto
+Sofia Pellegrini,2026-06-02T10:30:00+02:00,cliente,whatsapp,Ciao! Per il compleanno a tema Hollywood è possibile mettere un tappeto rosso all'ingresso?,letto
+Sofia Pellegrini,2026-06-02T10:32:00+02:00,ai,whatsapp,Ciao Sofia! Sì certo, il nostro pacchetto 'Red Carpet' include un tappeto rosso da 10 metri all'ingresso con colonnine dorate e cordoni rossi.,letto
+Sofia Pellegrini,2026-06-02T10:35:00+02:00,cliente,whatsapp,Favoloso! Esattamente quello che volevo. Aggiungilo pure alla proposta.,letto
+Pietro Santoro,2026-06-01T09:00:00+02:00,staff,whatsapp,Gentile Pietro, le confermo che la sala per la convention aziendale del 22-23 giugno è prenotata. Abbiamo ricevuto l'acconto.,letto
+Pietro Santoro,2026-06-01T09:15:00+02:00,cliente,whatsapp,Grazie per la conferma. Ci risentiamo la prossima settimana per i dettagli del catering e il numero esatto dei partecipanti.,letto
+Pietro Santoro,2026-06-01T09:18:00+02:00,staff,whatsapp,A disposizione. Buona settimana!,letto
+Elena Marchetti,2026-06-02T12:10:00+02:00,cliente,whatsapp,Ciao! Vorrei fare una festa a sorpresa a mio marito. Potete evitare di mandare email con il vostro nome per non fargli scoprire nulla?,non_letto
+Elena Marchetti,2026-06-02T12:12:00+02:00,ai,whatsapp,Certamente Elena! Possiamo comunicare solo tramite WhatsApp a questo numero o usare note protette. Non invieremo email a indirizzi condivisi.,non_letto
+Elena Marchetti,2026-06-02T12:15:00+02:00,cliente,whatsapp,Grazie mille! Molto gentili. Siete operativi anche la domenica?,non_letto
+Elena Marchetti,2026-06-02T12:18:00+02:00,ai,whatsapp,Sì, ospitiamo eventi tutti i giorni della settimana, domenica inclusa. Che tipo di festa avevi in mente?,non_letto

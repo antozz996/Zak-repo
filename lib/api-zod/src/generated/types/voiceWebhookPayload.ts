@@ -5,11 +5,34 @@
  * Zak Ecosystem AI - CRM Omnicanale API
  * OpenAPI spec version: 0.1.0
  */
+import type { VoiceWebhookPayloadAnalysis } from './voiceWebhookPayloadAnalysis';
+import type { VoiceWebhookPayloadCall } from './voiceWebhookPayloadCall';
+import type { VoiceWebhookPayloadData } from './voiceWebhookPayloadData';
+import type { VoiceWebhookPayloadMessage } from './voiceWebhookPayloadMessage';
+import type { VoiceWebhookPayloadProvider } from './voiceWebhookPayloadProvider';
 
 export interface VoiceWebhookPayload {
-  trascrizione: string;
-  /** @nullable */
+  provider?: VoiceWebhookPayloadProvider;
+  trascrizione?: string;
+  /**
+     * If present, the webhook links the call to an existing CRM contact with the same normalized phone
+     * @nullable
+     */
   telefono?: string | null;
   /** @nullable */
   durata?: number | null;
+  /** @nullable */
+  call_id?: string | null;
+  /** @nullable */
+  recording_url?: string | null;
+  /** @nullable */
+  summary?: string | null;
+  /** Raw Vapi webhook message payload. */
+  message?: VoiceWebhookPayloadMessage;
+  /** Raw Bland or generic call payload. */
+  call?: VoiceWebhookPayloadCall;
+  /** Raw provider-specific payload wrapper. */
+  data?: VoiceWebhookPayloadData;
+  /** Provider intent analysis or extracted variables. */
+  analysis?: VoiceWebhookPayloadAnalysis;
 }

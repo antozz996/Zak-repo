@@ -9,24 +9,143 @@ export interface HealthStatus {
   status: string;
 }
 
+export type AuthUserRuolo = typeof AuthUserRuolo[keyof typeof AuthUserRuolo];
+
+
+export const AuthUserRuolo = {
+  admin: 'admin',
+  manager: 'manager',
+  staff: 'staff',
+} as const;
+
+export type AuthUserStato = typeof AuthUserStato[keyof typeof AuthUserStato];
+
+
+export const AuthUserStato = {
+  attivo: 'attivo',
+  disattivato: 'disattivato',
+} as const;
+
+export interface AuthUser {
+  id: string;
+  nome: string;
+  ruolo: AuthUserRuolo;
+  email: string;
+  stato: AuthUserStato;
+}
+
+export interface AuthLoginInput {
+  email: string;
+  /** @minLength 8 */
+  password: string;
+  remember?: boolean;
+}
+
+export interface AuthSession {
+  token: string;
+  expires_at: string;
+  utente: AuthUser;
+}
+
+export interface AuthLogoutResponse {
+  success: boolean;
+}
+
+export interface BootstrapAdminInput {
+  nome: string;
+  email: string;
+  /** @minLength 8 */
+  password: string;
+  /** Required when users already exist and ZAK_BOOTSTRAP_ADMIN_TOKEN is configured. */
+  bootstrap_token?: string;
+}
+
+export type UtenteRuolo = typeof UtenteRuolo[keyof typeof UtenteRuolo];
+
+
+export const UtenteRuolo = {
+  admin: 'admin',
+  manager: 'manager',
+  staff: 'staff',
+} as const;
+
+/**
+ * Stato operativo account staff. Gli account disattivati non devono poter accedere quando verra implementata l'autenticazione.
+ */
+export type UtenteStato = typeof UtenteStato[keyof typeof UtenteStato];
+
+
+export const UtenteStato = {
+  attivo: 'attivo',
+  disattivato: 'disattivato',
+} as const;
+
 export interface Utente {
   id: string;
   nome: string;
-  ruolo: string;
+  ruolo: UtenteRuolo;
   email: string;
+  /** Stato operativo account staff. Gli account disattivati non devono poter accedere quando verra implementata l'autenticazione. */
+  stato: UtenteStato;
   data_creazione: string;
 }
 
+export type UtenteInputRuolo = typeof UtenteInputRuolo[keyof typeof UtenteInputRuolo];
+
+
+export const UtenteInputRuolo = {
+  admin: 'admin',
+  manager: 'manager',
+  staff: 'staff',
+} as const;
+
+export type UtenteInputStato = typeof UtenteInputStato[keyof typeof UtenteInputStato];
+
+
+export const UtenteInputStato = {
+  attivo: 'attivo',
+  disattivato: 'disattivato',
+} as const;
+
 export interface UtenteInput {
   nome: string;
-  ruolo: string;
+  ruolo: UtenteInputRuolo;
   email: string;
+  stato?: UtenteInputStato;
+  /**
+     * Optional initial password. Never returned by the API.
+     * @minLength 8
+     */
+  password?: string;
 }
+
+export type UtenteUpdateRuolo = typeof UtenteUpdateRuolo[keyof typeof UtenteUpdateRuolo];
+
+
+export const UtenteUpdateRuolo = {
+  admin: 'admin',
+  manager: 'manager',
+  staff: 'staff',
+} as const;
+
+export type UtenteUpdateStato = typeof UtenteUpdateStato[keyof typeof UtenteUpdateStato];
+
+
+export const UtenteUpdateStato = {
+  attivo: 'attivo',
+  disattivato: 'disattivato',
+} as const;
 
 export interface UtenteUpdate {
   nome?: string;
-  ruolo?: string;
+  ruolo?: UtenteUpdateRuolo;
   email?: string;
+  stato?: UtenteUpdateStato;
+  /**
+     * Optional password reset. Never returned by the API.
+     * @minLength 8
+     */
+  password?: string;
 }
 
 export interface Contatto {
@@ -38,7 +157,10 @@ export interface Contatto {
   origine_lead: string;
   /** @nullable */
   tipo_evento?: string | null;
+  /** @nullable */
+  note_interna?: string | null;
   stato_lead: string;
+  handoff_richiesto: boolean;
   data_creazione: string;
   /** @nullable */
   ultimo_contatto?: string | null;
@@ -54,8 +176,26 @@ export interface ContattoInput {
   instagram_username?: string;
   origine_lead: string;
   tipo_evento?: string;
+  note_interna?: string;
   stato_lead: string;
+  handoff_richiesto?: boolean;
   operatore_assegnato_id?: string;
+}
+
+export interface ImportContattiCsvInput {
+  csv: string;
+}
+
+export type ImportContattiCsvResultErroriItem = {
+  riga: number;
+  motivo: string;
+};
+
+export interface ImportContattiCsvResult {
+  totale_righe: number;
+  creati: number;
+  saltati: number;
+  errori: ImportContattiCsvResultErroriItem[];
 }
 
 export interface ContattoUpdate {
@@ -64,9 +204,25 @@ export interface ContattoUpdate {
   instagram_username?: string;
   origine_lead?: string;
   tipo_evento?: string;
+  note_interna?: string;
   stato_lead?: string;
+  handoff_richiesto?: boolean;
   operatore_assegnato_id?: string;
 }
+
+/**
+ * @nullable
+ */
+export type PreventivoGoogleSyncStatus = typeof PreventivoGoogleSyncStatus[keyof typeof PreventivoGoogleSyncStatus] | null;
+
+
+export const PreventivoGoogleSyncStatus = {
+  non_configurato: 'non_configurato',
+  pending: 'pending',
+  synced: 'synced',
+  conflict: 'conflict',
+  error: 'error',
+} as const;
 
 export interface Preventivo {
   id: string;
@@ -83,7 +239,26 @@ export interface Preventivo {
   note?: string | null;
   stato_evento: string;
   data_creazione: string;
+  /** @nullable */
+  google_calendar_id?: string | null;
+  /** @nullable */
+  google_event_id?: string | null;
+  /** @nullable */
+  google_sync_status?: PreventivoGoogleSyncStatus;
+  /** @nullable */
+  google_last_synced_at?: string | null;
 }
+
+export type PreventivoInputGoogleSyncStatus = typeof PreventivoInputGoogleSyncStatus[keyof typeof PreventivoInputGoogleSyncStatus];
+
+
+export const PreventivoInputGoogleSyncStatus = {
+  non_configurato: 'non_configurato',
+  pending: 'pending',
+  synced: 'synced',
+  conflict: 'conflict',
+  error: 'error',
+} as const;
 
 export interface PreventivoInput {
   contatto_id: string;
@@ -92,7 +267,21 @@ export interface PreventivoInput {
   budget_stimato?: number;
   note?: string;
   stato_evento: string;
+  google_calendar_id?: string;
+  google_event_id?: string;
+  google_sync_status?: PreventivoInputGoogleSyncStatus;
 }
+
+export type PreventivoUpdateGoogleSyncStatus = typeof PreventivoUpdateGoogleSyncStatus[keyof typeof PreventivoUpdateGoogleSyncStatus];
+
+
+export const PreventivoUpdateGoogleSyncStatus = {
+  non_configurato: 'non_configurato',
+  pending: 'pending',
+  synced: 'synced',
+  conflict: 'conflict',
+  error: 'error',
+} as const;
 
 export interface PreventivoUpdate {
   data_evento_richiesta?: string;
@@ -100,7 +289,144 @@ export interface PreventivoUpdate {
   budget_stimato?: number;
   note?: string;
   stato_evento?: string;
+  google_calendar_id?: string;
+  google_event_id?: string;
+  google_sync_status?: PreventivoUpdateGoogleSyncStatus;
 }
+
+export type PreventivoPricingInputPacchetto = typeof PreventivoPricingInputPacchetto[keyof typeof PreventivoPricingInputPacchetto];
+
+
+export const PreventivoPricingInputPacchetto = {
+  essenziale: 'essenziale',
+  standard: 'standard',
+  premium: 'premium',
+} as const;
+
+export type PreventivoPricingInputExtraItem = typeof PreventivoPricingInputExtraItem[keyof typeof PreventivoPricingInputExtraItem];
+
+
+export const PreventivoPricingInputExtraItem = {
+  open_bar: 'open_bar',
+  dj_set: 'dj_set',
+  fotografo: 'fotografo',
+  allestimento: 'allestimento',
+  torta: 'torta',
+  sicurezza: 'sicurezza',
+} as const;
+
+export interface PreventivoPricingInput {
+  pacchetto: PreventivoPricingInputPacchetto;
+  numero_invitati: number;
+  tipo_evento?: string;
+  extra?: PreventivoPricingInputExtraItem[];
+}
+
+export interface PreventivoPricingVoce {
+  codice: string;
+  descrizione: string;
+  quantita: number;
+  prezzo_unitario: number;
+  totale: number;
+}
+
+export type PreventivoPricingResultPacchetto = typeof PreventivoPricingResultPacchetto[keyof typeof PreventivoPricingResultPacchetto];
+
+
+export const PreventivoPricingResultPacchetto = {
+  essenziale: 'essenziale',
+  standard: 'standard',
+  premium: 'premium',
+} as const;
+
+export interface PreventivoPricingResult {
+  pacchetto: PreventivoPricingResultPacchetto;
+  numero_invitati: number;
+  voci: PreventivoPricingVoce[];
+  totale: number;
+  totale_formattato: string;
+  note?: string;
+}
+
+export type PreventivoVersioneSnapshot = { [key: string]: unknown };
+
+export interface PreventivoVersione {
+  id: string;
+  preventivo_id: string;
+  numero_versione: number;
+  snapshot: PreventivoVersioneSnapshot;
+  /** @nullable */
+  nota?: string | null;
+  data_creazione: string;
+}
+
+export interface PreventivoVersioneInput {
+  nota?: string;
+}
+
+export type PreventivoWhatsAppSendResultStatus = typeof PreventivoWhatsAppSendResultStatus[keyof typeof PreventivoWhatsAppSendResultStatus];
+
+
+export const PreventivoWhatsAppSendResultStatus = {
+  sent: 'sent',
+  skipped: 'skipped',
+  failed: 'failed',
+} as const;
+
+export interface PreventivoWhatsAppSendResult {
+  success: boolean;
+  status: PreventivoWhatsAppSendResultStatus;
+  message: string;
+  /** @nullable */
+  provider_message_id?: string | null;
+}
+
+export type PreventivoConfermaDigitaleInputMetodo = typeof PreventivoConfermaDigitaleInputMetodo[keyof typeof PreventivoConfermaDigitaleInputMetodo];
+
+
+export const PreventivoConfermaDigitaleInputMetodo = {
+  firma_digitale: 'firma_digitale',
+  conferma_whatsapp: 'conferma_whatsapp',
+  conferma_manuale: 'conferma_manuale',
+} as const;
+
+export interface PreventivoConfermaDigitaleInput {
+  firmatario_nome: string;
+  firmatario_telefono?: string;
+  metodo: PreventivoConfermaDigitaleInputMetodo;
+  note?: string;
+}
+
+export interface PreventivoConfermaDigitaleResult {
+  preventivo: Preventivo;
+  message: string;
+}
+
+/**
+ * @nullable
+ */
+export type AgendaItemGoogleSyncStatus = typeof AgendaItemGoogleSyncStatus[keyof typeof AgendaItemGoogleSyncStatus] | null;
+
+
+export const AgendaItemGoogleSyncStatus = {
+  non_configurato: 'non_configurato',
+  pending: 'pending',
+  synced: 'synced',
+  conflict: 'conflict',
+  error: 'error',
+} as const;
+
+/**
+ * @nullable
+ */
+export type AgendaItemGoogleSyncDirection = typeof AgendaItemGoogleSyncDirection[keyof typeof AgendaItemGoogleSyncDirection] | null;
+
+
+export const AgendaItemGoogleSyncDirection = {
+  zak: 'zak',
+  google: 'google',
+  bidirectional: 'bidirectional',
+} as const;
 
 export interface AgendaItem {
   id: string;
@@ -110,8 +436,44 @@ export interface AgendaItem {
   data_ora_inizio: string;
   data_ora_fine: string;
   categoria: string;
+  /** @nullable */
+  contatto_id?: string | null;
+  /** @nullable */
+  contatto_nome?: string | null;
   promemoria_inviato: boolean;
+  /** @nullable */
+  google_calendar_id?: string | null;
+  /** @nullable */
+  google_event_id?: string | null;
+  /** @nullable */
+  google_sync_status?: AgendaItemGoogleSyncStatus;
+  /** @nullable */
+  google_sync_direction?: AgendaItemGoogleSyncDirection;
+  /** @nullable */
+  google_last_synced_at?: string | null;
+  /** @nullable */
+  google_updated_at?: string | null;
 }
+
+export type AgendaItemInputGoogleSyncStatus = typeof AgendaItemInputGoogleSyncStatus[keyof typeof AgendaItemInputGoogleSyncStatus];
+
+
+export const AgendaItemInputGoogleSyncStatus = {
+  non_configurato: 'non_configurato',
+  pending: 'pending',
+  synced: 'synced',
+  conflict: 'conflict',
+  error: 'error',
+} as const;
+
+export type AgendaItemInputGoogleSyncDirection = typeof AgendaItemInputGoogleSyncDirection[keyof typeof AgendaItemInputGoogleSyncDirection];
+
+
+export const AgendaItemInputGoogleSyncDirection = {
+  zak: 'zak',
+  google: 'google',
+  bidirectional: 'bidirectional',
+} as const;
 
 export interface AgendaItemInput {
   titolo: string;
@@ -119,7 +481,32 @@ export interface AgendaItemInput {
   data_ora_inizio: string;
   data_ora_fine: string;
   categoria: string;
+  contatto_id?: string;
+  google_calendar_id?: string;
+  google_event_id?: string;
+  google_sync_status?: AgendaItemInputGoogleSyncStatus;
+  google_sync_direction?: AgendaItemInputGoogleSyncDirection;
 }
+
+export type AgendaItemUpdateGoogleSyncStatus = typeof AgendaItemUpdateGoogleSyncStatus[keyof typeof AgendaItemUpdateGoogleSyncStatus];
+
+
+export const AgendaItemUpdateGoogleSyncStatus = {
+  non_configurato: 'non_configurato',
+  pending: 'pending',
+  synced: 'synced',
+  conflict: 'conflict',
+  error: 'error',
+} as const;
+
+export type AgendaItemUpdateGoogleSyncDirection = typeof AgendaItemUpdateGoogleSyncDirection[keyof typeof AgendaItemUpdateGoogleSyncDirection];
+
+
+export const AgendaItemUpdateGoogleSyncDirection = {
+  zak: 'zak',
+  google: 'google',
+  bidirectional: 'bidirectional',
+} as const;
 
 export interface AgendaItemUpdate {
   titolo?: string;
@@ -127,7 +514,243 @@ export interface AgendaItemUpdate {
   data_ora_inizio?: string;
   data_ora_fine?: string;
   categoria?: string;
+  contatto_id?: string;
   promemoria_inviato?: boolean;
+  google_calendar_id?: string;
+  google_event_id?: string;
+  google_sync_status?: AgendaItemUpdateGoogleSyncStatus;
+  google_sync_direction?: AgendaItemUpdateGoogleSyncDirection;
+}
+
+export interface TaskPersonale {
+  id: string;
+  titolo: string;
+  /** @nullable */
+  descrizione?: string | null;
+  stato: string;
+  priorita: string;
+  /** @nullable */
+  scadenza?: string | null;
+  /** @nullable */
+  contatto_id?: string | null;
+  /** @nullable */
+  contatto_nome?: string | null;
+  fonte: string;
+  data_creazione: string;
+  /** @nullable */
+  completato_il?: string | null;
+}
+
+export interface TaskPersonaleInput {
+  titolo: string;
+  descrizione?: string;
+  stato?: string;
+  priorita?: string;
+  scadenza?: string;
+  contatto_id?: string;
+  fonte?: string;
+}
+
+export interface TaskPersonaleUpdate {
+  titolo?: string;
+  descrizione?: string;
+  stato?: string;
+  priorita?: string;
+  scadenza?: string;
+  contatto_id?: string;
+  fonte?: string;
+  completato_il?: string;
+}
+
+export interface B2BCompetitor {
+  id: string;
+  nome: string;
+  categoria: string;
+  /** @nullable */
+  citta?: string | null;
+  /** @nullable */
+  zona?: string | null;
+  /** @nullable */
+  target?: string | null;
+  /** @nullable */
+  prezzo_medio?: number | null;
+  /** @nullable */
+  rating?: number | null;
+  /** @nullable */
+  punti_forza?: string | null;
+  /** @nullable */
+  punti_deboli?: string | null;
+  /** @nullable */
+  sito?: string | null;
+  /** @nullable */
+  instagram?: string | null;
+  /** @nullable */
+  note?: string | null;
+  data_creazione: string;
+  data_aggiornamento: string;
+}
+
+export interface B2BCompetitorInput {
+  nome: string;
+  categoria?: string;
+  citta?: string;
+  zona?: string;
+  target?: string;
+  prezzo_medio?: number;
+  rating?: number;
+  punti_forza?: string;
+  punti_deboli?: string;
+  sito?: string;
+  instagram?: string;
+  note?: string;
+}
+
+export interface B2BCompetitorUpdate {
+  nome?: string;
+  categoria?: string;
+  citta?: string;
+  zona?: string;
+  target?: string;
+  prezzo_medio?: number;
+  rating?: number;
+  punti_forza?: string;
+  punti_deboli?: string;
+  sito?: string;
+  instagram?: string;
+  note?: string;
+}
+
+export interface B2BMateriale {
+  id: string;
+  /** @nullable */
+  competitor_id?: string | null;
+  /** @nullable */
+  competitor_nome?: string | null;
+  nome_file: string;
+  tipo_materiale: string;
+  /** @nullable */
+  url?: string | null;
+  stato: string;
+  /** @nullable */
+  note?: string | null;
+  data_creazione: string;
+}
+
+export interface B2BMaterialeInput {
+  competitor_id?: string;
+  nome_file: string;
+  tipo_materiale?: string;
+  url?: string;
+  stato?: string;
+  note?: string;
+}
+
+export interface B2BMaterialeUpdate {
+  competitor_id?: string;
+  nome_file?: string;
+  tipo_materiale?: string;
+  url?: string;
+  stato?: string;
+  note?: string;
+}
+
+export interface B2BTemplate {
+  id: string;
+  titolo: string;
+  target_tipo: string;
+  /** @nullable */
+  target_descrizione?: string | null;
+  messaggio: string;
+  /** @nullable */
+  vantaggi?: string | null;
+  /** @nullable */
+  cta?: string | null;
+  utilizzi: number;
+  data_creazione: string;
+  data_aggiornamento: string;
+}
+
+export interface B2BTemplateInput {
+  titolo: string;
+  target_tipo?: string;
+  target_descrizione?: string;
+  messaggio: string;
+  vantaggi?: string;
+  cta?: string;
+  utilizzi?: number;
+}
+
+export interface B2BTemplateUpdate {
+  titolo?: string;
+  target_tipo?: string;
+  target_descrizione?: string;
+  messaggio?: string;
+  vantaggi?: string;
+  cta?: string;
+  utilizzi?: number;
+}
+
+export type B2BCompetitorAnalysisInputFocus = typeof B2BCompetitorAnalysisInputFocus[keyof typeof B2BCompetitorAnalysisInputFocus];
+
+
+export const B2BCompetitorAnalysisInputFocus = {
+  prezzo: 'prezzo',
+  proposta: 'proposta',
+  debolezze: 'debolezze',
+  generale: 'generale',
+} as const;
+
+export interface B2BCompetitorAnalysisInput {
+  competitor_id?: string;
+  prompt: string;
+  focus?: B2BCompetitorAnalysisInputFocus;
+}
+
+export interface B2BCompetitorAnalysisResult {
+  titolo: string;
+  sintesi: string;
+  punti_forza: string[];
+  punti_deboli: string[];
+  opportunita: string[];
+  azioni_consigliate: string[];
+  confidence?: string;
+}
+
+export type B2BExportInputFormato = typeof B2BExportInputFormato[keyof typeof B2BExportInputFormato];
+
+
+export const B2BExportInputFormato = {
+  pdf: 'pdf',
+  presentazione: 'presentazione',
+} as const;
+
+export interface B2BExportInput {
+  titolo: string;
+  target: string;
+  messaggio?: string;
+  budget?: number;
+  formato: B2BExportInputFormato;
+}
+
+export type B2BExportResultFormato = typeof B2BExportResultFormato[keyof typeof B2BExportResultFormato];
+
+
+export const B2BExportResultFormato = {
+  pdf: 'pdf',
+  presentazione: 'presentazione',
+} as const;
+
+export type B2BExportResultSlidesItem = {
+  titolo: string;
+  contenuto: string;
+};
+
+export interface B2BExportResult {
+  formato: B2BExportResultFormato;
+  titolo: string;
+  contenuto: string;
+  download_filename?: string;
+  slides: B2BExportResultSlidesItem[];
 }
 
 export interface Messaggio {
@@ -136,6 +759,16 @@ export interface Messaggio {
   canale: string;
   direzione: string;
   testo: string;
+  /** @nullable */
+  media_id?: string | null;
+  /** @nullable */
+  media_tipo?: string | null;
+  /** @nullable */
+  media_mime_type?: string | null;
+  /** @nullable */
+  media_sha256?: string | null;
+  /** @nullable */
+  media_filename?: string | null;
   timestamp: string;
   letto?: boolean;
   /** @nullable */
@@ -148,6 +781,48 @@ export interface MessaggioInput {
   testo: string;
 }
 
+export interface StatoLeadStoricoItem {
+  id: string;
+  contatto_id: string;
+  /** @nullable */
+  stato_precedente?: string | null;
+  stato_successivo: string;
+  origine: string;
+  /** @nullable */
+  nota?: string | null;
+  data_cambio: string;
+}
+
+export interface OperatorPresence {
+  utente_id: string;
+  nome: string;
+  ruolo: string;
+  online: boolean;
+  ultimo_heartbeat: string;
+}
+
+export interface OperatorPresenceHeartbeatInput {
+  utente_id: string;
+}
+
+export interface ChatTypingStatus {
+  contatto_id: string;
+  canale: string;
+  utente_id: string;
+  utente_nome: string;
+  is_typing: boolean;
+  updated_at: string;
+  /** @nullable */
+  expires_at?: string | null;
+}
+
+export interface ChatTypingInput {
+  contatto_id: string;
+  canale: string;
+  utente_id: string;
+  is_typing: boolean;
+}
+
 export interface InboxEntry {
   contatto_id: string;
   contatto_nome: string;
@@ -157,6 +832,7 @@ export interface InboxEntry {
   timestamp: string;
   non_letti: number;
   stato_lead: string;
+  handoff_richiesto: boolean;
   /** @nullable */
   operatore_assegnato_id?: string | null;
   /** @nullable */
@@ -176,6 +852,11 @@ export interface DashboardStats {
   eventi_confermati: number;
   budget_totale_confermato: number;
   messaggi_non_letti: number;
+  lead_con_preventivo: number;
+  lead_confermati: number;
+  conversione_lead_preventivo: number;
+  conversione_preventivo_confermato: number;
+  conversione_lead_confermato: number;
 }
 
 export interface PipelineCount {
@@ -197,9 +878,116 @@ export interface AttivitaItem {
   contatto_nome?: string | null;
 }
 
+export type CalendarAvailabilityProvider = typeof CalendarAvailabilityProvider[keyof typeof CalendarAvailabilityProvider];
+
+
+export const CalendarAvailabilityProvider = {
+  internal: 'internal',
+  google: 'google',
+  combined: 'combined',
+} as const;
+
+/**
+ * @nullable
+ */
+export type CalendarAvailabilitySlotRichiesto = typeof CalendarAvailabilitySlotRichiesto[keyof typeof CalendarAvailabilitySlotRichiesto] | null;
+
+
+export const CalendarAvailabilitySlotRichiesto = {
+  pranzo: 'pranzo',
+  pomeriggio: 'pomeriggio',
+  sera: 'sera',
+  intera_giornata: 'intera_giornata',
+} as const;
+
+export type CalendarAvailabilitySlotDisponibiliItem = typeof CalendarAvailabilitySlotDisponibiliItem[keyof typeof CalendarAvailabilitySlotDisponibiliItem];
+
+
+export const CalendarAvailabilitySlotDisponibiliItem = {
+  pranzo: 'pranzo',
+  pomeriggio: 'pomeriggio',
+  sera: 'sera',
+  intera_giornata: 'intera_giornata',
+} as const;
+
 export interface CalendarAvailability {
   disponibile: boolean;
+  provider: CalendarAvailabilityProvider;
+  /** @nullable */
+  motivo?: string | null;
+  /** @nullable */
+  slot_richiesto?: CalendarAvailabilitySlotRichiesto;
+  slot_disponibili: CalendarAvailabilitySlotDisponibiliItem[];
   date_alternative: string[];
+}
+
+export type GoogleCalendarStatusMode = typeof GoogleCalendarStatusMode[keyof typeof GoogleCalendarStatusMode];
+
+
+export const GoogleCalendarStatusMode = {
+  env_refresh_token: 'env_refresh_token',
+  non_configurato: 'non_configurato',
+} as const;
+
+export interface GoogleCalendarStatus {
+  configured: boolean;
+  enabled: boolean;
+  calendar_id: string;
+  mode: GoogleCalendarStatusMode;
+  /** @nullable */
+  last_full_sync_at?: string | null;
+  /** @nullable */
+  last_incremental_sync_at?: string | null;
+  sync_token_available?: boolean;
+  /** @nullable */
+  last_error?: string | null;
+  required_env?: string[];
+}
+
+export type GoogleCalendarSyncInputDirection = typeof GoogleCalendarSyncInputDirection[keyof typeof GoogleCalendarSyncInputDirection];
+
+
+export const GoogleCalendarSyncInputDirection = {
+  zak_to_google: 'zak_to_google',
+  google_to_zak: 'google_to_zak',
+  bidirectional: 'bidirectional',
+} as const;
+
+export interface GoogleCalendarSyncInput {
+  direction?: GoogleCalendarSyncInputDirection;
+  full_sync?: boolean;
+  days_ahead?: number;
+}
+
+export interface GoogleCalendarSyncResult {
+  configured: boolean;
+  direction: string;
+  pushed: number;
+  pulled: number;
+  skipped: number;
+  conflicts: number;
+  errors: string[];
+  message?: string;
+}
+
+export type ProductionReadinessCheckStatus = typeof ProductionReadinessCheckStatus[keyof typeof ProductionReadinessCheckStatus];
+
+
+export const ProductionReadinessCheckStatus = {
+  ok: 'ok',
+  warning: 'warning',
+  missing: 'missing',
+} as const;
+
+export interface ProductionReadinessCheck {
+  key: string;
+  status: ProductionReadinessCheckStatus;
+  message: string;
+}
+
+export interface ProductionReadiness {
+  ready: boolean;
+  checks: ProductionReadinessCheck[];
 }
 
 export type WebhookPayloadEntryItem = { [key: string]: unknown };
@@ -209,12 +997,59 @@ export interface WebhookPayload {
   entry?: WebhookPayloadEntryItem[];
 }
 
+export type VoiceWebhookPayloadProvider = typeof VoiceWebhookPayloadProvider[keyof typeof VoiceWebhookPayloadProvider];
+
+
+export const VoiceWebhookPayloadProvider = {
+  generic: 'generic',
+  vapi: 'vapi',
+  bland: 'bland',
+} as const;
+
+/**
+ * Raw Vapi webhook message payload.
+ */
+export type VoiceWebhookPayloadMessage = { [key: string]: unknown };
+
+/**
+ * Raw Bland or generic call payload.
+ */
+export type VoiceWebhookPayloadCall = { [key: string]: unknown };
+
+/**
+ * Raw provider-specific payload wrapper.
+ */
+export type VoiceWebhookPayloadData = { [key: string]: unknown };
+
+/**
+ * Provider intent analysis or extracted variables.
+ */
+export type VoiceWebhookPayloadAnalysis = { [key: string]: unknown };
+
 export interface VoiceWebhookPayload {
-  trascrizione: string;
-  /** @nullable */
+  provider?: VoiceWebhookPayloadProvider;
+  trascrizione?: string;
+  /**
+     * If present, the webhook links the call to an existing CRM contact with the same normalized phone
+     * @nullable
+     */
   telefono?: string | null;
   /** @nullable */
   durata?: number | null;
+  /** @nullable */
+  call_id?: string | null;
+  /** @nullable */
+  recording_url?: string | null;
+  /** @nullable */
+  summary?: string | null;
+  /** Raw Vapi webhook message payload. */
+  message?: VoiceWebhookPayloadMessage;
+  /** Raw Bland or generic call payload. */
+  call?: VoiceWebhookPayloadCall;
+  /** Raw provider-specific payload wrapper. */
+  data?: VoiceWebhookPayloadData;
+  /** Provider intent analysis or extracted variables. */
+  analysis?: VoiceWebhookPayloadAnalysis;
 }
 
 export interface AutomazioneLog {
@@ -242,6 +1077,24 @@ export interface AutomazioneConfigUpdate {
   valore: string;
 }
 
+export type AutomazioniPerformancePerTipoItem = {
+  tipo: string;
+  totale: number;
+  eseguiti: number;
+  saltati: number;
+  errori: number;
+};
+
+export interface AutomazioniPerformance {
+  totale: number;
+  eseguiti: number;
+  saltati: number;
+  errori: number;
+  tasso_successo: number;
+  ultimi_30_giorni: number;
+  per_tipo: AutomazioniPerformancePerTipoItem[];
+}
+
 export interface TriggerManualInput {
   tipo: string;
 }
@@ -249,6 +1102,25 @@ export interface TriggerManualInput {
 export interface TriggerManualResponse {
   eseguiti: number;
   dettagli?: string[];
+}
+
+export interface AuditLogItem {
+  id: string;
+  /** @nullable */
+  utente_id?: string | null;
+  /** @nullable */
+  utente_nome?: string | null;
+  azione: string;
+  entita: string;
+  /** @nullable */
+  entita_id?: string | null;
+  /** @nullable */
+  dettagli?: string | null;
+  /** @nullable */
+  ip_address?: string | null;
+  /** @nullable */
+  user_agent?: string | null;
+  data_creazione: string;
 }
 
 export interface WebhookResponse {
@@ -275,17 +1147,94 @@ data_da?: string;
 data_a?: string;
 };
 
+export type ListTaskPersonaliParams = {
+stato?: string;
+priorita?: string;
+contatto_id?: string;
+};
+
+export type ListB2BCompetitorParams = {
+search?: string;
+categoria?: string;
+};
+
+export type ListB2BMaterialiParams = {
+competitor_id?: string;
+stato?: string;
+};
+
+export type ListB2BTemplateParams = {
+target_tipo?: string;
+};
+
 export type ListMessaggiParams = {
 canale?: string;
 contatto_id?: string;
+letto?: boolean;
+stato_lead?: string;
+operatore_id?: string;
+};
+
+export type GetChatInboxParams = {
+canale?: string;
+stato_lead?: string;
+operatore_id?: string;
+};
+
+export type ListChatTypingParams = {
+contatto_id: string;
+canale: string;
+};
+
+export type GetDashboardStatsParams = {
+data_da?: string;
+data_a?: string;
+};
+
+export type GetLeadPipelineParams = {
+data_da?: string;
+data_a?: string;
+};
+
+export type GetEventiMeseParams = {
+data_da?: string;
+data_a?: string;
+};
+
+export type GetAttivitaRecenteParams = {
+data_da?: string;
+data_a?: string;
 };
 
 export type CheckCalendarAvailabilityParams = {
 data: string;
+slot?: CheckCalendarAvailabilitySlot;
 };
+
+export type CheckCalendarAvailabilitySlot = typeof CheckCalendarAvailabilitySlot[keyof typeof CheckCalendarAvailabilitySlot];
+
+
+export const CheckCalendarAvailabilitySlot = {
+  pranzo: 'pranzo',
+  pomeriggio: 'pomeriggio',
+  sera: 'sera',
+  intera_giornata: 'intera_giornata',
+} as const;
 
 export type ListAutomazioniLogParams = {
 tipo?: string;
 limit?: number;
+};
+
+export type ListAuditLogParams = {
+azione?: string;
+entita?: string;
+limit?: number;
+};
+
+export type WebhookWhatsappChallengeParams = {
+'hub.mode': string;
+'hub.verify_token': string;
+'hub.challenge': string;
 };
 

@@ -1,0 +1,76 @@
+{
+  "re_engagement_attivo": {
+    "descrizione": "Lead fermo in stato 'proposta_inviata' da piu' di 5 giorni senza interazione. Automazione abilitata.",
+    "lead_id": "L-8821",
+    "days_since_last_contact": 6,
+    "current_lead_status": "proposta_inviata",
+    "automation_active": true,
+    "whatsapp_window_24h": "closed",
+    "expected_action": "send_meta_template",
+    "template_name": "re_engagement_followup",
+    "expected_status": "executed"
+  },
+  "re_engagement_disattivato": {
+    "descrizione": "Lead fermo da 7 giorni, ma l'interruttore globale di automazione follow-up e' spento.",
+    "lead_id": "L-8822",
+    "days_since_last_contact": 7,
+    "current_lead_status": "proposta_inviata",
+    "automation_active": false,
+    "whatsapp_window_24h": "closed",
+    "expected_action": "none",
+    "expected_status": "skipped_automation_disabled"
+  },
+  "ricorrenza_valida": {
+    "descrizione": "Cliente ha festeggiato l'anno scorso e si attiva l'automazione annuale per proporre il rinnovo.",
+    "contact_id": "C-4410",
+    "last_event_date": "2025-06-15",
+    "current_date": "2026-05-15",
+    "event_type": "compleanno",
+    "expected_action": "send_recurrent_offer",
+    "expected_status": "executed"
+  },
+  "ricorrenza_fuori_segmento": {
+    "descrizione": "L'anno scorso l'evento e' stato cancellato con penale. Escluso dalle ricorrenze automatiche.",
+    "contact_id": "C-4411",
+    "last_event_date": "2025-06-15",
+    "current_date": "2026-05-15",
+    "last_event_status": "cancelled",
+    "expected_action": "none",
+    "expected_status": "skipped_out_of_segment"
+  },
+  "promemoria_agenda_imminente": {
+    "descrizione": "Visita programmata tra 24 ore. Invio promemoria automatico abilitato.",
+    "event_id": "E-901",
+    "event_type": "visit",
+    "hours_until_event": 24,
+    "reminder_sent": false,
+    "whatsapp_window_24h": "open",
+    "expected_action": "send_whatsapp_text",
+    "expected_status": "executed"
+  },
+  "promemoria_gia_inviato": {
+    "descrizione": "Visita tra 22 ore, ma l'evento ha gia' il flag reminder_sent impostato a true.",
+    "event_id": "E-901",
+    "event_type": "visit",
+    "hours_until_event": 22,
+    "reminder_sent": true,
+    "expected_action": "none",
+    "expected_status": "skipped_already_sent"
+  },
+  "finestra_whatsapp_chiusa_senza_template": {
+    "descrizione": "Finestra 24h chiusa e si tenta di inviare un messaggio libero invece di un template.",
+    "lead_id": "L-8825",
+    "whatsapp_window_24h": "closed",
+    "message_type": "free_text",
+    "expected_action": "block_message",
+    "expected_status": "error_policy_violation"
+  },
+  "template_meta_non_configurato": {
+    "descrizione": "Si attiva il follow-up ma il template richiesto non e' approvato sul pannello Business Manager Meta.",
+    "lead_id": "L-8826",
+    "whatsapp_window_24h": "closed",
+    "template_name": "re_engagement_v3_expired",
+    "expected_action": "fail_delivery",
+    "expected_status": "error_template_not_found"
+  }
+}

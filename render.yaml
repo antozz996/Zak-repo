@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: zak-ecosystem-ai
+    env: node
+    plan: free
+    buildCommand: corepack pnpm install --frozen-lockfile && corepack pnpm --filter @workspace/api-spec run codegen && corepack pnpm run build
+    startCommand: corepack pnpm --filter @workspace/api-server run start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: ZAK_LLM_BOOKING_ENABLED
+        value: "false"
+      - key: ZAK_GOOGLE_CALENDAR_ENABLED
+        value: "false"
+      - key: GOOGLE_CALENDAR_TIMEZONE
+        value: Europe/Rome
+      - key: META_GRAPH_API_VERSION
+        value: v20.0
+      - key: META_WHATSAPP_TEMPLATE_LANGUAGE
+        value: it

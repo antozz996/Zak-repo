@@ -9,4 +9,7 @@
 export type ListMessaggiParams = {
 canale?: string;
 contatto_id?: string;
+letto?: boolean;
+stato_lead?: string;
+operatore_id?: string;
 };

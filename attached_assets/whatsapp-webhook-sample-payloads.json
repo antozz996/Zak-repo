@@ -1,0 +1,160 @@
+{
+  "meta_verification_challenge": {
+    "hub.mode": "subscribe",
+    "hub.challenge": "1158201444",
+    "hub.verify_token": "zak_secure_verify_token_2026"
+  },
+  "inbound_text_message": {
+    "object": "whatsapp_business_account",
+    "entry": [
+      {
+        "id": "WHATSAPP_BUSINESS_ACCOUNT_ID",
+        "changes": [
+          {
+            "value": {
+              "messaging_product": "whatsapp",
+              "metadata": {
+                "display_phone_number": "15550000000",
+                "phone_number_id": "100000000000000"
+              },
+              "contacts": [
+                {
+                  "profile": {
+                    "name": "Mario Rossi"
+                  },
+                  "wa_id": "393331234567"
+                }
+              ],
+              "messages": [
+                {
+                  "from": "393331234567",
+                  "id": "wamid.HBgLMzkzMzMxMjM0NTY3FQIAERgSRDM0RTU2NzhBOUQwMTIzNDU2NwA=",
+                  "timestamp": "1772481600",
+                  "text": {
+                    "body": "Salve, vorrei ricevere informazioni sui prezzi per eventi aziendali."
+                  },
+                  "type": "text"
+                }
+              ]
+            },
+            "field": "messages"
+          }
+        ]
+      }
+    ]
+  },
+  "inbound_media_image": {
+    "object": "whatsapp_business_account",
+    "entry": [
+      {
+        "id": "WHATSAPP_BUSINESS_ACCOUNT_ID",
+        "changes": [
+          {
+            "value": {
+              "messaging_product": "whatsapp",
+              "metadata": {
+                "display_phone_number": "15550000000",
+                "phone_number_id": "100000000000000"
+              },
+              "contacts": [
+                {
+                  "profile": {
+                    "name": "Mario Rossi"
+                  },
+                  "wa_id": "393331234567"
+                }
+              ],
+              "messages": [
+                {
+                  "from": "393331234567",
+                  "id": "wamid.HBgLMzkzMzMxMjM0NTY3FQIAERgSRDM0RTU2NzhBOUQwOTk4ODc3NgA=",
+                  "timestamp": "1772481650",
+                  "type": "image",
+                  "image": {
+                    "caption": "Brochure di riferimento del competitor",
+                    "mime_type": "image/jpeg",
+                    "sha256": "d41d8cd98f00b204e9800998ecf8427e",
+                    "id": "444555666777"
+                  }
+                }
+              ]
+            },
+            "field": "messages"
+          }
+        ]
+      }
+    ]
+  },
+  "message_status_delivered": {
+    "object": "whatsapp_business_account",
+    "entry": [
+      {
+        "id": "WHATSAPP_BUSINESS_ACCOUNT_ID",
+        "changes": [
+          {
+            "value": {
+              "messaging_product": "whatsapp",
+              "metadata": {
+                "display_phone_number": "15550000000",
+                "phone_number_id": "100000000000000"
+              },
+              "statuses": [
+                {
+                  "id": "wamid.HBgLMzkzMzMxMjM0NTY3FQIAERgSRDM0RTU2NzhBOUQwMTIzNDU2NwA=",
+                  "status": "delivered",
+                  "timestamp": "1772481605",
+                  "recipient_id": "393331234567"
+                }
+              ]
+            },
+            "field": "messages"
+          }
+        ]
+      }
+    ]
+  },
+  "message_status_read": {
+    "object": "whatsapp_business_account",
+    "entry": [
+      {
+        "id": "WHATSAPP_BUSINESS_ACCOUNT_ID",
+        "changes": [
+          {
+            "value": {
+              "messaging_product": "whatsapp",
+              "metadata": {
+                "display_phone_number": "15550000000",
+                "phone_number_id": "100000000000000"
+              },
+              "statuses": [
+                {
+                  "id": "wamid.HBgLMzkzMzMxMjM0NTY3FQIAERgSRDM0RTU2NzhBOUQwMTIzNDU2NwA=",
+                  "status": "read",
+                  "timestamp": "1772481610",
+                  "recipient_id": "393331234567"
+                }
+              ]
+            },
+            "field": "messages"
+          }
+        ]
+      }
+    ]
+  },
+  "incomplete_payload": {
+    "object": "whatsapp_business_account",
+    "entry": [
+      {
+        "id": "WHATSAPP_BUSINESS_ACCOUNT_ID",
+        "changes": [
+          {
+            "value": {
+              "messaging_product": "whatsapp"
+            },
+            "field": "messages"
+          }
+        ]
+      }
+    ]
+  }
+}

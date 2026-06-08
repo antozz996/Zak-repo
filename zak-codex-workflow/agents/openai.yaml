@@ -1,0 +1,3 @@
+interface:
+  display_name: "Zak Codex Workflow"
+  short_description: "OpenAPI-first coding workflow for Zak Ecosystem AI."

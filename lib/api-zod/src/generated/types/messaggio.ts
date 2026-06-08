@@ -12,6 +12,16 @@ export interface Messaggio {
   canale: string;
   direzione: string;
   testo: string;
+  /** @nullable */
+  media_id?: string | null;
+  /** @nullable */
+  media_tipo?: string | null;
+  /** @nullable */
+  media_mime_type?: string | null;
+  /** @nullable */
+  media_sha256?: string | null;
+  /** @nullable */
+  media_filename?: string | null;
   timestamp: string;
   letto?: boolean;
   /** @nullable */

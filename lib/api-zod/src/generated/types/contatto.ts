@@ -15,7 +15,10 @@ export interface Contatto {
   origine_lead: string;
   /** @nullable */
   tipo_evento?: string | null;
+  /** @nullable */
+  note_interna?: string | null;
   stato_lead: string;
+  handoff_richiesto: boolean;
   data_creazione: string;
   /** @nullable */
   ultimo_contatto?: string | null;

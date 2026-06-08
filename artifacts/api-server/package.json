@@ -7,6 +7,13 @@
     "dev": "export NODE_ENV=development && pnpm run build && pnpm run start",
     "build": "node ./build.mjs",
     "start": "node --enable-source-maps ./dist/index.mjs",
+    "test:auth": "corepack pnpm --dir ../../scripts exec tsx ../artifacts/api-server/src/lib/auth.test.ts",
+    "test:booking-assistant": "corepack pnpm --dir ../../scripts exec tsx ../artifacts/api-server/src/lib/booking-assistant-parser.test.ts",
+    "test:llm-booking": "corepack pnpm --dir ../../scripts exec tsx ../artifacts/api-server/src/lib/llm-booking-extractor.test.ts",
+    "test:voice-assistant": "corepack pnpm --dir ../../scripts exec tsx ../artifacts/api-server/src/lib/voice-assistant-parser.test.ts",
+    "test:voice-provider": "corepack pnpm --dir ../../scripts exec tsx ../artifacts/api-server/src/lib/voice-provider-parser.test.ts",
+    "test:whatsapp-webhook": "corepack pnpm --dir ../../scripts exec tsx ../artifacts/api-server/src/lib/whatsapp-webhook-parser.test.ts",
+    "test:backend": "corepack pnpm run test:auth && corepack pnpm run test:booking-assistant && corepack pnpm run test:llm-booking && corepack pnpm run test:voice-assistant && corepack pnpm run test:voice-provider && corepack pnpm run test:whatsapp-webhook",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {

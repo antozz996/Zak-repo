@@ -1,0 +1,106 @@
+{
+  "richiesta_compleanno_completa": {
+    "raw_input": "Ciao! Vorrei organizzare la mia festa di compleanno (18 anni) per il 14 novembre 2026. Saremo circa 50 persone, budget sui 2500 euro.",
+    "expected_extraction": {
+      "tipo_evento": "compleanno",
+      "data_evento": "2026-11-14",
+      "numero_invitati": 50,
+      "budget": 2500,
+      "confidence": 0.98,
+      "campi_mancanti": []
+    }
+  },
+  "richiesta_laurea_senza_data": {
+    "raw_input": "Salve, sto organizzando la mia festa di laurea per circa 70 persone, budget massimo 3000 euro. Avete disponibilita'?",
+    "expected_extraction": {
+      "tipo_evento": "laurea",
+      "data_evento": null,
+      "numero_invitati": 70,
+      "budget": 3000,
+      "confidence": 0.85,
+      "campi_mancanti": ["data_evento"]
+    }
+  },
+  "richiesta_matrimonio_data_occupata": {
+    "raw_input": "Buonasera, vorremmo organizzare il nostro matrimonio sabato 12 settembre 2026. Saremo 120 invitati.",
+    "expected_extraction": {
+      "tipo_evento": "matrimonio",
+      "data_evento": "2026-09-12",
+      "numero_invitati": 120,
+      "budget": null,
+      "confidence": 0.95,
+      "campi_mancanti": ["budget"]
+    },
+    "conflict_check": {
+      "date_status": "occupied",
+      "conflict_with_id": "PRV-2026-0422",
+      "suggested_alternatives": ["2026-09-05", "2026-09-19"]
+    }
+  },
+  "richiesta_operatore_umano": {
+    "raw_input": "Senti ma posso parlare con una persona vera? Non mi va di chattare con un bot.",
+    "expected_extraction": {
+      "tipo_evento": null,
+      "data_evento": null,
+      "numero_invitati": null,
+      "budget": null,
+      "confidence": 1.0,
+      "campi_mancanti": []
+    },
+    "routing": {
+      "action": "human_escalation",
+      "reason": "user_explicit_request"
+    }
+  },
+  "messaggio_ambiguo": {
+    "raw_input": "Ciao, forse faccio qualcosa dopo l'estate, vediamo...",
+    "expected_extraction": {
+      "tipo_evento": null,
+      "data_evento": null,
+      "numero_invitati": null,
+      "budget": null,
+      "confidence": 0.3,
+      "campi_mancanti": ["tipo_evento", "data_evento", "numero_invitati"]
+    },
+    "routing": {
+      "action": "clarification_needed"
+    }
+  },
+  "messaggio_numero_invitati_in_lettere": {
+    "raw_input": "Vorremmo fare un meeting aziendale a ottobre, saremo circa un centinaio di colleghi.",
+    "expected_extraction": {
+      "tipo_evento": "meeting_aziendale",
+      "data_evento": null,
+      "numero_invitati": 100,
+      "budget": null,
+      "confidence": 0.9,
+      "campi_mancanti": ["data_evento", "budget"]
+    }
+  },
+  "messaggio_con_budget": {
+    "raw_input": "Abbiamo un budget fisso di 4000 euro per l'evento di fine anno.",
+    "expected_extraction": {
+      "tipo_evento": "private_party",
+      "data_evento": null,
+      "numero_invitati": null,
+      "budget": 4000,
+      "confidence": 0.8,
+      "campi_mancanti": ["tipo_evento", "data_evento", "numero_invitati"]
+    }
+  },
+  "richiesta_fuori_contesto": {
+    "raw_input": "Ma vendete anche pizze d'asporto stasera?",
+    "expected_extraction": {
+      "tipo_evento": null,
+      "data_evento": null,
+      "numero_invitati": null,
+      "budget": null,
+      "confidence": 0.95,
+      "campi_mancanti": []
+    },
+    "routing": {
+      "action": "out_of_bounds_reply",
+      "reply_template": "La nostra e' una location per eventi privati ed aziendali. Non effettuiamo servizio pizzeria d'asporto."
+    }
+  }
+}

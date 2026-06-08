@@ -1,6 +1,8 @@
 import { and, desc, eq } from "drizzle-orm";
 import {
   contattiCrmTable,
+  automazioniConfigTable,
+  bookingConversationStateTable,
   db,
   messaggiTable,
   preventiviEventiTable,
@@ -8,29 +10,22 @@ import {
   type Preventivo,
 } from "@workspace/db";
 import { sendWhatsAppTextSafely } from "./whatsapp";
-
-const EVENT_TYPES = [
-  "diciottesimo",
-  "laurea",
-  "compleanno",
-  "matrimonio",
-  "aziendale",
-] as const;
-
-const MONTHS: Record<string, number> = {
-  gennaio: 0,
-  febbraio: 1,
-  marzo: 2,
-  aprile: 3,
-  maggio: 4,
-  giugno: 5,
-  luglio: 6,
-  agosto: 7,
-  settembre: 8,
-  ottobre: 9,
-  novembre: 10,
-  dicembre: 11,
-};
+import { logLeadStatusChange } from "./lead-status-history";
+import { logWhatsAppOutbound } from "./whatsapp-outbound-log";
+import { getWhatsAppConversationWindow } from "./whatsapp-conversation-window";
+import { checkGoogleCalendarAvailability } from "./google-calendar";
+import {
+  extractDataEvento,
+  extractNome,
+  extractNumeroInvitati,
+  extractTipoEvento,
+  formatDateForReply,
+  getCurrentBookingStep,
+  getMissingBookingSteps,
+  isHandoffRequest,
+  renderTemplate,
+} from "./booking-assistant-parser";
+import { extractBookingDataWithLlm } from "./llm-booking-extractor";
 
 type BookingAssistantResult = {
   contatto: Contatto;
@@ -41,91 +36,82 @@ type BookingAssistantResult = {
     tipo_evento?: string;
     data_evento_richiesta?: string;
     numero_invitati?: number;
+    budget_stimato?: number;
+    preferenze?: string[];
+    handoff_richiesto?: boolean;
+    livello_confidenza?: string;
+    origine?: "llm" | "rule_based";
   };
 };
 
-function normalizeText(value: string): string {
-  return value
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "");
-}
+const bookingAssistantTemplateDefaults = [
+  {
+    chiave: "booking_assistant_template_nome",
+    valore: "Ciao! Sono Zak AI. Per iniziare, come ti chiami?",
+    descrizione: "Risposta quando manca il nome del lead. Placeholder disponibili: {{nome}}.",
+  },
+  {
+    chiave: "booking_assistant_template_tipo_evento",
+    valore: "Piacere {{nome}}! Che tipo di evento vuoi organizzare? Ad esempio compleanno, laurea, diciottesimo, matrimonio o aziendale.",
+    descrizione: "Risposta quando manca il tipo evento. Placeholder disponibili: {{nome}}.",
+  },
+  {
+    chiave: "booking_assistant_template_data_evento",
+    valore: "Perfetto {{nome}}. Che data hai in mente per il tuo {{tipo_evento}}? Puoi scriverla anche come 14/09/2026.",
+    descrizione: "Risposta quando manca la data evento. Placeholder disponibili: {{nome}}, {{tipo_evento}}.",
+  },
+  {
+    chiave: "booking_assistant_template_numero_invitati",
+    valore: "Ottimo. Quanti invitati prevedi circa?",
+    descrizione: "Risposta quando manca il numero invitati.",
+  },
+  {
+    chiave: "booking_assistant_template_completo",
+    valore: "Perfetto {{nome}}, ho raccolto tutte le informazioni principali per il tuo {{tipo_evento}} del {{data_evento}} per circa {{numero_invitati}} invitati. Ti ricontatteremo presto con i dettagli.",
+    descrizione: "Risposta finale quando il lead e qualificato. Placeholder: {{nome}}, {{tipo_evento}}, {{data_evento}}, {{numero_invitati}}.",
+  },
+  {
+    chiave: "booking_assistant_template_handoff",
+    valore: "Va bene, ti passo allo staff. Un operatore Zak riprendera la conversazione appena possibile.",
+    descrizione: "Risposta quando il cliente chiede un operatore umano.",
+  },
+  {
+    chiave: "booking_assistant_template_data_occupata",
+    valore: "La data {{data_evento}} risulta gia occupata.{{alternative}} Dimmi quale preferisci oppure scrivimi un'altra data.",
+    descrizione: "Risposta quando la data richiesta e occupata. Placeholder: {{data_evento}}, {{alternative}}.",
+  },
+  {
+    chiave: "booking_assistant_template_data_disponibile",
+    valore: "Ottimo, il {{data_evento}} risulta disponibile. Quanti invitati prevedi circa?",
+    descrizione: "Risposta quando la data e disponibile ma mancano gli invitati. Placeholder: {{data_evento}}.",
+  },
+];
 
-function extractNome(text: string): string | undefined {
-  const normalized = normalizeText(text);
-  const match = normalized.match(/\b(?:mi chiamo|sono|io sono)\s+([a-z' ]{2,40})/i);
-  if (!match) return undefined;
-  const raw = match[1]
-    .trim()
-    .replace(/\s{2,}/g, " ")
-    .split(" ")
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1).toLowerCase())
-    .join(" ");
-  return raw;
-}
+type BookingAssistantTemplates = Record<(typeof bookingAssistantTemplateDefaults)[number]["chiave"], string>;
 
-function extractTipoEvento(text: string): string | undefined {
-  const normalized = normalizeText(text);
-  return EVENT_TYPES.find((type) => normalized.includes(type));
-}
-
-function parseNumericGuests(match: RegExpMatchArray | null): number | undefined {
-  if (!match) return undefined;
-  const value = Number.parseInt(match[1] ?? "", 10);
-  if (Number.isNaN(value) || value <= 0) return undefined;
-  return value;
-}
-
-function extractNumeroInvitati(text: string): number | undefined {
-  return (
-    parseNumericGuests(text.match(/\b(\d{1,4})\s*(?:invitati|persone|ospiti|ragazzi|ragazze)\b/i)) ??
-    parseNumericGuests(text.match(/\bsiamo\s+(?:circa\s+)?(\d{1,4})\b/i)) ??
-    parseNumericGuests(text.match(/\b(?:per|da)\s+(\d{1,4})\s+(?:persone|invitati|ospiti)\b/i))
-  );
-}
-
-function toIsoDate(date: Date): string | undefined {
-  if (Number.isNaN(date.getTime())) return undefined;
-  return date.toISOString().split("T")[0];
-}
-
-function extractSlashDate(text: string): string | undefined {
-  const match = text.match(/\b(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{2,4})\b/);
-  if (!match) return undefined;
-  const day = Number.parseInt(match[1] ?? "", 10);
-  const month = Number.parseInt(match[2] ?? "", 10) - 1;
-  let year = Number.parseInt(match[3] ?? "", 10);
-  if (year < 100) year += 2000;
-  return toIsoDate(new Date(year, month, day));
-}
-
-function extractMonthNameDate(text: string): string | undefined {
-  const normalized = normalizeText(text);
-  const match = normalized.match(/\b(\d{1,2})\s+(gennaio|febbraio|marzo|aprile|maggio|giugno|luglio|agosto|settembre|ottobre|novembre|dicembre)(?:\s+(\d{4}))?\b/);
-  if (!match) return undefined;
-  const day = Number.parseInt(match[1] ?? "", 10);
-  const month = MONTHS[match[2] ?? ""];
-  const year = match[3] ? Number.parseInt(match[3], 10) : new Date().getFullYear();
-  return toIsoDate(new Date(year, month, day));
-}
-
-function extractRelativeDate(text: string): string | undefined {
-  const normalized = normalizeText(text);
-  const base = new Date();
-  base.setHours(0, 0, 0, 0);
-  if (normalized.includes("dopodomani")) {
-    base.setDate(base.getDate() + 2);
-    return toIsoDate(base);
+async function ensureBookingAssistantTemplateDefaults() {
+  for (const config of bookingAssistantTemplateDefaults) {
+    await db.insert(automazioniConfigTable).values(config).onConflictDoNothing();
   }
-  if (normalized.includes("domani")) {
-    base.setDate(base.getDate() + 1);
-    return toIsoDate(base);
-  }
-  return undefined;
 }
 
-function extractDataEvento(text: string): string | undefined {
-  return extractSlashDate(text) ?? extractMonthNameDate(text) ?? extractRelativeDate(text);
+async function getBookingAssistantTemplates(): Promise<BookingAssistantTemplates> {
+  await ensureBookingAssistantTemplateDefaults();
+  const rows = await db
+    .select()
+    .from(automazioniConfigTable)
+    .where(eq(automazioniConfigTable.chiave, "booking_assistant_template_nome"));
+  const firstTemplate = rows[0];
+
+  // If the first key exists, read all keys in one pass. The preliminary read keeps old DBs safe after onConflictDoNothing.
+  const allRows = firstTemplate
+    ? await db.select().from(automazioniConfigTable)
+    : [];
+  const values = new Map(allRows.map((row) => [row.chiave, row.valore]));
+
+  return Object.fromEntries(
+    bookingAssistantTemplateDefaults.map((template) => [template.chiave, values.get(template.chiave) ?? template.valore]),
+  ) as BookingAssistantTemplates;
 }
 
 async function getOrCreateOpenPreventivo(contattoId: string): Promise<Preventivo> {
@@ -156,7 +142,8 @@ async function checkAvailability(dataEvento: string): Promise<{ disponibile: boo
     .from(preventiviEventiTable)
     .where(and(eq(preventiviEventiTable.data_evento_richiesta, dataEvento), eq(preventiviEventiTable.stato_evento, "confermato")));
 
-  if (!existing) {
+  const googleAvailability = !existing ? await checkGoogleCalendarAvailability({ data: dataEvento }) : null;
+  if (!existing && (!googleAvailability || googleAvailability.slotDisponibili.length > 0)) {
     return { disponibile: true, alternative: [] };
   }
 
@@ -175,7 +162,12 @@ async function checkAvailability(dataEvento: string): Promise<{ disponibile: boo
         .select()
         .from(preventiviEventiTable)
         .where(and(eq(preventiviEventiTable.data_evento_richiesta, candidateStr), eq(preventiviEventiTable.stato_evento, "confermato")));
-      if (!conflict) alternative.push(candidateStr);
+      if (!conflict) {
+        const googleCandidateAvailability = await checkGoogleCalendarAvailability({ data: candidateStr });
+        if (!googleCandidateAvailability || googleCandidateAvailability.slotDisponibili.length > 0) {
+          alternative.push(candidateStr);
+        }
+      }
     }
     offset++;
     checked++;
@@ -184,29 +176,65 @@ async function checkAvailability(dataEvento: string): Promise<{ disponibile: boo
   return { disponibile: false, alternative };
 }
 
-function formatDateForReply(date: string): string {
-  const [year, month, day] = date.split("-");
-  return `${day}/${month}/${year}`;
-}
+function buildNextQuestion(contatto: Contatto, preventivo: Preventivo, templates: BookingAssistantTemplates): string {
+  const variables = {
+    nome: contatto.nome,
+    tipo_evento: contatto.tipo_evento,
+    data_evento: preventivo.data_evento_richiesta ? formatDateForReply(preventivo.data_evento_richiesta) : "",
+    numero_invitati: preventivo.numero_invitati ?? "",
+  };
 
-function buildNextQuestion(contatto: Contatto, preventivo: Preventivo): string {
   if (!contatto.nome || contatto.nome === "Sconosciuto") {
-    return "Ciao! Sono Zak AI. Per iniziare, come ti chiami?";
+    return renderTemplate(templates.booking_assistant_template_nome, variables);
   }
 
   if (!contatto.tipo_evento) {
-    return `Piacere ${contatto.nome}! Che tipo di evento vuoi organizzare? Ad esempio compleanno, laurea, diciottesimo, matrimonio o aziendale.`;
+    return renderTemplate(templates.booking_assistant_template_tipo_evento, variables);
   }
 
   if (!preventivo.data_evento_richiesta) {
-    return `Perfetto ${contatto.nome}. Che data hai in mente per il tuo ${contatto.tipo_evento}? Puoi scriverla anche come 14/09/2026.`;
+    return renderTemplate(templates.booking_assistant_template_data_evento, variables);
   }
 
   if (!preventivo.numero_invitati) {
-    return "Ottimo. Quanti invitati prevedi circa?";
+    return renderTemplate(templates.booking_assistant_template_numero_invitati, variables);
   }
 
-  return `Perfetto ${contatto.nome}, ho raccolto tutte le informazioni principali per il tuo ${contatto.tipo_evento} del ${formatDateForReply(preventivo.data_evento_richiesta)} per circa ${preventivo.numero_invitati} invitati. Ti ricontatteremo presto con i dettagli.`;
+  return renderTemplate(templates.booking_assistant_template_completo, variables);
+}
+
+async function persistConversationState(params: {
+  contatto: Contatto;
+  preventivo: Preventivo | null;
+  datiEstratti: BookingAssistantResult["datiEstratti"];
+}) {
+  const snapshot = {
+    nome: params.contatto.nome,
+    tipo_evento: params.contatto.tipo_evento,
+    data_evento_richiesta: params.preventivo?.data_evento_richiesta,
+    numero_invitati: params.preventivo?.numero_invitati,
+    handoff_richiesto: params.contatto.handoff_richiesto,
+  };
+  const stepCorrente = getCurrentBookingStep(snapshot);
+  const missingSteps = getMissingBookingSteps(snapshot);
+  const now = new Date();
+  const values = {
+    contatto_id: params.contatto.id,
+    step_corrente: stepCorrente,
+    dati_mancanti: missingSteps.filter((step) => step !== "handoff").join(","),
+    dati_estratti_json: JSON.stringify(params.datiEstratti),
+    completato: stepCorrente === "completo",
+    ultimo_messaggio_at: now,
+    data_aggiornamento: now,
+  };
+
+  await db
+    .insert(bookingConversationStateTable)
+    .values(values)
+    .onConflictDoUpdate({
+      target: bookingConversationStateTable.contatto_id,
+      set: values,
+    });
 }
 
 async function saveAssistantMessage(contatto: Contatto, testo: string) {
@@ -218,9 +246,19 @@ async function saveAssistantMessage(contatto: Contatto, testo: string) {
     mittente_nome: "Zak AI",
   });
 
-  await sendWhatsAppTextSafely({
-    to: contatto.telefono,
-    text: testo,
+  const window = await getWhatsAppConversationWindow(contatto.id);
+  const result = window.isOpen
+    ? await sendWhatsAppTextSafely({
+        to: contatto.telefono,
+        text: testo,
+      })
+    : { status: "skipped" as const, reason: "WhatsApp 24-hour conversation window expired" };
+  await logWhatsAppOutbound({
+    contattoId: contatto.id,
+    telefono: contatto.telefono,
+    sorgente: "booking_assistant",
+    testo,
+    result,
   });
 }
 
@@ -229,16 +267,72 @@ export async function processBookingAssistantMessage(input: {
   testo: string;
 }): Promise<BookingAssistantResult> {
   const datiEstratti: BookingAssistantResult["datiEstratti"] = {};
+  const templates = await getBookingAssistantTemplates();
 
-  const nome = extractNome(input.testo);
-  const tipoEvento = extractTipoEvento(input.testo);
-  const dataEvento = extractDataEvento(input.testo);
-  const numeroInvitati = extractNumeroInvitati(input.testo);
+  if (input.contatto.handoff_richiesto) {
+    await db
+      .update(contattiCrmTable)
+      .set({ ultimo_contatto: new Date() })
+      .where(eq(contattiCrmTable.id, input.contatto.id));
+    await persistConversationState({
+      contatto: input.contatto,
+      preventivo: null,
+      datiEstratti,
+    });
+    return { contatto: input.contatto, preventivo: null, risposta: null, datiEstratti };
+  }
+
+  const llmExtraction = await extractBookingDataWithLlm({
+    testo: input.testo,
+    contesto: {
+      contatto: {
+        nome: input.contatto.nome,
+        tipo_evento: input.contatto.tipo_evento,
+        stato_lead: input.contatto.stato_lead,
+      },
+    },
+  });
+
+  if (llmExtraction) {
+    datiEstratti.origine = "llm";
+    datiEstratti.handoff_richiesto = llmExtraction.handoff_richiesto;
+    datiEstratti.livello_confidenza = llmExtraction.livello_confidenza;
+    if (llmExtraction.preferenze.length > 0) datiEstratti.preferenze = llmExtraction.preferenze;
+  } else {
+    datiEstratti.origine = "rule_based";
+  }
+
+  if (isHandoffRequest(input.testo) || llmExtraction?.handoff_richiesto) {
+    const [updated] = await db
+      .update(contattiCrmTable)
+      .set({
+        handoff_richiesto: true,
+        ultimo_contatto: new Date(),
+      })
+      .where(eq(contattiCrmTable.id, input.contatto.id))
+      .returning();
+    const contatto = updated ?? input.contatto;
+    const risposta = renderTemplate(templates.booking_assistant_template_handoff, { nome: contatto.nome });
+    await saveAssistantMessage(contatto, risposta);
+    await persistConversationState({
+      contatto,
+      preventivo: null,
+      datiEstratti,
+    });
+    return { contatto, preventivo: null, risposta, datiEstratti };
+  }
+
+  const nome = llmExtraction?.nome ?? extractNome(input.testo);
+  const tipoEvento = llmExtraction?.tipo_evento ?? extractTipoEvento(input.testo);
+  const dataEvento = llmExtraction?.data_evento_richiesta ?? extractDataEvento(input.testo);
+  const numeroInvitati = llmExtraction?.numero_invitati ?? extractNumeroInvitati(input.testo);
+  const budgetStimato = llmExtraction?.budget_stimato;
 
   if (nome) datiEstratti.nome = nome;
   if (tipoEvento) datiEstratti.tipo_evento = tipoEvento;
   if (dataEvento) datiEstratti.data_evento_richiesta = dataEvento;
   if (numeroInvitati) datiEstratti.numero_invitati = numeroInvitati;
+  if (budgetStimato) datiEstratti.budget_stimato = budgetStimato;
 
   const contattoUpdate: Partial<Contatto> = {
     ultimo_contatto: new Date(),
@@ -256,12 +350,22 @@ export async function processBookingAssistantMessage(input: {
 
   let contatto = input.contatto;
   if (Object.keys(contattoUpdate).length > 0) {
+    const previousStatus = contatto.stato_lead;
     const [updated] = await db
       .update(contattiCrmTable)
       .set(contattoUpdate)
       .where(eq(contattiCrmTable.id, input.contatto.id))
       .returning();
-    if (updated) contatto = updated;
+    if (updated) {
+      contatto = updated;
+      await logLeadStatusChange({
+        contattoId: updated.id,
+        previousStatus,
+        nextStatus: updated.stato_lead,
+        origine: "booking_assistant",
+        nota: "Qualificazione automatica lead da chat WhatsApp",
+      });
+    }
   }
 
   let preventivo = await getOrCreateOpenPreventivo(contatto.id);
@@ -273,11 +377,16 @@ export async function processBookingAssistantMessage(input: {
   if (!preventivo.numero_invitati && numeroInvitati) {
     preventivoUpdate.numero_invitati = numeroInvitati;
   }
+  if (!preventivo.budget_stimato && budgetStimato) {
+    preventivoUpdate.budget_stimato = String(budgetStimato);
+  }
 
   const noteParts = [
     preventivo.note,
     nome ? `Nome rilevato in chat: ${nome}` : null,
     tipoEvento ? `Tipo evento rilevato: ${tipoEvento}` : null,
+    llmExtraction?.preferenze.length ? `Preferenze rilevate: ${llmExtraction.preferenze.join(", ")}` : null,
+    llmExtraction ? `Estrazione LLM: confidenza ${llmExtraction.livello_confidenza}` : null,
   ].filter(Boolean);
 
   if (noteParts.length > 0) {
@@ -293,7 +402,7 @@ export async function processBookingAssistantMessage(input: {
     if (updatedPreventivo) preventivo = updatedPreventivo;
   }
 
-  let risposta = buildNextQuestion(contatto, preventivo);
+  let risposta = buildNextQuestion(contatto, preventivo, templates);
 
   if (dataEvento && preventivo.data_evento_richiesta === dataEvento) {
     const availability = await checkAvailability(dataEvento);
@@ -301,20 +410,31 @@ export async function processBookingAssistantMessage(input: {
       const alternativeText = availability.alternative.length > 0
         ? ` Ti posso proporre queste alternative: ${availability.alternative.map(formatDateForReply).join(", ")}.`
         : "";
-      risposta = `La data ${formatDateForReply(dataEvento)} risulta gia occupata.${alternativeText} Dimmi quale preferisci oppure scrivimi un'altra data.`;
+      risposta = renderTemplate(templates.booking_assistant_template_data_occupata, {
+        data_evento: formatDateForReply(dataEvento),
+        alternative: alternativeText,
+      });
       await db
         .update(preventiviEventiTable)
         .set({ data_evento_richiesta: null })
         .where(eq(preventiviEventiTable.id, preventivo.id));
       preventivo = { ...preventivo, data_evento_richiesta: null };
     } else if (!preventivo.numero_invitati) {
-      risposta = `Ottimo, il ${formatDateForReply(dataEvento)} risulta disponibile. Quanti invitati prevedi circa?`;
+      risposta = renderTemplate(templates.booking_assistant_template_data_disponibile, {
+        data_evento: formatDateForReply(dataEvento),
+      });
     }
   }
 
   if (risposta) {
     await saveAssistantMessage(contatto, risposta);
   }
+
+  await persistConversationState({
+    contatto,
+    preventivo,
+    datiEstratti,
+  });
 
   return {
     contatto,

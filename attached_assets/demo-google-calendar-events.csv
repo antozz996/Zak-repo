@@ -1,0 +1,21 @@
+titolo,descrizione,data_inizio,data_fine,tipo_evento,stato,source_calendar,external_event_id,timezone
+Matrimonio Rossi & Bianchi,Evento di matrimonio principale,2026-09-12T16:00:00,2026-09-12T23:30:00,matrimonio,synced,zak,ext_event_001,Europe/Rome
+Festa di Laurea Marco Neri,Festa privata laureato,2026-07-18T18:00:00,2026-07-18T23:00:00,laurea,synced,zak,ext_event_002,Europe/Rome
+Team Building Rossi SpA,Riunione aziendale e cena,2026-09-18T09:00:00,2026-09-18T18:00:00,aziendale,synced,zak,ext_event_003,Europe/Rome
+Sopralluogo Villa Sposi,Visita guidata giardini,2026-06-04T15:00:00,2026-06-04T16:30:00,sopralluogo,synced,google,ext_event_004,Europe/Rome
+Pranzo Privato Azienda,Festa privata pranzo,2026-06-04T12:00:00,2026-06-04T15:30:00,aziendale,conflict,google,ext_event_005,Europe/Rome
+Compleanno 50 anni Bruno,Cena in giardino,2026-08-22T20:00:00,2026-08-23T01:00:00,compleanno,synced,zak,ext_event_006,Europe/Rome
+Manutenzione Piscina,Chiusura per pulizia programmata,2026-06-10T08:00:00,2026-06-10T14:00:00,altro,synced,google,ext_event_007,Europe/Rome
+Servizio Fotografico Wedding,Sopralluogo con fotografo,2026-06-12T10:00:00,2026-06-12T12:00:00,sopralluogo,synced,google,ext_event_008,Europe/Rome
+Festa di Laurea Elena,Rinfresco e DJ Set,2026-07-25T19:00:00,2026-07-26T00:30:00,laurea,synced,zak,ext_event_009,Europe/Rome
+Cena di Gala Rotary Club,Evento aziendale formale,2026-10-03T19:30:00,2026-10-03T23:30:00,aziendale,synced,zak,ext_event_010,Europe/Rome
+Sopralluogo Famiglia Bianchi,Incontro con wedding planner,2026-06-05T16:00:00,2026-06-05T17:30:00,sopralluogo,synced,google,ext_event_011,Europe/Rome
+Manutenzione Impianto Audio,Verifica casse e luci sala,2026-06-15T09:00:00,2026-06-15T12:00:00,altro,synced,google,ext_event_012,Europe/Rome
+Festa 18 anni Alessia,Compleanno giovani,2026-08-29T18:00:00,2026-08-29T23:30:00,compleanno,synced,zak,ext_event_013,Europe/Rome
+Pranzo Comunione Francesca,Evento per famiglia,2026-06-14T12:30:00,2026-06-14T17:00:00,altro,synced,zak,ext_event_014,Europe/Rome
+Meeting Partner Commerciali,Aggiornamento fornitori,2026-06-18T10:30:00,2026-06-18T12:30:00,aziendale,synced,google,ext_event_015,Europe/Rome
+Sopralluogo Ditta Fiori,Misure allestimenti floreali,2026-06-06T10:00:00,2026-06-06T11:30:00,sopralluogo,synced,google,ext_event_016,Europe/Rome
+Matrimonio Esposito & Gallo,Wedding cerimonia e cena,2026-09-26T15:30:00,2026-09-26T23:59:00,matrimonio,synced,zak,ext_event_017,Europe/Rome
+Cena di Pensionamento Aldo,Evento privato aziendale,2026-07-31T20:00:00,2026-07-31T23:30:00,aziendale,synced,zak,ext_event_018,Europe/Rome
+Servizio Catering Esterno,Consegna e allestimento tavoli,2026-06-08T14:00:00,2026-06-08T18:00:00,altro,synced,google,ext_event_019,Europe/Rome
+Festa Laurea Sofia,Aperitivo e buffet,2026-07-11T18:30:00,2026-07-11T22:30:00,laurea,synced,zak,ext_event_020,Europe/Rome
