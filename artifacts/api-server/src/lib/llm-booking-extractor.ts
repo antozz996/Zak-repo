@@ -152,6 +152,14 @@ export function normalizeBookingLlmExtraction(value: unknown): BookingLlmExtract
   };
 }
 
+type ChatCompletionResponse = {
+  choices?: Array<{
+    message?: {
+      content?: string;
+    };
+  }>;
+};
+
 export async function extractBookingDataWithLlm(input: {
   testo: string;
   contesto?: Record<string, unknown>;
@@ -163,30 +171,64 @@ export async function extractBookingDataWithLlm(input: {
   const timeout = setTimeout(() => controller.abort(), Number.isFinite(config.timeoutMs) ? config.timeoutMs : 12000);
 
   try {
-    const response = await fetch(`${config.baseUrl}/responses`, {
+    const isResponsesApi = config.baseUrl.includes("api.openai.com") && 
+      !config.model.includes("gemini") && 
+      !config.model.includes("llama") && 
+      !config.model.includes("claude");
+      
+    const url = isResponsesApi ? `${config.baseUrl}/responses` : `${config.baseUrl}/chat/completions`;
+    
+    const body = isResponsesApi
+      ? {
+          model: config.model,
+          input: buildPrompt(input),
+          text: {
+            format: {
+              type: "json_schema",
+              name: "zak_booking_extraction",
+              strict: true,
+              schema: bookingExtractionSchema,
+            },
+          },
+        }
+      : {
+          model: config.model,
+          messages: [
+            {
+              role: "user",
+              content: buildPrompt(input),
+            },
+          ],
+          response_format: {
+            type: "json_schema",
+            json_schema: {
+              name: "zak_booking_extraction",
+              strict: true,
+              schema: bookingExtractionSchema,
+            },
+          },
+        };
+
+    const response = await fetch(url, {
       method: "POST",
       signal: controller.signal,
       headers: {
         "content-type": "application/json",
         authorization: `Bearer ${config.apiKey}`,
       },
-      body: JSON.stringify({
-        model: config.model,
-        input: buildPrompt(input),
-        text: {
-          format: {
-            type: "json_schema",
-            name: "zak_booking_extraction",
-            strict: true,
-            schema: bookingExtractionSchema,
-          },
-        },
-      }),
+      body: JSON.stringify(body),
     });
 
     if (!response.ok) return null;
-    const payload = await response.json() as OpenAIResponse;
-    const text = extractResponseText(payload);
+    const payload = await response.json() as OpenAIResponse & ChatCompletionResponse;
+    
+    let text: string | null = null;
+    if (payload.choices && payload.choices[0]?.message?.content) {
+      text = payload.choices[0].message.content;
+    } else {
+      text = extractResponseText(payload);
+    }
+    
     if (!text) return null;
     return normalizeBookingLlmExtraction(JSON.parse(text));
   } catch {
