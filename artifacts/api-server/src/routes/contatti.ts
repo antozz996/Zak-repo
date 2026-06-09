@@ -3,6 +3,7 @@ import { db, contattiCrmTable, messaggiTable, statoLeadStoricoTable, insertConta
 import { eq, and, ilike, or, desc } from "drizzle-orm";
 import { logLeadStatusChange } from "../lib/lead-status-history";
 import { logAuditAction } from "../lib/audit-log";
+import { parseLimit, parseOffset } from "../lib/pagination";
 
 const router = Router();
 
@@ -95,7 +96,9 @@ function sendDuplicateResponse(res: Response, duplicate: DuplicateMatch) {
 }
 
 router.get("/contatti", async (req, res) => {
-  const { stato_lead, tipo_evento, origine_lead, search } = req.query as Record<string, string>;
+  const { stato_lead, tipo_evento, origine_lead, search, limit, offset } = req.query as Record<string, string | undefined>;
+  const lim = parseLimit(limit, 200, 500);
+  const off = parseOffset(offset);
 
   const conditions = [];
   if (stato_lead) conditions.push(eq(contattiCrmTable.stato_lead, stato_lead));
@@ -122,7 +125,9 @@ router.get("/contatti", async (req, res) => {
     .from(contattiCrmTable)
     .leftJoin(utentiTable, eq(contattiCrmTable.operatore_assegnato_id, utentiTable.id))
     .where(conditions.length > 0 ? and(...conditions) : undefined)
-    .orderBy(desc(contattiCrmTable.data_creazione));
+    .orderBy(desc(contattiCrmTable.data_creazione))
+    .limit(lim)
+    .offset(off);
 
   res.json(contatti);
 });
@@ -316,11 +321,16 @@ router.delete("/contatti/:id", async (req, res) => {
 });
 
 router.get("/contatti/:id/messaggi", async (req, res) => {
+  const { limit, offset } = req.query as Record<string, string | undefined>;
+  const lim = parseLimit(limit, 100, 300);
+  const off = parseOffset(offset);
   const rows = await db
     .select()
     .from(messaggiTable)
     .where(eq(messaggiTable.contatto_id, req.params.id))
-    .orderBy(messaggiTable.timestamp);
+    .orderBy(messaggiTable.timestamp)
+    .limit(lim)
+    .offset(off);
   res.json(rows);
 });
 

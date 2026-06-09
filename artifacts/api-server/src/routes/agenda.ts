@@ -3,6 +3,7 @@ import { db, agendaPersonaleTable, contattiCrmTable, insertAgendaItemSchema, upd
 import { eq, and, gte, lte, desc } from "drizzle-orm";
 import { logAuditAction } from "../lib/audit-log";
 import { deleteGoogleCalendarEvent, syncAgendaItemToGoogle } from "../lib/google-calendar";
+import { parseLimit, parseOffset } from "../lib/pagination";
 
 const router = Router();
 
@@ -17,7 +18,9 @@ function validateAgendaRange(start: Date, end: Date) {
 }
 
 router.get("/agenda", async (req, res) => {
-  const { categoria, data_da, data_a } = req.query as Record<string, string>;
+  const { categoria, data_da, data_a, limit, offset } = req.query as Record<string, string | undefined>;
+  const lim = parseLimit(limit, 200, 500);
+  const off = parseOffset(offset);
   const conditions = [];
   if (categoria) conditions.push(eq(agendaPersonaleTable.categoria, categoria));
   if (data_da) conditions.push(gte(agendaPersonaleTable.data_ora_inizio, new Date(data_da)));
@@ -38,7 +41,9 @@ router.get("/agenda", async (req, res) => {
     .from(agendaPersonaleTable)
     .leftJoin(contattiCrmTable, eq(contattiCrmTable.id, agendaPersonaleTable.contatto_id))
     .where(conditions.length > 0 ? and(...conditions) : undefined)
-    .orderBy(agendaPersonaleTable.data_ora_inizio);
+    .orderBy(agendaPersonaleTable.data_ora_inizio)
+    .limit(lim)
+    .offset(off);
   res.json(rows);
 });
 

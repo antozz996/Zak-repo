@@ -44,6 +44,9 @@ const getChannelIcon = (canale: string) => {
   }
 };
 
+const INBOX_PAGE_SIZE = 80;
+const MESSAGES_PAGE_SIZE = 100;
+
 export default function Inbox() {
   const queryClient = useQueryClient();
   const [selectedContactId, setSelectedContactId] = useState<string | null>(null);
@@ -53,12 +56,15 @@ export default function Inbox() {
   const [filterChannel, setFilterChannel] = useState<string>("all");
   const [filterLeadStatus, setFilterLeadStatus] = useState<string>("all");
   const [filterOperator, setFilterOperator] = useState<string>("all");
+  const [inboxLimit, setInboxLimit] = useState(INBOX_PAGE_SIZE);
+  const [messagesLimit, setMessagesLimit] = useState(MESSAGES_PAGE_SIZE);
 
   const inboxFilters = useMemo(() => ({
     canale: filterChannel === "all" ? undefined : filterChannel,
     stato_lead: filterLeadStatus === "all" ? undefined : filterLeadStatus,
     operatore_id: filterOperator === "all" ? undefined : filterOperator,
-  }), [filterChannel, filterLeadStatus, filterOperator]);
+    limit: inboxLimit,
+  }), [filterChannel, filterLeadStatus, filterOperator, inboxLimit]);
 
   const { data: inbox, isLoading: inboxLoading } = useGetChatInbox(inboxFilters);
   const inboxEntries = inbox ?? [];
@@ -67,7 +73,8 @@ export default function Inbox() {
   const messaggiParams = useMemo(() => ({
     contatto_id: selectedContactId || undefined,
     canale: selectedChannel || undefined,
-  }), [selectedChannel, selectedContactId]);
+    limit: messagesLimit,
+  }), [messagesLimit, selectedChannel, selectedContactId]);
   const typingParams = useMemo(() => ({
     contatto_id: selectedContactId || "",
     canale: selectedChannel || "",
@@ -114,6 +121,14 @@ export default function Inbox() {
   const visibleTypingOperators = useMemo(() => {
     return (typingOperators ?? []).filter((status) => status.is_typing && status.utente_id !== selectedOperatorId);
   }, [selectedOperatorId, typingOperators]);
+
+  useEffect(() => {
+    setInboxLimit(INBOX_PAGE_SIZE);
+  }, [filterChannel, filterLeadStatus, filterOperator]);
+
+  useEffect(() => {
+    setMessagesLimit(MESSAGES_PAGE_SIZE);
+  }, [selectedChannel, selectedContactId]);
 
   useEffect(() => {
     if (unreadInboundIds.length === 0 || markMessaggioRead.isPending) {
@@ -216,7 +231,7 @@ export default function Inbox() {
       {
         onSuccess: async () => {
           setMessageText("");
-          await queryClient.invalidateQueries({ queryKey: getListMessaggiQueryKey({ contatto_id: selectedContactId, canale: selectedChannel }) });
+          await queryClient.invalidateQueries({ queryKey: getListMessaggiQueryKey(messaggiParams) });
           await queryClient.invalidateQueries({ queryKey: getGetChatInboxQueryKey(inboxFilters) });
         },
       },
@@ -341,6 +356,18 @@ export default function Inbox() {
                     )}
                   </button>
                 ))}
+                {inboxEntries.length >= inboxLimit && (
+                  <div className="p-3">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full"
+                      onClick={() => setInboxLimit((current) => current + INBOX_PAGE_SIZE)}
+                    >
+                      Mostra altre conversazioni
+                    </Button>
+                  </div>
+                )}
               </div>
             )}
           </ScrollArea>
@@ -399,6 +426,16 @@ export default function Inbox() {
                         </div>
                       </div>
                     ))}
+                    {(messages?.length ?? 0) >= messagesLimit && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="mx-auto flex"
+                        onClick={() => setMessagesLimit((current) => current + MESSAGES_PAGE_SIZE)}
+                      >
+                        Mostra messaggi precedenti
+                      </Button>
+                    )}
                   </div>
                 )}
               </ScrollArea>

@@ -1418,5 +1418,5 @@ Formato consigliato per nuove voci:
 - **Allineamento GitHub**: Committati tutti i file core/auth/B2B precedentemente non tracciati e allineato il branch `main` con il push remoto su GitHub.
 - **Supporto AI Gratuita**: Estesa la logica del Booking Assistant in `llm-booking-extractor.ts` per supportare gli endpoint `/chat/completions` standard. Questo rende l'applicazione compatibile con i provider AI gratuiti (come Google Gemini via AI Studio, OpenRouter o Groq).
 - **Seeder di Test Completo**: Aggiunto lo script `seed-demo.ts` in `@workspace/api-server` che popola il database Neon reale con tutti i dataset demo (`utenti-staff`, `contatti_crm`, `messaggi` per inbox, `preventivi_eventi`, `agenda_personale` e `task_personali`).
-- **Comandi globali**: Aggiunto il comando `"seed:demo"` nel root `package.json` ed eseguito con successo, inserendo 15 staff, 20 contatti, 40 messaggi, 20 preventivi, 20 eventi agenda e 20 task board items.
-
+- **Comandi globali**: Aggiunto il comando `"seed:demo"` nel root `package.json` e nel package `scripts`, con esecuzione riuscita e inserimento di 15 staff, 20 contatti, 40 messaggi, 20 preventivi, 20 eventi agenda e 20 task board items.
+- **Ottimizzazione performance CRM**: Aggiunti indici Drizzle per Inbox, messaggi, contatti, preventivi, agenda, audit log e log automazioni; introdotti `limit`/`offset` sulle liste principali; aggiornata Inbox con caricamento incrementale di conversazioni e messaggi; aggiunta cache breve da 30 secondi sulle metriche Dashboard.

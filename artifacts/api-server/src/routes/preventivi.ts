@@ -8,6 +8,7 @@ import { sendWhatsAppTextSafely } from "../lib/whatsapp";
 import { logWhatsAppOutbound } from "../lib/whatsapp-outbound-log";
 import { logLeadStatusChange } from "../lib/lead-status-history";
 import { deleteGoogleCalendarEvent, syncPreventivoToGoogle } from "../lib/google-calendar";
+import { parseLimit, parseOffset } from "../lib/pagination";
 
 const router = Router();
 
@@ -211,7 +212,9 @@ async function hasConfirmedDateConflict(dataEventoRichiesta?: string, excludeId?
 }
 
 router.get("/preventivi", async (req, res) => {
-  const { stato_evento, contatto_id } = req.query as Record<string, string>;
+  const { stato_evento, contatto_id, limit, offset } = req.query as Record<string, string | undefined>;
+  const lim = parseLimit(limit, 200, 500);
+  const off = parseOffset(offset);
   const conditions = [];
   if (stato_evento) conditions.push(eq(preventiviEventiTable.stato_evento, stato_evento));
   if (contatto_id) conditions.push(eq(preventiviEventiTable.contatto_id, contatto_id));
@@ -235,7 +238,9 @@ router.get("/preventivi", async (req, res) => {
     .from(preventiviEventiTable)
     .leftJoin(contattiCrmTable, eq(preventiviEventiTable.contatto_id, contattiCrmTable.id))
     .where(conditions.length > 0 ? and(...conditions) : undefined)
-    .orderBy(desc(preventiviEventiTable.data_creazione));
+    .orderBy(desc(preventiviEventiTable.data_creazione))
+    .limit(lim)
+    .offset(off);
 
   res.json(rows);
 });

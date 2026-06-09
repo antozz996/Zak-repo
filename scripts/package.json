@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "hello": "tsx ./src/hello.ts",
-    "seed:demo": "tsx ./src/seed-demo.ts",
+    "seed:demo": "tsx ../artifacts/api-server/src/seed-demo.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "devDependencies": {

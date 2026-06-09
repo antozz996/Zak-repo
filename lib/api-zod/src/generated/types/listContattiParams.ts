@@ -11,4 +11,13 @@ stato_lead?: string;
 tipo_evento?: string;
 origine_lead?: string;
 search?: string;
+/**
+ * @minimum 1
+ * @maximum 500
+ */
+limit?: number;
+/**
+ * @minimum 0
+ */
+offset?: number;
 };

@@ -254,11 +254,19 @@ export const ConfirmPreventivoDigitaleResponse = zod.object({
 /**
  * @summary List CRM contacts
  */
+export const listContattiQueryLimitMax = 500;
+
+export const listContattiQueryOffsetMin = 0;
+
+
+
 export const ListContattiQueryParams = zod.object({
   "stato_lead": zod.coerce.string().optional(),
   "tipo_evento": zod.coerce.string().optional(),
   "origine_lead": zod.coerce.string().optional(),
-  "search": zod.coerce.string().optional()
+  "search": zod.coerce.string().optional(),
+  "limit": zod.coerce.number().min(1).max(listContattiQueryLimitMax).optional(),
+  "offset": zod.coerce.number().min(listContattiQueryOffsetMin).optional()
 })
 
 export const ListContattiResponseItem = zod.object({
@@ -452,9 +460,17 @@ export const MarkMessaggioReadResponse = zod.object({
 /**
  * @summary List event quotes
  */
+export const listPreventiviQueryLimitMax = 500;
+
+export const listPreventiviQueryOffsetMin = 0;
+
+
+
 export const ListPreventiviQueryParams = zod.object({
   "stato_evento": zod.coerce.string().optional(),
-  "contatto_id": zod.coerce.string().optional()
+  "contatto_id": zod.coerce.string().optional(),
+  "limit": zod.coerce.number().min(1).max(listPreventiviQueryLimitMax).optional(),
+  "offset": zod.coerce.number().min(listPreventiviQueryOffsetMin).optional()
 })
 
 export const ListPreventiviResponseItem = zod.object({
@@ -587,10 +603,18 @@ export const DeletePreventivoParams = zod.object({
 /**
  * @summary List personal agenda items
  */
+export const listAgendaQueryLimitMax = 500;
+
+export const listAgendaQueryOffsetMin = 0;
+
+
+
 export const ListAgendaQueryParams = zod.object({
   "categoria": zod.coerce.string().optional(),
   "data_da": zod.coerce.string().optional(),
-  "data_a": zod.coerce.string().optional()
+  "data_a": zod.coerce.string().optional(),
+  "limit": zod.coerce.number().min(1).max(listAgendaQueryLimitMax).optional(),
+  "offset": zod.coerce.number().min(listAgendaQueryOffsetMin).optional()
 })
 
 export const ListAgendaResponseItem = zod.object({
@@ -1121,12 +1145,20 @@ export const ExportB2BPitchResponse = zod.object({
 /**
  * @summary List all chat messages across channels
  */
+export const listMessaggiQueryLimitMax = 300;
+
+export const listMessaggiQueryOffsetMin = 0;
+
+
+
 export const ListMessaggiQueryParams = zod.object({
   "canale": zod.coerce.string().optional(),
   "contatto_id": zod.coerce.string().optional(),
   "letto": zod.coerce.boolean().optional(),
   "stato_lead": zod.coerce.string().optional(),
-  "operatore_id": zod.coerce.string().optional()
+  "operatore_id": zod.coerce.string().optional(),
+  "limit": zod.coerce.number().min(1).max(listMessaggiQueryLimitMax).optional(),
+  "offset": zod.coerce.number().min(listMessaggiQueryOffsetMin).optional()
 })
 
 export const ListMessaggiResponseItem = zod.object({
@@ -1160,10 +1192,18 @@ export const SendMessaggioBody = zod.object({
 /**
  * @summary Get unified inbox - one entry per contact with last message
  */
+export const getChatInboxQueryLimitMax = 200;
+
+export const getChatInboxQueryOffsetMin = 0;
+
+
+
 export const GetChatInboxQueryParams = zod.object({
   "canale": zod.coerce.string().optional(),
   "stato_lead": zod.coerce.string().optional(),
-  "operatore_id": zod.coerce.string().optional()
+  "operatore_id": zod.coerce.string().optional(),
+  "limit": zod.coerce.number().min(1).max(getChatInboxQueryLimitMax).optional(),
+  "offset": zod.coerce.number().min(getChatInboxQueryOffsetMin).optional()
 })
 
 export const GetChatInboxResponseItem = zod.object({
@@ -1423,9 +1463,16 @@ export const GetProductionReadinessResponse = zod.object({
 /**
  * @summary Get automation execution log
  */
+export const listAutomazioniLogQueryLimitMax = 200;
+
+export const listAutomazioniLogQueryOffsetMin = 0;
+
+
+
 export const ListAutomazioniLogQueryParams = zod.object({
   "tipo": zod.coerce.string().optional(),
-  "limit": zod.coerce.number().optional()
+  "limit": zod.coerce.number().min(1).max(listAutomazioniLogQueryLimitMax).optional(),
+  "offset": zod.coerce.number().min(listAutomazioniLogQueryOffsetMin).optional()
 })
 
 export const ListAutomazioniLogResponseItem = zod.object({
@@ -1507,10 +1554,17 @@ export const TriggerAutomazioneResponse = zod.object({
 /**
  * @summary List staff action audit log entries
  */
+export const listAuditLogQueryLimitMax = 300;
+
+export const listAuditLogQueryOffsetMin = 0;
+
+
+
 export const ListAuditLogQueryParams = zod.object({
   "azione": zod.coerce.string().optional(),
   "entita": zod.coerce.string().optional(),
-  "limit": zod.coerce.number().optional()
+  "limit": zod.coerce.number().min(1).max(listAuditLogQueryLimitMax).optional(),
+  "offset": zod.coerce.number().min(listAuditLogQueryOffsetMin).optional()
 })
 
 export const ListAuditLogResponseItem = zod.object({

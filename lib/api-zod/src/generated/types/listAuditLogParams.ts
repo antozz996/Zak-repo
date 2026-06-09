@@ -9,5 +9,13 @@
 export type ListAuditLogParams = {
 azione?: string;
 entita?: string;
+/**
+ * @minimum 1
+ * @maximum 300
+ */
 limit?: number;
+/**
+ * @minimum 0
+ */
+offset?: number;
 };

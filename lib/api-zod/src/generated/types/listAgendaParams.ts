@@ -10,4 +10,13 @@ export type ListAgendaParams = {
 categoria?: string;
 data_da?: string;
 data_a?: string;
+/**
+ * @minimum 1
+ * @maximum 500
+ */
+limit?: number;
+/**
+ * @minimum 0
+ */
+offset?: number;
 };

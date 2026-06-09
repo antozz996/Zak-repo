@@ -5,6 +5,7 @@ import { sendWhatsAppTemplateSafely, sendWhatsAppTextSafely } from "../lib/whats
 import { logWhatsAppOutbound } from "../lib/whatsapp-outbound-log";
 import { getWhatsAppConversationWindow } from "../lib/whatsapp-conversation-window";
 import { logAuditAction } from "../lib/audit-log";
+import { parseLimit, parseOffset } from "../lib/pagination";
 
 const router = Router();
 
@@ -418,15 +419,17 @@ export async function runPromemoriaAgenda(): Promise<{ eseguiti: number; dettagl
 }
 
 router.get("/automazioni/log", async (req, res) => {
-  const { tipo, limit } = req.query as { tipo?: string; limit?: string };
-  const lim = Math.min(parseInt(limit || "50", 10), 200);
+  const { tipo, limit, offset } = req.query as { tipo?: string; limit?: string; offset?: string };
+  const lim = parseLimit(limit, 50, 200);
+  const off = parseOffset(offset);
 
   const rows = await db
     .select()
     .from(automazioniLogTable)
     .where(tipo ? eq(automazioniLogTable.tipo, tipo) : undefined)
     .orderBy(desc(automazioniLogTable.data_esecuzione))
-    .limit(lim);
+    .limit(lim)
+    .offset(off);
 
   res.json(rows);
 });

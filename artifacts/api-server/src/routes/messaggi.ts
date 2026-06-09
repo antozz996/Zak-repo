@@ -7,6 +7,7 @@ import { logWhatsAppOutbound } from "../lib/whatsapp-outbound-log";
 import { getWhatsAppConversationWindow } from "../lib/whatsapp-conversation-window";
 import { logAuditAction } from "../lib/audit-log";
 import { publishChatEvent, streamChatEvents } from "../lib/chat-events";
+import { parseLimit, parseOffset } from "../lib/pagination";
 
 const router = Router();
 const presenceHeartbeats = new Map<string, Date>();
@@ -46,7 +47,11 @@ router.get("/messaggi", async (req, res) => {
     stato_lead,
     operatore_id,
     letto,
+    limit,
+    offset,
   } = req.query as Record<string, string | undefined>;
+  const lim = parseLimit(limit, 100, 300);
+  const off = parseOffset(offset);
   const conditions: SQL[] = [];
   if (canale) conditions.push(eq(messaggiTable.canale, canale));
   if (contatto_id) conditions.push(eq(messaggiTable.contatto_id, contatto_id));
@@ -65,7 +70,9 @@ router.get("/messaggi", async (req, res) => {
     .from(messaggiTable)
     .innerJoin(contattiCrmTable, eq(contattiCrmTable.id, messaggiTable.contatto_id))
     .where(conditions.length > 0 ? and(...conditions) : undefined)
-    .orderBy(desc(messaggiTable.timestamp));
+    .orderBy(desc(messaggiTable.timestamp))
+    .limit(lim)
+    .offset(off);
   res.json(rows.map((row) => row.messaggi));
 });
 
@@ -154,7 +161,9 @@ router.patch("/messaggi/:id/read", async (req, res) => {
 
 // Unified inbox: one entry per contact with last message
 router.get("/chat/inbox", async (req, res) => {
-  const { canale, stato_lead, operatore_id } = req.query as Record<string, string | undefined>;
+  const { canale, stato_lead, operatore_id, limit, offset } = req.query as Record<string, string | undefined>;
+  const lim = parseLimit(limit, 80, 200);
+  const off = parseOffset(offset);
   const inboxFilters = [
     canale ? sql`AND m.canale = ${canale}` : sql``,
     stato_lead ? sql`AND c.stato_lead = ${stato_lead}` : sql``,
@@ -190,6 +199,8 @@ router.get("/chat/inbox", async (req, res) => {
       ${inboxFilters[2]}
     GROUP BY c.id, c.nome, c.telefono, c.stato_lead, c.handoff_richiesto, c.operatore_assegnato_id, u.nome, m.canale, m.testo, m.timestamp
     ORDER BY m.timestamp DESC
+    LIMIT ${lim}
+    OFFSET ${off}
   `);
   res.json(inbox.rows);
 });

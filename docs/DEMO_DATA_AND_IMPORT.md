@@ -159,4 +159,23 @@ Nome Cognome,+39 3XX XXXXXXX,username_ig,whatsapp,compleanno,nuovo,Note opzional
 
 ---
 
-*Ultimo aggiornamento: 2026-06-02*
+## 7. Seeder completo del database
+
+Per popolare in un colpo solo tutto il dataset demo usato da Inbox, Preventivi, Agenda e Task board:
+
+```bash
+corepack pnpm run seed:demo
+```
+
+Il comando:
+
+- svuota i dati demo esistenti per evitare duplicati;
+- inserisce 15 utenti staff, 20 contatti CRM, 40 messaggi, 20 preventivi, 20 eventi agenda e 20 task personali;
+- usa i CSV demo presenti in `attached_assets/` come fonte dei record;
+- richiede una connessione PostgreSQL valida tramite `DATABASE_URL`.
+
+La password di default per gli utenti staff demo e `VillaZak2026!`.
+
+---
+
+*Ultimo aggiornamento: 2026-06-09*

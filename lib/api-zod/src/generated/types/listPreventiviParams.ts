@@ -9,4 +9,13 @@
 export type ListPreventiviParams = {
 stato_evento?: string;
 contatto_id?: string;
+/**
+ * @minimum 1
+ * @maximum 500
+ */
+limit?: number;
+/**
+ * @minimum 0
+ */
+offset?: number;
 };

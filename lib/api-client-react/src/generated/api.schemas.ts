@@ -1134,17 +1134,44 @@ stato_lead?: string;
 tipo_evento?: string;
 origine_lead?: string;
 search?: string;
+/**
+ * @minimum 1
+ * @maximum 500
+ */
+limit?: number;
+/**
+ * @minimum 0
+ */
+offset?: number;
 };
 
 export type ListPreventiviParams = {
 stato_evento?: string;
 contatto_id?: string;
+/**
+ * @minimum 1
+ * @maximum 500
+ */
+limit?: number;
+/**
+ * @minimum 0
+ */
+offset?: number;
 };
 
 export type ListAgendaParams = {
 categoria?: string;
 data_da?: string;
 data_a?: string;
+/**
+ * @minimum 1
+ * @maximum 500
+ */
+limit?: number;
+/**
+ * @minimum 0
+ */
+offset?: number;
 };
 
 export type ListTaskPersonaliParams = {
@@ -1173,12 +1200,30 @@ contatto_id?: string;
 letto?: boolean;
 stato_lead?: string;
 operatore_id?: string;
+/**
+ * @minimum 1
+ * @maximum 300
+ */
+limit?: number;
+/**
+ * @minimum 0
+ */
+offset?: number;
 };
 
 export type GetChatInboxParams = {
 canale?: string;
 stato_lead?: string;
 operatore_id?: string;
+/**
+ * @minimum 1
+ * @maximum 200
+ */
+limit?: number;
+/**
+ * @minimum 0
+ */
+offset?: number;
 };
 
 export type ListChatTypingParams = {
@@ -1223,13 +1268,29 @@ export const CheckCalendarAvailabilitySlot = {
 
 export type ListAutomazioniLogParams = {
 tipo?: string;
+/**
+ * @minimum 1
+ * @maximum 200
+ */
 limit?: number;
+/**
+ * @minimum 0
+ */
+offset?: number;
 };
 
 export type ListAuditLogParams = {
 azione?: string;
 entita?: string;
+/**
+ * @minimum 1
+ * @maximum 300
+ */
 limit?: number;
+/**
+ * @minimum 0
+ */
+offset?: number;
 };
 
 export type WebhookWhatsappChallengeParams = {

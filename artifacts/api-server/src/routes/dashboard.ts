@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { Router, type NextFunction, type Request, type Response } from "express";
 import { db, contattiCrmTable, preventiviEventiTable, messaggiTable, agendaPersonaleTable } from "@workspace/db";
 import { eq, count, sql, and, gte, lt, lte, desc, type SQL } from "drizzle-orm";
 import {
@@ -8,6 +8,8 @@ import {
 } from "../lib/google-calendar";
 
 const router = Router();
+const DASHBOARD_CACHE_MS = 30_000;
+const dashboardCache = new Map<string, { expiresAt: number; body: unknown }>();
 
 function isCalendarSlot(value: string | undefined): value is CalendarSlot {
   return Boolean(value && (calendarSlots as readonly string[]).includes(value));
@@ -49,6 +51,35 @@ function buildDateConditions(column: any, dataDa?: string, dataA?: string): SQL[
   if (dataA) conditions.push(lte(column, dataA));
   return conditions;
 }
+
+function cacheDashboardJson(req: Request, res: Response, next: NextFunction) {
+  if (req.method !== "GET" || !req.path.startsWith("/dashboard/")) {
+    next();
+    return;
+  }
+
+  const cacheKey = req.originalUrl;
+  const cached = dashboardCache.get(cacheKey);
+  if (cached && cached.expiresAt > Date.now()) {
+    res.json(cached.body);
+    return;
+  }
+
+  const originalJson = res.json.bind(res);
+  res.json = (body: unknown) => {
+    if (res.statusCode < 400) {
+      dashboardCache.set(cacheKey, {
+        expiresAt: Date.now() + DASHBOARD_CACHE_MS,
+        body,
+      });
+    }
+    return originalJson(body);
+  };
+
+  next();
+}
+
+router.use(cacheDashboardJson);
 
 router.get("/dashboard/stats", async (req, res) => {
   const range = parseDateRange(req.query as { data_da?: string; data_a?: string });

@@ -12,4 +12,13 @@ contatto_id?: string;
 letto?: boolean;
 stato_lead?: string;
 operatore_id?: string;
+/**
+ * @minimum 1
+ * @maximum 300
+ */
+limit?: number;
+/**
+ * @minimum 0
+ */
+offset?: number;
 };
