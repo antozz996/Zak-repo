@@ -8,6 +8,7 @@
     "build": "corepack pnpm run typecheck && corepack pnpm -r --if-present run build",
     "format": "corepack pnpm exec prettier --write .",
     "format:check": "corepack pnpm exec prettier --check .",
+    "seed:demo": "corepack pnpm --dir scripts exec tsx ../artifacts/api-server/src/seed-demo.ts",
     "test:frontend-critical": "corepack pnpm --filter @workspace/zak-app run test:critical",
     "typecheck:libs": "tsc --build",
     "typecheck": "corepack pnpm run typecheck:libs && corepack pnpm -r --filter \"./artifacts/**\" --filter \"./scripts\" --if-present run typecheck"

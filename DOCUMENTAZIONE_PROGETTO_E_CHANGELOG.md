@@ -1412,3 +1412,11 @@ Formato consigliato per nuove voci:
 - note operative:
   - serve `corepack pnpm --filter @workspace/db run push` quando `DATABASE_URL` e configurato, per applicare colonne/tabelle Google
   - il blocco temporaneo su codegen/test/build e stato risolto nella sessione Codex del 2026-06-08
+
+### 2026-06-09 - Allineamento GitHub, Supporto AI Gratuita e Seeder Dati Demo
+
+- **Allineamento GitHub**: Committati tutti i file core/auth/B2B precedentemente non tracciati e allineato il branch `main` con il push remoto su GitHub.
+- **Supporto AI Gratuita**: Estesa la logica del Booking Assistant in `llm-booking-extractor.ts` per supportare gli endpoint `/chat/completions` standard. Questo rende l'applicazione compatibile con i provider AI gratuiti (come Google Gemini via AI Studio, OpenRouter o Groq).
+- **Seeder di Test Completo**: Aggiunto lo script `seed-demo.ts` in `@workspace/api-server` che popola il database Neon reale con tutti i dataset demo (`utenti-staff`, `contatti_crm`, `messaggi` per inbox, `preventivi_eventi`, `agenda_personale` e `task_personali`).
+- **Comandi globali**: Aggiunto il comando `"seed:demo"` nel root `package.json` ed eseguito con successo, inserendo 15 staff, 20 contatti, 40 messaggi, 20 preventivi, 20 eventi agenda e 20 task board items.
+
