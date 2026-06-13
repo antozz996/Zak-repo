@@ -18,17 +18,7 @@ import Impostazioni from "@/pages/impostazioni";
 import Automazioni from "@/pages/automazioni";
 import AuditLog from "@/pages/audit-log";
 import B2BCompetitor from "@/pages/b2b-competitor";
-import PreventivoPDFPreview from "@/pages/preventivo-pdf-preview";
-import AdminRoles from "@/pages/admin-roles";
 import Login from "@/pages/login";
-import LoginMock from "@/pages/login-mock";
-import AccessDeniedMock from "@/pages/access-denied-mock";
-import SecurityAuditMock from "@/pages/security-audit-mock";
-import RealtimeInboxMock from "@/pages/realtime-inbox-mock";
-import LlmBookingReviewMock from "@/pages/llm-booking-review-mock";
-import PreventivoPricingBuilderMock from "@/pages/preventivo-pricing-builder-mock";
-import PreventivoSignatureMock from "@/pages/preventivo-signature-mock";
-import GoogleCalendarSettingsMock from "@/pages/google-calendar-settings-mock";
 
 const queryClient = new QueryClient();
 configureAuthTokenGetter();
@@ -55,16 +45,6 @@ function Router() {
       <Route path="/automazioni">{withAuth(<Automazioni />, "manager")}</Route>
       <Route path="/audit-log">{withAuth(<AuditLog />, "admin")}</Route>
       <Route path="/b2b-competitor">{withAuth(<B2BCompetitor />, "manager")}</Route>
-      <Route path="/preventivo-pdf-preview">{withAuth(<PreventivoPDFPreview />)}</Route>
-      <Route path="/admin-roles">{withAuth(<AdminRoles />, "admin")}</Route>
-      <Route path="/login-mock">{withAuth(<LoginMock />)}</Route>
-      <Route path="/access-denied-mock">{withAuth(<AccessDeniedMock />)}</Route>
-      <Route path="/security-audit-mock">{withAuth(<SecurityAuditMock />, "admin")}</Route>
-      <Route path="/realtime-inbox-mock">{withAuth(<RealtimeInboxMock />)}</Route>
-      <Route path="/llm-booking-review-mock">{withAuth(<LlmBookingReviewMock />, "manager")}</Route>
-      <Route path="/preventivo-pricing-builder-mock">{withAuth(<PreventivoPricingBuilderMock />, "manager")}</Route>
-      <Route path="/preventivo-signature-mock">{withAuth(<PreventivoSignatureMock />)}</Route>
-      <Route path="/google-calendar-settings-mock">{withAuth(<GoogleCalendarSettingsMock />, "manager")}</Route>
       <Route component={NotFound} />
     </Switch>
   );

@@ -10,15 +10,8 @@ import {
   Settings,
   Zap,
   ShieldCheck,
-  Briefcase,
-  FileCheck,
-  KeyRound,
-  Lock,
-  ShieldAlert,
   Menu,
   X,
-  Bot,
-  Calculator,
   LogOut,
 } from "lucide-react";
 import { useGetChatInbox, useGetCurrentUser, useLogout } from "@workspace/api-client-react";
@@ -46,22 +39,12 @@ export function SidebarLayout({ children }: { children: React.ReactNode }) {
   const navItems = [
     { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard, minRole: "staff" },
     { href: "/inbox", label: "Inbox", icon: MessageSquare, badge: unreadCount, minRole: "staff" },
-    { href: "/realtime-inbox-mock", label: "Realtime Inbox (Mock)", icon: MessageSquare, minRole: "staff" },
-    { href: "/llm-booking-review-mock", label: "LLM Review (Mock)", icon: Bot, minRole: "manager" },
     { href: "/contatti", label: "Contatti", icon: Users, minRole: "staff" },
     { href: "/preventivi", label: "Preventivi", icon: FileText, minRole: "staff" },
-    { href: "/preventivo-pricing-builder-mock", label: "Pricing Builder (Mock)", icon: Calculator, minRole: "manager" },
-    { href: "/preventivo-signature-mock", label: "Firma Preventivo (Mock)", icon: FileCheck, minRole: "staff" },
-    { href: "/preventivo-pdf-preview", label: "PDF Preventivo", icon: FileCheck, minRole: "staff" },
     { href: "/agenda", label: "Agenda", icon: Calendar, minRole: "staff" },
-    { href: "/google-calendar-settings-mock", label: "Google Cal (Mock)", icon: Calendar, minRole: "manager" },
     { href: "/task", label: "Task", icon: CheckSquare, minRole: "staff" },
     { href: "/automazioni", label: "Automazioni", icon: Zap, minRole: "manager" },
-    { href: "/b2b-competitor", label: "B2B", icon: Briefcase, minRole: "manager" },
-    { href: "/admin-roles", label: "Ruoli", icon: KeyRound, minRole: "admin" },
     { href: "/audit-log", label: "Audit Log", icon: ShieldCheck, minRole: "admin" },
-    { href: "/security-audit-mock", label: "Sicurezza (Mock)", icon: ShieldAlert, minRole: "admin" },
-    { href: "/login-mock", label: "Login (Mock)", icon: Lock, minRole: "staff" },
     { href: "/impostazioni", label: "Impostazioni", icon: Settings, minRole: "manager" },
   ] satisfies Array<{ href: string; label: string; icon: typeof LayoutDashboard; badge?: number; minRole: StaffRole }>;
 
