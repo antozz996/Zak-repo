@@ -2966,6 +2966,20 @@ components:
           enum: [ok, warning, missing]
         message:
           type: string
+        required_env:
+          type: array
+          items:
+            type: string
+        configured_env:
+          type: array
+          items:
+            type: string
+        optional_env:
+          type: array
+          items:
+            type: string
+        action:
+          type: string
 
     ProductionReadiness:
       type: object

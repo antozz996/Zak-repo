@@ -42,6 +42,7 @@ assertIncludes(app, "ProtectedRoute", "Router protects real app routes");
 assertIncludes(app, 'path="/inbox"', "Router exposes Inbox");
 assertIncludes(app, 'path="/preventivi"', "Router exposes Preventivi");
 assertIncludes(app, 'path="/task"', "Router exposes Task");
+assertIncludes(app, 'path="/go-live"', "Router exposes Go-live readiness center");
 
 const login = readSource("src/pages/login.tsx");
 assertIncludes(login, "useLogin", "Login page authenticates with generated API hook");
@@ -63,5 +64,10 @@ assertIncludes(b2b, "useCreateB2BTemplate", "B2B page creates real co-branding t
 assertIncludes(b2b, "useDeleteB2BTemplate", "B2B page deletes real co-branding templates");
 assertIncludes(b2b, "useAnalyzeB2BCompetitor", "B2B page generates real structured competitor analysis");
 assertIncludes(b2b, "useExportB2BPitch", "B2B page exports real B2B pitch outlines");
+
+const goLive = readSource("src/pages/go-live.tsx");
+assertIncludes(goLive, "useGetProductionReadiness", "Go-live page reads backend readiness");
+assertIncludes(goLive, "useGetGoogleCalendarStatus", "Go-live page reads Google Calendar status");
+assertIncludes(goLive, "useSyncGoogleCalendar", "Go-live page can run Google Calendar sync");
 
 console.log("critical zak-app smoke tests passed");

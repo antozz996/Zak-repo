@@ -77,6 +77,8 @@ Se nessun secret voice e configurato, il webhook resta aperto per compatibilita 
   - ID del numero WhatsApp Business mittente
 - `META_APP_SECRET`
   - secret dell'app Meta usato per verificare firme webhook WhatsApp in produzione
+- `META_WEBHOOK_VERIFY_TOKEN`
+  - token scelto da noi e inserito anche nel pannello Meta per verificare la challenge del webhook WhatsApp
 - `META_GRAPH_API_VERSION`
   - opzionale, default `v20.0`
 - `META_WHATSAPP_TEMPLATE_LANGUAGE`

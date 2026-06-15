@@ -11,4 +11,8 @@ export interface ProductionReadinessCheck {
   key: string;
   status: ProductionReadinessCheckStatus;
   message: string;
+  required_env?: string[];
+  configured_env?: string[];
+  optional_env?: string[];
+  action?: string;
 }

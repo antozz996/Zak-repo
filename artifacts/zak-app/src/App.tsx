@@ -18,6 +18,7 @@ import Impostazioni from "@/pages/impostazioni";
 import Automazioni from "@/pages/automazioni";
 import AuditLog from "@/pages/audit-log";
 import B2BCompetitor from "@/pages/b2b-competitor";
+import GoLive from "@/pages/go-live";
 import Login from "@/pages/login";
 
 const queryClient = new QueryClient();
@@ -45,6 +46,7 @@ function Router() {
       <Route path="/automazioni">{withAuth(<Automazioni />, "manager")}</Route>
       <Route path="/audit-log">{withAuth(<AuditLog />, "admin")}</Route>
       <Route path="/b2b-competitor">{withAuth(<B2BCompetitor />, "manager")}</Route>
+      <Route path="/go-live">{withAuth(<GoLive />, "admin")}</Route>
       <Route component={NotFound} />
     </Switch>
   );

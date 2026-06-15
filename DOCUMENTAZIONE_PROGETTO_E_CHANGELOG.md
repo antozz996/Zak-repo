@@ -539,17 +539,8 @@ Rotte principali in `artifacts/zak-app/src/App.tsx`:
 - `/impostazioni`
 - `/automazioni`
 - `/audit-log`
-- `/admin-roles`
-- `/login-mock`
-- `/access-denied-mock`
-- `/security-audit-mock`
-- `/realtime-inbox-mock`
-- `/llm-booking-review-mock`
-- `/preventivo-pricing-builder-mock`
-- `/preventivo-signature-mock`
-- `/google-calendar-settings-mock`
 - `/b2b-competitor`
-- `/preventivo-pdf-preview`
+- `/go-live`
 
 Pattern frontend usati:
 
@@ -569,12 +560,9 @@ Nota task:
 
 Nota sicurezza/RBAC:
 
-- la pagina `/admin-roles` e` un mock frontend con dati locali fittizi
-- non implementa autenticazione reale, sessioni, JWT o permessi persistenti
-- serve come base UX per la futura implementazione core di ruoli e permessi reali
-- le pagine `/login-mock`, `/access-denied-mock` e `/security-audit-mock` sono prototipi UI non collegati ad autenticazione reale
-- le pagine `/realtime-inbox-mock`, `/llm-booking-review-mock`, `/preventivo-pricing-builder-mock`, `/preventivo-signature-mock` e `/google-calendar-settings-mock` sono prototipi UI core-adjacent con stato locale, non collegati a backend reale
-- le API backend reali per LLM, Google Calendar, Voice provider e readiness sono implementate; i client/schemi OpenAPI generati sono stati riallineati il 2026-06-08
+- l'app produzione usa login reale, sessione staff backend e protezione route lato frontend/backend
+- i prototipi mock non sono piu` importati dal router e i relativi sorgenti TSX sono stati rimossi da `artifacts/zak-app/src/pages`
+- le API backend reali per LLM, Google Calendar, Voice provider e readiness sono implementate; la pagina `/go-live` mostra le variabili mancanti e permette il sync Google manuale quando configurato
 
 ## 9. Backend attuale
 
@@ -1421,3 +1409,13 @@ Formato consigliato per nuove voci:
 - **Comandi globali**: Aggiunto il comando `"seed:demo"` nel root `package.json` e nel package `scripts`, con esecuzione riuscita e inserimento di 15 staff, 20 contatti, 40 messaggi, 20 preventivi, 20 eventi agenda e 20 task board items.
 - **Ottimizzazione performance CRM**: Aggiunti indici Drizzle per Inbox, messaggi, contatti, preventivi, agenda, audit log e log automazioni; introdotti `limit`/`offset` sulle liste principali; aggiornata Inbox con caricamento incrementale di conversazioni e messaggi; aggiunta cache breve da 30 secondi sulle metriche Dashboard.
 - **Pulizia app produzione**: Rimossi dalla navigazione e dal router principale i prototipi `/login-mock`, `/access-denied-mock`, `/security-audit-mock`, `/realtime-inbox-mock`, `/llm-booking-review-mock`, `/preventivo-pricing-builder-mock`, `/preventivo-signature-mock`, `/google-calendar-settings-mock`, `/admin-roles` e la preview PDF simulata; la sidebar ora espone solo moduli operativi collegati al backend reale.
+- **B2B produzione reale**: Sostituita la pagina B2B ibrida/demo con una console operativa collegata alle API reali per competitor, materiali, template, analisi strutturata ed export pitch; ripristinata la voce B2B nella sidebar produzione per i ruoli manager/admin.
+- **Rimozione sorgenti mock**: Eliminati da `artifacts/zak-app/src/pages` i file TSX dei prototipi non piu` raggiungibili dal router produzione, mantenendo il mockup sandbox separato come area dedicata alle sperimentazioni.
+- **Polish UX produzione**: Riallineata la pagina 404 allo stile e alla lingua italiana dell'app, con rientro diretto alla dashboard.
+
+### 2026-06-15 - Centro Go-live e chiusura configurazioni provider-ready
+
+- **Centro Go-live admin**: Aggiunta la pagina `/go-live`, protetta admin e raggiungibile dalla sidebar, con stato readiness backend, elenco variabili mancanti, endpoint provider e sync Google Calendar manuale.
+- **Readiness arricchita**: Esteso `GET /api/production/readiness` con `required_env`, `configured_env`, `optional_env` e `action`, cosi` la UI puo indicare esattamente quali chiavi inserire senza logica duplicata.
+- **Contratto OpenAPI riallineato**: Aggiornato `ProductionReadinessCheck` e rigenerati client React Query/Zod.
+- **Env provider-ready**: Aggiornato `.env.example` con `OPENAI_BASE_URL` e `META_WEBHOOK_VERIFY_TOKEN`; documentata la configurazione Meta per challenge webhook.

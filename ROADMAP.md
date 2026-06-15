@@ -245,6 +245,7 @@ Queste voci non sono blocchi di codice core: richiedono credenziali reali, scelt
 - [x] Eseguire `corepack pnpm --filter @workspace/db run push` con `DATABASE_URL` reale Neon e verificare schema PostgreSQL - Completato da Codex il 2026-06-08
 - [x] Configurare segreti auth locali e creare primo admin con `POST /api/auth/bootstrap-admin` - Completato da Codex il 2026-06-08
 - [x] Predisporre deploy Render one-service con backend Express che serve anche frontend statico - Completato da Codex il 2026-06-08
+- [x] Aggiungere centro admin `/go-live` con readiness, variabili mancanti e sync Google manuale - Completato da Codex il 2026-06-15
 - [ ] Configurare `OPENAI_API_KEY`, `ZAK_LLM_BOOKING_ENABLED=true` e confermare modello runtime LLM (`gpt-5.4-nano` default, eventuale upgrade a `gpt-5.5`) - Responsabile: owner prodotto/tecnico
 - [ ] Creare OAuth client Google Cloud, ottenere `GOOGLE_REFRESH_TOKEN`, scegliere `GOOGLE_CALENDAR_ID` e registrare eventuale watch webhook su `/api/webhook/google-calendar` - Responsabile: owner Google Workspace
 - [ ] Decidere policy cancellazioni Google: mantenere default non distruttivo oppure impostare `ZAK_GOOGLE_DELETE_CANCELLED=true` - Responsabile: owner operativo

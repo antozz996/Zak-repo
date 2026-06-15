@@ -1455,7 +1455,11 @@ export const GetProductionReadinessResponse = zod.object({
   "checks": zod.array(zod.object({
   "key": zod.string(),
   "status": zod.enum(['ok', 'warning', 'missing']),
-  "message": zod.string()
+  "message": zod.string(),
+  "required_env": zod.array(zod.string()).optional(),
+  "configured_env": zod.array(zod.string()).optional(),
+  "optional_env": zod.array(zod.string()).optional(),
+  "action": zod.string().optional()
 }))
 })
 

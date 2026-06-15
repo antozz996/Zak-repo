@@ -1,19 +1,28 @@
+import { Link } from "wouter";
+import { AlertCircle, ArrowLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { AlertCircle } from "lucide-react";
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-gray-50">
-      <Card className="w-full max-w-md mx-4">
+    <div className="flex min-h-screen w-full items-center justify-center bg-muted/30 p-6">
+      <Card className="w-full max-w-md">
         <CardContent className="pt-6">
-          <div className="flex mb-4 gap-2">
-            <AlertCircle className="h-8 w-8 text-red-500" />
-            <h1 className="text-2xl font-bold text-gray-900">404 Page Not Found</h1>
+          <div className="mb-4 flex gap-3">
+            <AlertCircle className="h-8 w-8 shrink-0 text-destructive" />
+            <div>
+              <h1 className="text-2xl font-bold">Pagina non trovata</h1>
+              <p className="mt-2 text-sm text-muted-foreground">
+                La sezione richiesta non esiste o non e` piu` disponibile in produzione.
+              </p>
+            </div>
           </div>
-
-          <p className="mt-4 text-sm text-gray-600">
-            Did you forget to add the page to the router?
-          </p>
+          <Button asChild variant="outline">
+            <Link href="/dashboard">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Torna alla dashboard
+            </Link>
+          </Button>
         </CardContent>
       </Card>
     </div>
