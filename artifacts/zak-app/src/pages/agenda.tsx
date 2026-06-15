@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "wouter";
 import { SidebarLayout } from "@/components/layout/sidebar-layout";
 import {
   useListAgenda,
@@ -16,7 +17,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from "@/com
 import { Textarea } from "@/components/ui/textarea";
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isSameMonth, isToday, addMonths, subMonths, startOfWeek, endOfWeek } from "date-fns";
 import { it } from "date-fns/locale";
-import { Plus, Pencil, Trash2, ChevronLeft, ChevronRight, List, CalendarDays } from "lucide-react";
+import { Plus, Pencil, Trash2, ChevronLeft, ChevronRight, List, CalendarDays, FileSpreadsheet } from "lucide-react";
 
 type AgendaItem = {
   id: string;
@@ -130,6 +131,12 @@ export default function Agenda() {
             <p className="text-muted-foreground">Impegni personali e lavorativi di Salvatore.</p>
           </div>
           <div className="flex gap-2">
+            <Button asChild variant="outline">
+              <Link href="/agenda/importa-numbers">
+                <FileSpreadsheet className="w-4 h-4 mr-2" />
+                Importa Numbers
+              </Link>
+            </Button>
             <div className="flex border rounded-md overflow-hidden">
               <button
                 onClick={() => setVista("lista")}

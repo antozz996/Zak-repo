@@ -15,6 +15,7 @@ import {
   KeyRound,
   Loader2,
   RefreshCw,
+  RotateCcwKey,
   ShieldCheck,
 } from "lucide-react";
 import { SidebarLayout } from "@/components/layout/sidebar-layout";
@@ -36,6 +37,45 @@ const statusClass: Record<ProductionReadinessCheck["status"], string> = {
   warning: "border-amber-200 bg-amber-50 text-amber-800",
   missing: "border-red-200 bg-red-50 text-red-800",
 };
+
+const providerSteps = [
+  {
+    title: "1. Sicurezza staff",
+    detail: "Verifica segreti auth, ruota le chiavi condivise fuori dal secret manager e cambia le password demo degli utenti staff.",
+    env: ["DATABASE_URL", "NODE_ENV", "ZAK_AUTH_SECRET", "ZAK_BOOTSTRAP_ADMIN_TOKEN"],
+    test: "Login staff e gestione utenti da Impostazioni.",
+  },
+  {
+    title: "2. LLM Booking",
+    detail: "Abilita l'estrazione AI solo quando la chiave provider e` presente. Il fallback rule-based resta attivo se il provider fallisce.",
+    env: ["ZAK_LLM_BOOKING_ENABLED", "OPENAI_API_KEY", "OPENAI_BASE_URL", "ZAK_LLM_BOOKING_MODEL"],
+    test: "Messaggio lead in Inbox con creazione/aggiornamento contatto e preventivo.",
+  },
+  {
+    title: "3. Meta WhatsApp",
+    detail: "Configura Cloud API, firma webhook e verify token nel pannello Meta Business.",
+    env: ["META_WHATSAPP_ACCESS_TOKEN", "META_WHATSAPP_PHONE_NUMBER_ID", "META_APP_SECRET", "META_WEBHOOK_VERIFY_TOKEN"],
+    test: "Messaggio WhatsApp reale ricevuto in Inbox.",
+  },
+  {
+    title: "4. Google Calendar",
+    detail: "Attiva OAuth server-side solo se vuoi davvero Google Calendar. Se lavori da Apple Numbers, lascia Google disattivato e usa l'import dedicato dalla pagina Agenda.",
+    env: ["ZAK_GOOGLE_CALENDAR_ENABLED", "GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET", "GOOGLE_REFRESH_TOKEN", "GOOGLE_CALENDAR_ID"],
+    test: "Sync manuale Google completato senza errori.",
+  },
+  {
+    title: "5. Voice assistant",
+    detail: "Configura il webhook nel provider voice e passa il secret supportato negli header.",
+    env: ["VOICE_WEBHOOK_SECRET", "VAPI_WEBHOOK_SECRET", "BLAND_WEBHOOK_SECRET"],
+    test: "Chiamata demo con creazione contatto, messaggio voice, task o agenda.",
+  },
+  {
+    title: "6. Smoke finale",
+    detail: "Dopo ogni modifica env esegui redeploy/restart Render, aggiorna questa pagina e controlla i moduli operativi.",
+    env: ["Render redeploy", "Go-live refresh"],
+    test: "Inbox, Preventivi, Agenda, B2B, Automazioni e Audit Log senza errori.",
+  },
+];
 
 function unique(values: string[]) {
   return Array.from(new Set(values.filter(Boolean)));
@@ -100,6 +140,22 @@ function ReadinessRow({ check }: { check: ProductionReadinessCheck }) {
           <EnvPills values={check.optional_env} />
         </div>
       ) : null}
+    </div>
+  );
+}
+
+function ProviderStepCard({ step }: { step: (typeof providerSteps)[number] }) {
+  return (
+    <div className="rounded-md border p-4">
+      <h3 className="font-semibold">{step.title}</h3>
+      <p className="mt-1 text-sm text-muted-foreground">{step.detail}</p>
+      <div className="mt-3 space-y-2">
+        <p className="text-xs font-semibold uppercase text-muted-foreground">Env / azioni</p>
+        <EnvPills values={step.env} />
+      </div>
+      <p className="mt-3 text-sm">
+        <span className="font-semibold">Test:</span> {step.test}
+      </p>
     </div>
   );
 }
@@ -189,6 +245,23 @@ export default function GoLive() {
             ) : (
               <EnvPills values={missingKeys} />
             )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <RotateCcwKey className="h-5 w-5" />
+              Sequenza operativa
+            </CardTitle>
+            <CardDescription>
+              Inserisci le chiavi solo nel pannello Render o nei provider: non salvarle nel repository e non condividerle in chat.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="grid gap-3 lg:grid-cols-2">
+            {providerSteps.map((step) => (
+              <ProviderStepCard key={step.title} step={step} />
+            ))}
           </CardContent>
         </Card>
 
@@ -307,6 +380,10 @@ export default function GoLive() {
                 <div>
                   <p className="font-semibold">Google Calendar watch</p>
                   <p className="font-mono text-xs text-muted-foreground">/api/webhook/google-calendar</p>
+                </div>
+                <div>
+                  <p className="font-semibold">Import interno Apple Numbers</p>
+                  <p className="font-mono text-xs text-muted-foreground">/agenda/importa-numbers</p>
                 </div>
               </CardContent>
             </Card>

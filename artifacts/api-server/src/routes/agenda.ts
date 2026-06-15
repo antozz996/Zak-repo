@@ -1,9 +1,17 @@
 import { Router } from "express";
 import { db, agendaPersonaleTable, contattiCrmTable, insertAgendaItemSchema, updateAgendaItemSchema } from "@workspace/db";
+import { ImportAgendaNumbersCsvBody } from "@workspace/api-zod";
 import { eq, and, gte, lte, desc } from "drizzle-orm";
 import { logAuditAction } from "../lib/audit-log";
 import { deleteGoogleCalendarEvent, syncAgendaItemToGoogle } from "../lib/google-calendar";
+import {
+  annotateExistingAgendaItems,
+  buildNumbersAgendaDescription,
+  buildNumbersAgendaExistingKey,
+  parseNumbersAgendaCsv,
+} from "../lib/numbers-agenda-import";
 import { parseLimit, parseOffset } from "../lib/pagination";
+import { requireRole } from "../lib/auth";
 
 const router = Router();
 
@@ -72,6 +80,93 @@ router.post("/agenda", async (req, res) => {
   await syncAgendaItemToGoogle(row);
   await logAuditAction({ req, azione: "create", entita: "agenda", entitaId: row.id, dettagli: { categoria: row.categoria, titolo: row.titolo } });
   res.status(201).json({ ...row, contatto_nome: null });
+});
+
+router.post("/agenda/import-numbers-csv", requireRole("manager"), async (req, res) => {
+  const parsedBody = ImportAgendaNumbersCsvBody.safeParse(req.body);
+  if (!parsedBody.success) {
+    res.status(400).json({ error: parsedBody.error.message });
+    return;
+  }
+
+  const csv = parsedBody.data.csv.trim();
+  if (!csv) {
+    res.status(400).json({ error: "csv required" });
+    return;
+  }
+
+  const parsed = parseNumbersAgendaCsv(csv, {
+    year: parsedBody.data.year,
+    defaultMonth: parsedBody.data.default_month ?? undefined,
+    category: parsedBody.data.categoria ?? "lavoro",
+    pSlotLabel: parsedBody.data.p_slot_label ?? "P",
+    pStartTime: parsedBody.data.p_start_time ?? "13:00",
+    pEndTime: parsedBody.data.p_end_time ?? "17:00",
+    cSlotLabel: parsedBody.data.c_slot_label ?? "C",
+    cStartTime: parsedBody.data.c_start_time ?? "20:00",
+    cEndTime: parsedBody.data.c_end_time ?? "23:59",
+  });
+
+  const existingAgenda = await db.select({
+    data_ora_inizio: agendaPersonaleTable.data_ora_inizio,
+    titolo: agendaPersonaleTable.titolo,
+    descrizione: agendaPersonaleTable.descrizione,
+  }).from(agendaPersonaleTable);
+
+  const existingKeys = new Set(existingAgenda.map((item) => buildNumbersAgendaExistingKey({
+    data_ora_inizio: item.data_ora_inizio.toISOString(),
+    titolo: item.titolo,
+    descrizione: item.descrizione,
+  })));
+
+  const items = annotateExistingAgendaItems(parsed.items, existingKeys);
+  const dryRun = parsedBody.data.dry_run !== false;
+
+  let creati = 0;
+  let saltati = 0;
+  if (!dryRun) {
+    for (const item of items) {
+      if (item.gia_presente) {
+        saltati++;
+        continue;
+      }
+
+      const [row] = await db.insert(agendaPersonaleTable).values({
+        titolo: item.titolo,
+        descrizione: buildNumbersAgendaDescription(item),
+        data_ora_inizio: new Date(item.data_ora_inizio),
+        data_ora_fine: new Date(item.data_ora_fine),
+        categoria: parsedBody.data.categoria ?? "lavoro",
+      }).returning();
+
+      await syncAgendaItemToGoogle(row);
+      creati++;
+    }
+  } else {
+    saltati = items.filter((item) => item.gia_presente).length;
+  }
+
+  await logAuditAction({
+    req,
+    azione: dryRun ? "import_numbers_preview" : "import_numbers_csv",
+    entita: "agenda",
+    dettagli: {
+      totale_righe: parsed.totalRows,
+      trovati: items.length,
+      creati,
+      saltati: dryRun ? items.filter((item) => item.gia_presente).length : saltati,
+      errori: parsed.errors.length,
+    },
+  });
+
+  res.json({
+    totale_righe: parsed.totalRows,
+    trovati: items.length,
+    creati,
+    saltati: dryRun ? items.filter((item) => item.gia_presente).length : saltati,
+    errori: parsed.errors,
+    items,
+  });
 });
 
 router.get("/agenda/:id", async (req, res) => {

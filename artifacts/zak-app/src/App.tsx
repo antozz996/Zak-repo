@@ -13,6 +13,7 @@ import Contatti from "@/pages/contatti";
 import ContattiNuovo from "@/pages/contatti-nuovo";
 import Preventivi from "@/pages/preventivi";
 import Agenda from "@/pages/agenda";
+import AgendaImportNumbers from "@/pages/agenda-import-numbers";
 import Task from "@/pages/task";
 import Impostazioni from "@/pages/impostazioni";
 import Automazioni from "@/pages/automazioni";
@@ -41,6 +42,7 @@ function Router() {
       <Route path="/contatti">{withAuth(<Contatti />)}</Route>
       <Route path="/preventivi">{withAuth(<Preventivi />)}</Route>
       <Route path="/agenda">{withAuth(<Agenda />)}</Route>
+      <Route path="/agenda/importa-numbers">{withAuth(<AgendaImportNumbers />, "manager")}</Route>
       <Route path="/task">{withAuth(<Task />)}</Route>
       <Route path="/impostazioni">{withAuth(<Impostazioni />, "manager")}</Route>
       <Route path="/automazioni">{withAuth(<Automazioni />, "manager")}</Route>

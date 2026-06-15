@@ -43,6 +43,7 @@ assertIncludes(app, 'path="/inbox"', "Router exposes Inbox");
 assertIncludes(app, 'path="/preventivi"', "Router exposes Preventivi");
 assertIncludes(app, 'path="/task"', "Router exposes Task");
 assertIncludes(app, 'path="/go-live"', "Router exposes Go-live readiness center");
+assertIncludes(app, 'path="/agenda/importa-numbers"', "Router exposes Apple Numbers agenda import");
 
 const login = readSource("src/pages/login.tsx");
 assertIncludes(login, "useLogin", "Login page authenticates with generated API hook");
@@ -69,5 +70,8 @@ const goLive = readSource("src/pages/go-live.tsx");
 assertIncludes(goLive, "useGetProductionReadiness", "Go-live page reads backend readiness");
 assertIncludes(goLive, "useGetGoogleCalendarStatus", "Go-live page reads Google Calendar status");
 assertIncludes(goLive, "useSyncGoogleCalendar", "Go-live page can run Google Calendar sync");
+
+const agendaImportNumbers = readSource("src/pages/agenda-import-numbers.tsx");
+assertIncludes(agendaImportNumbers, "useImportAgendaNumbersCsv", "Agenda import page uses Numbers CSV import mutation");
 
 console.log("critical zak-app smoke tests passed");

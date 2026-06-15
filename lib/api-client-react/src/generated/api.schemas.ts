@@ -522,6 +522,66 @@ export interface AgendaItemUpdate {
   google_sync_direction?: AgendaItemUpdateGoogleSyncDirection;
 }
 
+export interface ImportAgendaNumbersCsvInput {
+  csv: string;
+  /**
+     * @minimum 2000
+     * @maximum 2100
+     */
+  year: number;
+  /**
+     * @minimum 1
+     * @maximum 12
+     */
+  default_month?: number;
+  categoria?: string;
+  p_slot_label?: string;
+  p_start_time?: string;
+  p_end_time?: string;
+  c_slot_label?: string;
+  c_start_time?: string;
+  c_end_time?: string;
+  dry_run?: boolean;
+}
+
+export type ImportAgendaNumbersCsvItemAccontoStato = typeof ImportAgendaNumbersCsvItemAccontoStato[keyof typeof ImportAgendaNumbersCsvItemAccontoStato];
+
+
+export const ImportAgendaNumbersCsvItemAccontoStato = {
+  si: 'si',
+  no: 'no',
+  sconosciuto: 'sconosciuto',
+} as const;
+
+export interface ImportAgendaNumbersCsvItem {
+  riga: number;
+  giorno: number;
+  mese: number;
+  mese_label: string;
+  slot: string;
+  titolo: string;
+  data: string;
+  data_ora_inizio: string;
+  data_ora_fine: string;
+  acconto_stato: ImportAgendaNumbersCsvItemAccontoStato;
+  gia_presente: boolean;
+  raw_text: string;
+}
+
+export type ImportAgendaNumbersCsvResultErroriItem = {
+  riga: number;
+  motivo: string;
+};
+
+export interface ImportAgendaNumbersCsvResult {
+  totale_righe: number;
+  trovati: number;
+  creati: number;
+  saltati: number;
+  errori: ImportAgendaNumbersCsvResultErroriItem[];
+  items: ImportAgendaNumbersCsvItem[];
+}
+
 export interface TaskPersonale {
   id: string;
   titolo: string;

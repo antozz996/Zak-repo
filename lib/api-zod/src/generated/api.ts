@@ -655,6 +655,63 @@ export const CreateAgendaItemBody = zod.object({
 
 
 /**
+ * @summary Import agenda events from an Apple Numbers monthly planner CSV
+ */
+export const importAgendaNumbersCsvBodyYearMin = 2000;
+export const importAgendaNumbersCsvBodyYearMax = 2100;
+
+export const importAgendaNumbersCsvBodyDefaultMonthMax = 12;
+
+export const importAgendaNumbersCsvBodyCategoriaDefault = `lavoro`;
+export const importAgendaNumbersCsvBodyPSlotLabelDefault = `P`;
+export const importAgendaNumbersCsvBodyPStartTimeDefault = `13:00`;
+export const importAgendaNumbersCsvBodyPEndTimeDefault = `17:00`;
+export const importAgendaNumbersCsvBodyCSlotLabelDefault = `C`;
+export const importAgendaNumbersCsvBodyCStartTimeDefault = `20:00`;
+export const importAgendaNumbersCsvBodyCEndTimeDefault = `23:59`;
+export const importAgendaNumbersCsvBodyDryRunDefault = true;
+
+export const ImportAgendaNumbersCsvBody = zod.object({
+  "csv": zod.string(),
+  "year": zod.number().min(importAgendaNumbersCsvBodyYearMin).max(importAgendaNumbersCsvBodyYearMax),
+  "default_month": zod.number().min(1).max(importAgendaNumbersCsvBodyDefaultMonthMax).optional(),
+  "categoria": zod.string().default(importAgendaNumbersCsvBodyCategoriaDefault),
+  "p_slot_label": zod.string().default(importAgendaNumbersCsvBodyPSlotLabelDefault),
+  "p_start_time": zod.string().default(importAgendaNumbersCsvBodyPStartTimeDefault),
+  "p_end_time": zod.string().default(importAgendaNumbersCsvBodyPEndTimeDefault),
+  "c_slot_label": zod.string().default(importAgendaNumbersCsvBodyCSlotLabelDefault),
+  "c_start_time": zod.string().default(importAgendaNumbersCsvBodyCStartTimeDefault),
+  "c_end_time": zod.string().default(importAgendaNumbersCsvBodyCEndTimeDefault),
+  "dry_run": zod.boolean().default(importAgendaNumbersCsvBodyDryRunDefault)
+})
+
+export const ImportAgendaNumbersCsvResponse = zod.object({
+  "totale_righe": zod.number(),
+  "trovati": zod.number(),
+  "creati": zod.number(),
+  "saltati": zod.number(),
+  "errori": zod.array(zod.object({
+  "riga": zod.number(),
+  "motivo": zod.string()
+})),
+  "items": zod.array(zod.object({
+  "riga": zod.number(),
+  "giorno": zod.number(),
+  "mese": zod.number(),
+  "mese_label": zod.string(),
+  "slot": zod.string(),
+  "titolo": zod.string(),
+  "data": zod.string(),
+  "data_ora_inizio": zod.string(),
+  "data_ora_fine": zod.string(),
+  "acconto_stato": zod.enum(['si', 'no', 'sconosciuto']),
+  "gia_presente": zod.boolean(),
+  "raw_text": zod.string()
+}))
+})
+
+
+/**
  * @summary Get an agenda item
  */
 export const GetAgendaItemParams = zod.object({

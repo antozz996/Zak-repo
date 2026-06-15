@@ -719,6 +719,25 @@ paths:
               schema:
                 $ref: "#/components/schemas/AgendaItem"
 
+  /agenda/import-numbers-csv:
+    post:
+      operationId: importAgendaNumbersCsv
+      tags: [agenda]
+      summary: Import agenda events from an Apple Numbers monthly planner CSV
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ImportAgendaNumbersCsvInput"
+      responses:
+        "200":
+          description: Import result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ImportAgendaNumbersCsvResult"
+
   /agenda/{id}:
     get:
       operationId: getAgendaItem
@@ -2299,6 +2318,102 @@ components:
         google_sync_direction:
           type: string
           enum: [zak, google, bidirectional]
+
+    ImportAgendaNumbersCsvInput:
+      type: object
+      required: [csv, year]
+      properties:
+        csv:
+          type: string
+        year:
+          type: integer
+          minimum: 2000
+          maximum: 2100
+        default_month:
+          type: integer
+          minimum: 1
+          maximum: 12
+        categoria:
+          type: string
+          default: lavoro
+        p_slot_label:
+          type: string
+          default: P
+        p_start_time:
+          type: string
+          default: "13:00"
+        p_end_time:
+          type: string
+          default: "17:00"
+        c_slot_label:
+          type: string
+          default: C
+        c_start_time:
+          type: string
+          default: "20:00"
+        c_end_time:
+          type: string
+          default: "23:59"
+        dry_run:
+          type: boolean
+          default: true
+
+    ImportAgendaNumbersCsvItem:
+      type: object
+      required: [riga, giorno, mese, mese_label, slot, titolo, data, data_ora_inizio, data_ora_fine, acconto_stato, gia_presente, raw_text]
+      properties:
+        riga:
+          type: integer
+        giorno:
+          type: integer
+        mese:
+          type: integer
+        mese_label:
+          type: string
+        slot:
+          type: string
+        titolo:
+          type: string
+        data:
+          type: string
+        data_ora_inizio:
+          type: string
+        data_ora_fine:
+          type: string
+        acconto_stato:
+          type: string
+          enum: [si, no, sconosciuto]
+        gia_presente:
+          type: boolean
+        raw_text:
+          type: string
+
+    ImportAgendaNumbersCsvResult:
+      type: object
+      required: [totale_righe, trovati, creati, saltati, errori, items]
+      properties:
+        totale_righe:
+          type: integer
+        trovati:
+          type: integer
+        creati:
+          type: integer
+        saltati:
+          type: integer
+        errori:
+          type: array
+          items:
+            type: object
+            required: [riga, motivo]
+            properties:
+              riga:
+                type: integer
+              motivo:
+                type: string
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/ImportAgendaNumbersCsvItem"
 
     # ── MESSAGGI (Unified Chat) ───────────────────────────────────────────────
     TaskPersonale:

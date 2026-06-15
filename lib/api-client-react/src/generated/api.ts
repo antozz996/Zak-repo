@@ -66,6 +66,8 @@ import type {
   GoogleCalendarSyncInput,
   GoogleCalendarSyncResult,
   HealthStatus,
+  ImportAgendaNumbersCsvInput,
+  ImportAgendaNumbersCsvResult,
   ImportContattiCsvInput,
   ImportContattiCsvResult,
   InboxEntry,
@@ -2493,6 +2495,77 @@ export const useCreateAgendaItem = <TError = ErrorType<unknown>,
         TContext
       > => {
       return useMutation(getCreateAgendaItemMutationOptions(options));
+    }
+
+export const getImportAgendaNumbersCsvUrl = () => {
+
+
+
+
+  return `/api/agenda/import-numbers-csv`
+}
+
+/**
+ * @summary Import agenda events from an Apple Numbers monthly planner CSV
+ */
+export const importAgendaNumbersCsv = async (importAgendaNumbersCsvInput: ImportAgendaNumbersCsvInput, options?: RequestInit): Promise<ImportAgendaNumbersCsvResult> => {
+
+  return customFetch<ImportAgendaNumbersCsvResult>(getImportAgendaNumbersCsvUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      importAgendaNumbersCsvInput,)
+  }
+);}
+
+
+
+
+export const getImportAgendaNumbersCsvMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof importAgendaNumbersCsv>>, TError,{data: BodyType<ImportAgendaNumbersCsvInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof importAgendaNumbersCsv>>, TError,{data: BodyType<ImportAgendaNumbersCsvInput>}, TContext> => {
+
+const mutationKey = ['importAgendaNumbersCsv'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof importAgendaNumbersCsv>>, {data: BodyType<ImportAgendaNumbersCsvInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  importAgendaNumbersCsv(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ImportAgendaNumbersCsvMutationResult = NonNullable<Awaited<ReturnType<typeof importAgendaNumbersCsv>>>
+    export type ImportAgendaNumbersCsvMutationBody = BodyType<ImportAgendaNumbersCsvInput>
+    export type ImportAgendaNumbersCsvMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Import agenda events from an Apple Numbers monthly planner CSV
+ */
+export const useImportAgendaNumbersCsv = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof importAgendaNumbersCsv>>, TError,{data: BodyType<ImportAgendaNumbersCsvInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof importAgendaNumbersCsv>>,
+        TError,
+        {data: BodyType<ImportAgendaNumbersCsvInput>},
+        TContext
+      > => {
+      return useMutation(getImportAgendaNumbersCsvMutationOptions(options));
     }
 
 export const getGetAgendaItemUrl = (id: string,) => {

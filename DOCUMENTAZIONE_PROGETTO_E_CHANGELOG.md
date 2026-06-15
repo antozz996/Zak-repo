@@ -1420,3 +1420,5 @@ Formato consigliato per nuove voci:
 - **Contratto OpenAPI riallineato**: Aggiornato `ProductionReadinessCheck` e rigenerati client React Query/Zod.
 - **Env provider-ready**: Aggiornato `.env.example` con `OPENAI_BASE_URL` e `META_WEBHOOK_VERIFY_TOKEN`; documentata la configurazione Meta per challenge webhook.
 - **Fallback SPA produzione**: Reso esplicito il fallback Express su `index.html` per tutte le route `GET` non API, cosi` pagine come `/login` e `/go-live` funzionano anche da URL diretto su Render.
+- **Runbook operativo in app**: Estesa `/go-live` con sequenza guidata per sicurezza staff, LLM, Meta WhatsApp, Google Calendar, Voice assistant e smoke finale, inclusi env richiesti e test di accettazione.
+- **Import Apple Numbers in Agenda**: Aggiunti endpoint e pagina `/agenda/importa-numbers` per importare il planning mensile esportato da Numbers in CSV, con preview `dry_run`, deduplica, mapping slot `P`/`C` e creazione massiva di eventi agenda.
