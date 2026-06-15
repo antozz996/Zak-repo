@@ -1419,3 +1419,4 @@ Formato consigliato per nuove voci:
 - **Readiness arricchita**: Esteso `GET /api/production/readiness` con `required_env`, `configured_env`, `optional_env` e `action`, cosi` la UI puo indicare esattamente quali chiavi inserire senza logica duplicata.
 - **Contratto OpenAPI riallineato**: Aggiornato `ProductionReadinessCheck` e rigenerati client React Query/Zod.
 - **Env provider-ready**: Aggiornato `.env.example` con `OPENAI_BASE_URL` e `META_WEBHOOK_VERIFY_TOKEN`; documentata la configurazione Meta per challenge webhook.
+- **Fallback SPA produzione**: Reso esplicito il fallback Express su `index.html` per tutte le route `GET` non API, cosi` pagine come `/login` e `/go-live` funzionano anche da URL diretto su Render.

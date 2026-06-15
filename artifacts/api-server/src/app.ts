@@ -67,14 +67,10 @@ const frontendDist = [
 ].find((candidate) => existsSync(path.join(candidate, "index.html")));
 
 if (process.env["NODE_ENV"] === "production" && frontendDist) {
-  app.use(express.static(frontendDist));
-  app.use((req, res, next) => {
-    if (req.method !== "GET" || req.path.startsWith("/api")) {
-      next();
-      return;
-    }
-
-    res.sendFile(path.join(frontendDist, "index.html"));
+  const indexHtml = path.join(frontendDist, "index.html");
+  app.use(express.static(frontendDist, { index: false }));
+  app.get(/^\/(?!api(?:\/|$)).*/, (_req, res) => {
+    res.sendFile(indexHtml);
   });
 }
 
