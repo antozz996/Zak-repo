@@ -7,11 +7,13 @@ import {
   useUpdatePreventivo,
   useDeletePreventivo,
   useCalculatePreventivoPricing,
+  useCalculatePreventivoFoodCost,
   useSendPreventivoWhatsApp,
   useConfirmPreventivoDigitale,
   getDownloadPreventivoPdfUrl,
   getListPreventiviQueryKey,
   type PreventivoPricingInput,
+  type PreventivoFoodCostResult,
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -74,6 +76,17 @@ const parseBudget = (value?: number | string | null) => {
   return typeof value === "number" ? value : parseFloat(value);
 };
 
+const parseNumberField = (value: string, fallback = 0) => {
+  if (!value.trim()) return fallback;
+  const parsed = Number.parseFloat(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+};
+
+const formatCurrency = (value?: number | null) =>
+  typeof value === "number"
+    ? value.toLocaleString("it-IT", { style: "currency", currency: "EUR" })
+    : "-";
+
 export default function Preventivi() {
   const qc = useQueryClient();
   const [filtroStato, setFiltroStato] = useState("all");
@@ -84,6 +97,12 @@ export default function Preventivi() {
     pacchetto: PreventivoPricingInput["pacchetto"];
     extra: NonNullable<PreventivoPricingInput["extra"]>;
   }>({ pacchetto: "standard", extra: [] });
+  const [foodCostForm, setFoodCostForm] = useState({
+    costo_food_per_persona: "18",
+    costo_bevande_per_persona: "5",
+    costo_extra_fisso: "0",
+    percentuale_target: "30",
+  });
   const [errore, setErrore] = useState("");
 
   const { data: preventivi, isLoading, isError, refetch } = useListPreventivi({
@@ -96,6 +115,7 @@ export default function Preventivi() {
   const aggiorna = useUpdatePreventivo();
   const elimina = useDeletePreventivo();
   const calcolaPrezzo = useCalculatePreventivoPricing();
+  const calcolaFoodCost = useCalculatePreventivoFoodCost();
   const inviaWhatsApp = useSendPreventivoWhatsApp();
   const confermaDigitaleMutation = useConfirmPreventivoDigitale();
 
@@ -106,6 +126,13 @@ export default function Preventivi() {
     setForm(vuoto);
     setPricingForm({ pacchetto: "standard", extra: [] });
     calcolaPrezzo.reset();
+    calcolaFoodCost.reset();
+    setFoodCostForm({
+      costo_food_per_persona: "18",
+      costo_bevande_per_persona: "5",
+      costo_extra_fisso: "0",
+      percentuale_target: "30",
+    });
     setErrore("");
     setDrawerAperto(true);
   };
@@ -122,6 +149,13 @@ export default function Preventivi() {
     });
     setPricingForm({ pacchetto: "standard", extra: [] });
     calcolaPrezzo.reset();
+    calcolaFoodCost.reset();
+    setFoodCostForm({
+      costo_food_per_persona: "18",
+      costo_bevande_per_persona: "5",
+      costo_extra_fisso: "0",
+      percentuale_target: "30",
+    });
     setErrore("");
     setDrawerAperto(true);
   };
@@ -155,6 +189,37 @@ export default function Preventivi() {
     } catch {
       setErrore("Errore durante il calcolo del prezzo.");
     }
+  };
+
+  const applicaFoodCost = async () => {
+    const numeroInvitati = Number.parseInt(form.numero_invitati, 10);
+    if (!numeroInvitati || numeroInvitati <= 0) {
+      setErrore("Inserisci il numero invitati prima di calcolare il food cost.");
+      return;
+    }
+
+    try {
+      await calcolaFoodCost.mutateAsync({
+        data: {
+          numero_invitati: numeroInvitati,
+          budget_previsto: form.budget_stimato ? parseNumberField(form.budget_stimato) : undefined,
+          costo_food_per_persona: parseNumberField(foodCostForm.costo_food_per_persona),
+          costo_bevande_per_persona: parseNumberField(foodCostForm.costo_bevande_per_persona),
+          costo_extra_fisso: parseNumberField(foodCostForm.costo_extra_fisso),
+          percentuale_target: parseNumberField(foodCostForm.percentuale_target, 30),
+        },
+      });
+      setErrore("");
+    } catch {
+      setErrore("Errore durante il calcolo del food cost.");
+    }
+  };
+
+  const applicaPrezzoTarget = (result: PreventivoFoodCostResult) => {
+    setForm((current) => ({
+      ...current,
+      budget_stimato: result.prezzo_minimo_target.toFixed(2),
+    }));
   };
 
   const salva = async () => {
@@ -498,6 +563,133 @@ export default function Preventivi() {
                       </div>
                     ))}
                   </div>
+                </div>
+              )}
+            </div>
+            <div className="space-y-3 rounded-lg border bg-muted/20 p-4">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <Label>Food cost evento</Label>
+                  <p className="text-xs text-muted-foreground">
+                    Calcola incidenza costi, margine lordo e prezzo minimo in base agli invitati.
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  {calcolaFoodCost.data ? (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => applicaPrezzoTarget(calcolaFoodCost.data)}
+                    >
+                      Usa prezzo target
+                    </Button>
+                  ) : null}
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => void applicaFoodCost()}
+                    disabled={calcolaFoodCost.isPending}
+                  >
+                    <Calculator className="mr-2 h-4 w-4" />
+                    {calcolaFoodCost.isPending ? "Calcolo..." : "Food cost"}
+                  </Button>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <Label>Cibo per persona</Label>
+                  <Input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={foodCostForm.costo_food_per_persona}
+                    onChange={(e) => setFoodCostForm((current) => ({ ...current, costo_food_per_persona: e.target.value }))}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label>Bevande per persona</Label>
+                  <Input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={foodCostForm.costo_bevande_per_persona}
+                    onChange={(e) => setFoodCostForm((current) => ({ ...current, costo_bevande_per_persona: e.target.value }))}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label>Extra fissi evento</Label>
+                  <Input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={foodCostForm.costo_extra_fisso}
+                    onChange={(e) => setFoodCostForm((current) => ({ ...current, costo_extra_fisso: e.target.value }))}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label>Target food cost %</Label>
+                  <Input
+                    type="number"
+                    min="0.1"
+                    max="99.9"
+                    step="0.1"
+                    value={foodCostForm.percentuale_target}
+                    onChange={(e) => setFoodCostForm((current) => ({ ...current, percentuale_target: e.target.value }))}
+                  />
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Usa "Extra fissi evento" per personale, logistica, trasporti o altri costi non legati al singolo invitato.
+              </p>
+              {calcolaFoodCost.data && (
+                <div className="space-y-3 rounded-md bg-background p-3 text-sm">
+                  <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+                    <div className="rounded-md border p-3">
+                      <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Costo totale</p>
+                      <p className="mt-1 text-lg font-semibold">{formatCurrency(calcolaFoodCost.data.costo_totale)}</p>
+                    </div>
+                    <div className="rounded-md border p-3">
+                      <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Costo variabile persona</p>
+                      <p className="mt-1 text-lg font-semibold">{formatCurrency(calcolaFoodCost.data.costo_variabile_per_persona)}</p>
+                    </div>
+                    <div className="rounded-md border p-3">
+                      <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Prezzo minimo target</p>
+                      <p className="mt-1 text-lg font-semibold">{formatCurrency(calcolaFoodCost.data.prezzo_minimo_target)}</p>
+                    </div>
+                    <div className="rounded-md border p-3">
+                      <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Incidenza food cost</p>
+                      <p className="mt-1 text-lg font-semibold">
+                        {typeof calcolaFoodCost.data.food_cost_percentuale === "number"
+                          ? `${calcolaFoodCost.data.food_cost_percentuale}%`
+                          : "-"}
+                      </p>
+                    </div>
+                    <div className="rounded-md border p-3">
+                      <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Margine lordo</p>
+                      <p className="mt-1 text-lg font-semibold">{formatCurrency(calcolaFoodCost.data.margine_lordo)}</p>
+                    </div>
+                    <div className="rounded-md border p-3">
+                      <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Ricavo medio persona</p>
+                      <p className="mt-1 text-lg font-semibold">{formatCurrency(calcolaFoodCost.data.ricavo_medio_persona)}</p>
+                    </div>
+                  </div>
+                  <div className="space-y-1 text-xs text-muted-foreground">
+                    <div className="flex justify-between gap-3">
+                      <span>Costo variabile totale</span>
+                      <span>{formatCurrency(calcolaFoodCost.data.costo_variabile_totale)}</span>
+                    </div>
+                    <div className="flex justify-between gap-3">
+                      <span>Extra fissi</span>
+                      <span>{formatCurrency(calcolaFoodCost.data.costo_extra_fisso)}</span>
+                    </div>
+                    <div className="flex justify-between gap-3">
+                      <span>Margine per persona</span>
+                      <span>{formatCurrency(calcolaFoodCost.data.margine_per_persona)}</span>
+                    </div>
+                  </div>
+                  <p className="text-xs text-muted-foreground">{calcolaFoodCost.data.note}</p>
                 </div>
               )}
             </div>

@@ -100,6 +100,8 @@ export * from './preventivo';
 export * from './preventivoConfermaDigitaleInput';
 export * from './preventivoConfermaDigitaleInputMetodo';
 export * from './preventivoConfermaDigitaleResult';
+export * from './preventivoFoodCostInput';
+export * from './preventivoFoodCostResult';
 export * from './preventivoGoogleSyncStatus';
 export * from './preventivoInput';
 export * from './preventivoInputGoogleSyncStatus';

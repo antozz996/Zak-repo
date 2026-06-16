@@ -1423,3 +1423,4 @@ Formato consigliato per nuove voci:
 - **Runbook operativo in app**: Estesa `/go-live` con sequenza guidata per sicurezza staff, LLM, Meta WhatsApp, Google Calendar, Voice assistant e smoke finale, inclusi env richiesti e test di accettazione.
 - **Import Apple Numbers in Agenda**: Aggiunti endpoint e pagina `/agenda/importa-numbers` per importare il planning mensile esportato da Numbers in CSV, con preview `dry_run`, deduplica, mapping slot `P`/`C` e creazione massiva di eventi agenda.
 - **Accesso rapido Importa Eventi**: aggiunta una voce dedicata in sidebar per raggiungere piu` facilmente `/agenda/importa-numbers` nella versione live, senza dover passare dalla toolbar interna di Agenda.
+- **Food cost operativo nei preventivi**: aggiunto endpoint `POST /preventivi/calcola-food-cost` e relativo pannello in `Preventivi` per calcolare costo per persona, extra fissi, incidenza percentuale sul budget, margine lordo e prezzo minimo consigliato per target food cost.

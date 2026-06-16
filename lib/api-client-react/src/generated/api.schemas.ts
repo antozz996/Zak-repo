@@ -348,6 +348,54 @@ export interface PreventivoPricingResult {
   note?: string;
 }
 
+export interface PreventivoFoodCostInput {
+  /**
+     * @minimum 1
+     * @maximum 2000
+     */
+  numero_invitati: number;
+  /** @minimum 0 */
+  budget_previsto?: number;
+  /** @minimum 0 */
+  costo_food_per_persona: number;
+  /** @minimum 0 */
+  costo_bevande_per_persona: number;
+  /**
+     * Use this field for staff, logistica, trasporti or other fixed event costs.
+     * @minimum 0
+     */
+  costo_extra_fisso: number;
+  /**
+     * Target food cost incidence percentage on final selling price.
+     * @minimum 0.1
+     * @maximum 99.9
+     */
+  percentuale_target: number;
+}
+
+export interface PreventivoFoodCostResult {
+  numero_invitati: number;
+  /** @nullable */
+  budget_previsto?: number | null;
+  costo_food_per_persona: number;
+  costo_bevande_per_persona: number;
+  costo_variabile_per_persona: number;
+  costo_variabile_totale: number;
+  costo_extra_fisso: number;
+  costo_totale: number;
+  /** @nullable */
+  food_cost_percentuale?: number | null;
+  /** @nullable */
+  margine_lordo?: number | null;
+  /** @nullable */
+  margine_per_persona?: number | null;
+  /** @nullable */
+  ricavo_medio_persona?: number | null;
+  prezzo_minimo_target: number;
+  percentuale_target: number;
+  note: string;
+}
+
 export type PreventivoVersioneSnapshot = { [key: string]: unknown };
 
 export interface PreventivoVersione {

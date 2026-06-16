@@ -26,6 +26,7 @@ assertIncludes(inbox, "useUpdateChatTyping", "Inbox updates operator typing stat
 const preventivi = readSource("src/pages/preventivi.tsx");
 assertIncludes(preventivi, "useListPreventivi", "Preventivi loads quote list");
 assertIncludes(preventivi, "useCalculatePreventivoPricing", "Preventivi exposes pricing calculation");
+assertIncludes(preventivi, "useCalculatePreventivoFoodCost", "Preventivi exposes food cost calculation");
 assertIncludes(preventivi, "getDownloadPreventivoPdfUrl", "Preventivi exposes PDF download");
 assertIncludes(preventivi, "useSendPreventivoWhatsApp", "Preventivi exposes WhatsApp send");
 assertIncludes(preventivi, "useConfirmPreventivoDigitale", "Preventivi exposes digital confirmation");

@@ -90,6 +90,8 @@ import type {
   Preventivo,
   PreventivoConfermaDigitaleInput,
   PreventivoConfermaDigitaleResult,
+  PreventivoFoodCostInput,
+  PreventivoFoodCostResult,
   PreventivoInput,
   PreventivoPricingInput,
   PreventivoPricingResult,
@@ -2121,6 +2123,77 @@ export const useCalculatePreventivoPricing = <TError = ErrorType<void>,
         TContext
       > => {
       return useMutation(getCalculatePreventivoPricingMutationOptions(options));
+    }
+
+export const getCalculatePreventivoFoodCostUrl = () => {
+
+
+
+
+  return `/api/preventivi/calcola-food-cost`
+}
+
+/**
+ * @summary Calculate event food cost, incidence and margin from guests and budget
+ */
+export const calculatePreventivoFoodCost = async (preventivoFoodCostInput: PreventivoFoodCostInput, options?: RequestInit): Promise<PreventivoFoodCostResult> => {
+
+  return customFetch<PreventivoFoodCostResult>(getCalculatePreventivoFoodCostUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      preventivoFoodCostInput,)
+  }
+);}
+
+
+
+
+export const getCalculatePreventivoFoodCostMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof calculatePreventivoFoodCost>>, TError,{data: BodyType<PreventivoFoodCostInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof calculatePreventivoFoodCost>>, TError,{data: BodyType<PreventivoFoodCostInput>}, TContext> => {
+
+const mutationKey = ['calculatePreventivoFoodCost'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof calculatePreventivoFoodCost>>, {data: BodyType<PreventivoFoodCostInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  calculatePreventivoFoodCost(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CalculatePreventivoFoodCostMutationResult = NonNullable<Awaited<ReturnType<typeof calculatePreventivoFoodCost>>>
+    export type CalculatePreventivoFoodCostMutationBody = BodyType<PreventivoFoodCostInput>
+    export type CalculatePreventivoFoodCostMutationError = ErrorType<void>
+
+    /**
+ * @summary Calculate event food cost, incidence and margin from guests and budget
+ */
+export const useCalculatePreventivoFoodCost = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof calculatePreventivoFoodCost>>, TError,{data: BodyType<PreventivoFoodCostInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof calculatePreventivoFoodCost>>,
+        TError,
+        {data: BodyType<PreventivoFoodCostInput>},
+        TContext
+      > => {
+      return useMutation(getCalculatePreventivoFoodCostMutationOptions(options));
     }
 
 export const getGetPreventivoUrl = (id: string,) => {

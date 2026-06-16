@@ -2,7 +2,7 @@ import { Router } from "express";
 import { db, preventiviEventiTable, contattiCrmTable, preventiviVersioniTable, messaggiTable, insertPreventivoSchema, updatePreventivoSchema } from "@workspace/db";
 import { eq, and, desc, ne, sql } from "drizzle-orm";
 import { logAuditAction } from "../lib/audit-log";
-import { CalculatePreventivoPricingBody, ConfirmPreventivoDigitaleBody } from "@workspace/api-zod";
+import { CalculatePreventivoFoodCostBody, CalculatePreventivoPricingBody, ConfirmPreventivoDigitaleBody } from "@workspace/api-zod";
 import { getWhatsAppConversationWindow } from "../lib/whatsapp-conversation-window";
 import { sendWhatsAppTextSafely } from "../lib/whatsapp";
 import { logWhatsAppOutbound } from "../lib/whatsapp-outbound-log";
@@ -41,6 +41,10 @@ function roundCurrency(value: number) {
 
 function formatEuro(value: number) {
   return value.toLocaleString("it-IT", { style: "currency", currency: "EUR" });
+}
+
+function roundPercentage(value: number) {
+  return Math.round(value * 10) / 10;
 }
 
 function getTipoEventoMultiplier(tipoEvento?: string) {
@@ -312,6 +316,72 @@ router.post("/preventivi/calcola-prezzo", (req, res) => {
     totale,
     totale_formattato: formatEuro(totale),
     note: multiplier > 1 ? "Maggiorazione applicata per tipologia evento." : "Prezzo calcolato da listino interno Zak.",
+  });
+});
+
+router.post("/preventivi/calcola-food-cost", (req, res) => {
+  const parsed = CalculatePreventivoFoodCostBody.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.message });
+    return;
+  }
+
+  const {
+    budget_previsto,
+    costo_bevande_per_persona,
+    costo_extra_fisso,
+    costo_food_per_persona,
+    percentuale_target,
+  } = parsed.data;
+  const numeroInvitati = Math.trunc(parsed.data.numero_invitati);
+
+  if (numeroInvitati <= 0 || numeroInvitati > 2000) {
+    res.status(400).json({ error: "numero_invitati must be between 1 and 2000" });
+    return;
+  }
+
+  if (percentuale_target <= 0 || percentuale_target >= 100) {
+    res.status(400).json({ error: "percentuale_target must be between 0 and 100" });
+    return;
+  }
+
+  const costoVariabilePerPersona = roundCurrency(costo_food_per_persona + costo_bevande_per_persona);
+  const costoVariabileTotale = roundCurrency(costoVariabilePerPersona * numeroInvitati);
+  const costoTotale = roundCurrency(costoVariabileTotale + costo_extra_fisso);
+  const prezzoMinimoTarget = roundCurrency(costoTotale / (percentuale_target / 100));
+
+  const budgetPrevisto = budget_previsto ?? null;
+  const foodCostPercentuale = budgetPrevisto && budgetPrevisto > 0
+    ? roundPercentage((costoTotale / budgetPrevisto) * 100)
+    : null;
+  const margineLordo = budgetPrevisto && budgetPrevisto > 0
+    ? roundCurrency(budgetPrevisto - costoTotale)
+    : null;
+  const marginePerPersona = margineLordo !== null
+    ? roundCurrency(margineLordo / numeroInvitati)
+    : null;
+  const ricavoMedioPersona = budgetPrevisto && budgetPrevisto > 0
+    ? roundCurrency(budgetPrevisto / numeroInvitati)
+    : null;
+
+  res.json({
+    numero_invitati: numeroInvitati,
+    budget_previsto: budgetPrevisto,
+    costo_food_per_persona: roundCurrency(costo_food_per_persona),
+    costo_bevande_per_persona: roundCurrency(costo_bevande_per_persona),
+    costo_variabile_per_persona: costoVariabilePerPersona,
+    costo_variabile_totale: costoVariabileTotale,
+    costo_extra_fisso: roundCurrency(costo_extra_fisso),
+    costo_totale: costoTotale,
+    food_cost_percentuale: foodCostPercentuale,
+    margine_lordo: margineLordo,
+    margine_per_persona: marginePerPersona,
+    ricavo_medio_persona: ricavoMedioPersona,
+    prezzo_minimo_target: prezzoMinimoTarget,
+    percentuale_target: roundPercentage(percentuale_target),
+    note: budgetPrevisto && budgetPrevisto > 0
+      ? `Con budget ${formatEuro(budgetPrevisto)}, il food cost incide per ${foodCostPercentuale}% e il margine lordo stimato e' ${formatEuro(margineLordo ?? 0)}.`
+      : `Per mantenere un food cost al ${roundPercentage(percentuale_target)}%, il prezzo minimo consigliato e' ${formatEuro(prezzoMinimoTarget)}.`,
   });
 });
 

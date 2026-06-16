@@ -534,6 +534,52 @@ export const CalculatePreventivoPricingResponse = zod.object({
 
 
 /**
+ * @summary Calculate event food cost, incidence and margin from guests and budget
+ */
+export const calculatePreventivoFoodCostBodyNumeroInvitatiMax = 2000;
+
+export const calculatePreventivoFoodCostBodyBudgetPrevistoMin = 0;
+
+export const calculatePreventivoFoodCostBodyCostoFoodPerPersonaMin = 0;
+
+export const calculatePreventivoFoodCostBodyCostoBevandePerPersonaMin = 0;
+
+export const calculatePreventivoFoodCostBodyCostoExtraFissoMin = 0;
+
+export const calculatePreventivoFoodCostBodyPercentualeTargetMin = 0.1;
+export const calculatePreventivoFoodCostBodyPercentualeTargetMax = 99.9;
+
+
+
+export const CalculatePreventivoFoodCostBody = zod.object({
+  "numero_invitati": zod.number().min(1).max(calculatePreventivoFoodCostBodyNumeroInvitatiMax),
+  "budget_previsto": zod.number().min(calculatePreventivoFoodCostBodyBudgetPrevistoMin).optional(),
+  "costo_food_per_persona": zod.number().min(calculatePreventivoFoodCostBodyCostoFoodPerPersonaMin),
+  "costo_bevande_per_persona": zod.number().min(calculatePreventivoFoodCostBodyCostoBevandePerPersonaMin),
+  "costo_extra_fisso": zod.number().min(calculatePreventivoFoodCostBodyCostoExtraFissoMin).describe('Use this field for staff, logistica, trasporti or other fixed event costs.'),
+  "percentuale_target": zod.number().min(calculatePreventivoFoodCostBodyPercentualeTargetMin).max(calculatePreventivoFoodCostBodyPercentualeTargetMax).describe('Target food cost incidence percentage on final selling price.')
+})
+
+export const CalculatePreventivoFoodCostResponse = zod.object({
+  "numero_invitati": zod.number(),
+  "budget_previsto": zod.number().nullish(),
+  "costo_food_per_persona": zod.number(),
+  "costo_bevande_per_persona": zod.number(),
+  "costo_variabile_per_persona": zod.number(),
+  "costo_variabile_totale": zod.number(),
+  "costo_extra_fisso": zod.number(),
+  "costo_totale": zod.number(),
+  "food_cost_percentuale": zod.number().nullish(),
+  "margine_lordo": zod.number().nullish(),
+  "margine_per_persona": zod.number().nullish(),
+  "ricavo_medio_persona": zod.number().nullish(),
+  "prezzo_minimo_target": zod.number(),
+  "percentuale_target": zod.number(),
+  "note": zod.string()
+})
+
+
+/**
  * @summary Get an event quote
  */
 export const GetPreventivoParams = zod.object({

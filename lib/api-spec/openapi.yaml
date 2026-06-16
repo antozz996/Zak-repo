@@ -605,6 +605,27 @@ paths:
         "400":
           description: Invalid pricing request
 
+  /preventivi/calcola-food-cost:
+    post:
+      operationId: calculatePreventivoFoodCost
+      tags: [preventivi]
+      summary: Calculate event food cost, incidence and margin from guests and budget
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PreventivoFoodCostInput"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PreventivoFoodCostResult"
+        "400":
+          description: Invalid food cost request
+
   /preventivi/{id}:
     get:
       operationId: getPreventivo
@@ -2163,6 +2184,78 @@ components:
           type: number
         totale_formattato:
           type: string
+        note:
+          type: string
+
+    PreventivoFoodCostInput:
+      type: object
+      required: [numero_invitati, costo_food_per_persona, costo_bevande_per_persona, costo_extra_fisso, percentuale_target]
+      properties:
+        numero_invitati:
+          type: integer
+          minimum: 1
+          maximum: 2000
+        budget_previsto:
+          type: number
+          minimum: 0
+        costo_food_per_persona:
+          type: number
+          minimum: 0
+        costo_bevande_per_persona:
+          type: number
+          minimum: 0
+        costo_extra_fisso:
+          type: number
+          minimum: 0
+          description: Use this field for staff, logistica, trasporti or other fixed event costs.
+        percentuale_target:
+          type: number
+          minimum: 0.1
+          maximum: 99.9
+          description: Target food cost incidence percentage on final selling price.
+
+    PreventivoFoodCostResult:
+      type: object
+      required:
+        - numero_invitati
+        - costo_food_per_persona
+        - costo_bevande_per_persona
+        - costo_variabile_per_persona
+        - costo_variabile_totale
+        - costo_extra_fisso
+        - costo_totale
+        - prezzo_minimo_target
+        - percentuale_target
+        - note
+      properties:
+        numero_invitati:
+          type: integer
+        budget_previsto:
+          type: ["number", "null"]
+        costo_food_per_persona:
+          type: number
+        costo_bevande_per_persona:
+          type: number
+        costo_variabile_per_persona:
+          type: number
+        costo_variabile_totale:
+          type: number
+        costo_extra_fisso:
+          type: number
+        costo_totale:
+          type: number
+        food_cost_percentuale:
+          type: ["number", "null"]
+        margine_lordo:
+          type: ["number", "null"]
+        margine_per_persona:
+          type: ["number", "null"]
+        ricavo_medio_persona:
+          type: ["number", "null"]
+        prezzo_minimo_target:
+          type: number
+        percentuale_target:
+          type: number
         note:
           type: string
 
