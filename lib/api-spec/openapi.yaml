@@ -26,6 +26,8 @@ tags:
     description: Unified chat messages
   - name: dashboard
     description: Dashboard summaries and analytics
+  - name: reports
+    description: Economic reporting and margin analysis
   - name: calendar
     description: Calendar availability and Google Calendar synchronization
   - name: webhooks
@@ -1520,6 +1522,57 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/AttivitaItem"
+
+  /reports/snapshots:
+    post:
+      operationId: createEventCostSnapshot
+      tags: [reports]
+      summary: Create and persist an economic snapshot for an event quote
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EventCostSnapshotInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EventCostSnapshot"
+        "404":
+          description: Event quote not found or missing guests/revenue baseline
+
+  /reports/margins:
+    get:
+      operationId: getMarginReports
+      tags: [reports]
+      summary: Get aggregated margin analytics grouped by month and event type
+      parameters:
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: eventType
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MarginReportRow"
 
   /calendar/check-availability:
     get:
@@ -3075,6 +3128,99 @@ components:
           type: string
         contatto_nome:
           type: ["string", "null"]
+
+    EventCostSnapshotInput:
+      type: object
+      required: [event_id, food_cost_per_person, beverage_cost_per_person, fixed_extra_costs]
+      properties:
+        event_id:
+          type: string
+        total_guests:
+          type: integer
+          minimum: 1
+        total_revenue:
+          type: number
+          minimum: 0
+        food_cost_per_person:
+          type: number
+          minimum: 0
+        beverage_cost_per_person:
+          type: number
+          minimum: 0
+        fixed_extra_costs:
+          type: number
+          minimum: 0
+
+    EventCostSnapshot:
+      type: object
+      required:
+        - id
+        - event_id
+        - snapshot_date
+        - total_guests
+        - food_cost_per_person
+        - beverage_cost_per_person
+        - fixed_extra_costs
+        - total_revenue
+        - calculated_margin_total
+        - calculated_margin_percentage
+      properties:
+        id:
+          type: string
+        event_id:
+          type: string
+        event_type:
+          type: ["string", "null"]
+        snapshot_date:
+          type: string
+        total_guests:
+          type: integer
+        food_cost_per_person:
+          type: number
+        beverage_cost_per_person:
+          type: number
+        fixed_extra_costs:
+          type: number
+        total_revenue:
+          type: number
+        calculated_margin_total:
+          type: number
+        calculated_margin_percentage:
+          type: number
+
+    MarginReportRow:
+      type: object
+      required:
+        - month_start
+        - month_label
+        - snapshot_count
+        - total_revenue
+        - average_margin_total
+        - average_margin_percentage
+        - average_profit_per_person
+        - average_food_cost_incidence
+      properties:
+        month_start:
+          type: string
+          format: date
+        month_label:
+          type: string
+        event_type:
+          type: ["string", "null"]
+        snapshot_count:
+          type: integer
+        total_revenue:
+          type: number
+        average_margin_total:
+          type: number
+        average_margin_percentage:
+          type: number
+        average_profit_per_person:
+          type: number
+        average_food_cost_incidence:
+          type: number
+        average_total_guests:
+          type: number
 
     CalendarAvailability:
       type: object

@@ -14,3 +14,4 @@ export * from "./b2b_competitor";
 export * from "./b2b_materiali";
 export * from "./b2b_template";
 export * from "./google_calendar_sync";
+export * from "./event_cost_snapshots";

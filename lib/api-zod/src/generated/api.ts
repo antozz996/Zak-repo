@@ -1492,6 +1492,54 @@ export const GetAttivitaRecenteResponse = zod.array(GetAttivitaRecenteResponseIt
 
 
 /**
+ * @summary Create and persist an economic snapshot for an event quote
+ */
+
+export const createEventCostSnapshotBodyTotalRevenueMin = 0;
+
+export const createEventCostSnapshotBodyFoodCostPerPersonMin = 0;
+
+export const createEventCostSnapshotBodyBeverageCostPerPersonMin = 0;
+
+export const createEventCostSnapshotBodyFixedExtraCostsMin = 0;
+
+
+
+export const CreateEventCostSnapshotBody = zod.object({
+  "event_id": zod.string(),
+  "total_guests": zod.number().min(1).optional(),
+  "total_revenue": zod.number().min(createEventCostSnapshotBodyTotalRevenueMin).optional(),
+  "food_cost_per_person": zod.number().min(createEventCostSnapshotBodyFoodCostPerPersonMin),
+  "beverage_cost_per_person": zod.number().min(createEventCostSnapshotBodyBeverageCostPerPersonMin),
+  "fixed_extra_costs": zod.number().min(createEventCostSnapshotBodyFixedExtraCostsMin)
+})
+
+
+/**
+ * @summary Get aggregated margin analytics grouped by month and event type
+ */
+export const GetMarginReportsQueryParams = zod.object({
+  "startDate": zod.date().optional(),
+  "endDate": zod.date().optional(),
+  "eventType": zod.coerce.string().optional()
+})
+
+export const GetMarginReportsResponseItem = zod.object({
+  "month_start": zod.coerce.date(),
+  "month_label": zod.string(),
+  "event_type": zod.string().nullish(),
+  "snapshot_count": zod.number(),
+  "total_revenue": zod.number(),
+  "average_margin_total": zod.number(),
+  "average_margin_percentage": zod.number(),
+  "average_profit_per_person": zod.number(),
+  "average_food_cost_incidence": zod.number(),
+  "average_total_guests": zod.number().optional()
+})
+export const GetMarginReportsResponse = zod.array(GetMarginReportsResponseItem)
+
+
+/**
  * @summary Check if a date is available for events using internal data and Google Calendar when configured
  */
 export const CheckCalendarAvailabilityQueryParams = zod.object({

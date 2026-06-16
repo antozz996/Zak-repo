@@ -56,12 +56,15 @@ import type {
   ContattoInput,
   ContattoUpdate,
   DashboardStats,
+  EventCostSnapshot,
+  EventCostSnapshotInput,
   EventiMeseCount,
   GetAttivitaRecenteParams,
   GetChatInboxParams,
   GetDashboardStatsParams,
   GetEventiMeseParams,
   GetLeadPipelineParams,
+  GetMarginReportsParams,
   GoogleCalendarStatus,
   GoogleCalendarSyncInput,
   GoogleCalendarSyncResult,
@@ -82,6 +85,7 @@ import type {
   ListMessaggiParams,
   ListPreventiviParams,
   ListTaskPersonaliParams,
+  MarginReportRow,
   Messaggio,
   MessaggioInput,
   OperatorPresence,
@@ -5359,6 +5363,161 @@ export function useGetAttivitaRecente<TData = Awaited<ReturnType<typeof getAttiv
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
   const queryOptions = getGetAttivitaRecenteQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getCreateEventCostSnapshotUrl = () => {
+
+
+
+
+  return `/api/reports/snapshots`
+}
+
+/**
+ * @summary Create and persist an economic snapshot for an event quote
+ */
+export const createEventCostSnapshot = async (eventCostSnapshotInput: EventCostSnapshotInput, options?: RequestInit): Promise<EventCostSnapshot> => {
+
+  return customFetch<EventCostSnapshot>(getCreateEventCostSnapshotUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      eventCostSnapshotInput,)
+  }
+);}
+
+
+
+
+export const getCreateEventCostSnapshotMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createEventCostSnapshot>>, TError,{data: BodyType<EventCostSnapshotInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createEventCostSnapshot>>, TError,{data: BodyType<EventCostSnapshotInput>}, TContext> => {
+
+const mutationKey = ['createEventCostSnapshot'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createEventCostSnapshot>>, {data: BodyType<EventCostSnapshotInput>}> = (props) => {
+          const {data} = props ?? {};
+
+          return  createEventCostSnapshot(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateEventCostSnapshotMutationResult = NonNullable<Awaited<ReturnType<typeof createEventCostSnapshot>>>
+    export type CreateEventCostSnapshotMutationBody = BodyType<EventCostSnapshotInput>
+    export type CreateEventCostSnapshotMutationError = ErrorType<void>
+
+    /**
+ * @summary Create and persist an economic snapshot for an event quote
+ */
+export const useCreateEventCostSnapshot = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createEventCostSnapshot>>, TError,{data: BodyType<EventCostSnapshotInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createEventCostSnapshot>>,
+        TError,
+        {data: BodyType<EventCostSnapshotInput>},
+        TContext
+      > => {
+      return useMutation(getCreateEventCostSnapshotMutationOptions(options));
+    }
+
+export const getGetMarginReportsUrl = (params?: GetMarginReportsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/reports/margins?${stringifiedParams}` : `/api/reports/margins`
+}
+
+/**
+ * @summary Get aggregated margin analytics grouped by month and event type
+ */
+export const getMarginReports = async (params?: GetMarginReportsParams, options?: RequestInit): Promise<MarginReportRow[]> => {
+
+  return customFetch<MarginReportRow[]>(getGetMarginReportsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetMarginReportsQueryKey = (params?: GetMarginReportsParams,) => {
+    return [
+    `/api/reports/margins`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetMarginReportsQueryOptions = <TData = Awaited<ReturnType<typeof getMarginReports>>, TError = ErrorType<unknown>>(params?: GetMarginReportsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getMarginReports>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetMarginReportsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getMarginReports>>> = ({ signal }) => getMarginReports(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getMarginReports>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetMarginReportsQueryResult = NonNullable<Awaited<ReturnType<typeof getMarginReports>>>
+export type GetMarginReportsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary Get aggregated margin analytics grouped by month and event type
+ */
+
+export function useGetMarginReports<TData = Awaited<ReturnType<typeof getMarginReports>>, TError = ErrorType<unknown>>(
+ params?: GetMarginReportsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getMarginReports>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetMarginReportsQueryOptions(params,options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 

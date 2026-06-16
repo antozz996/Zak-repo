@@ -986,6 +986,49 @@ export interface AttivitaItem {
   contatto_nome?: string | null;
 }
 
+export interface EventCostSnapshotInput {
+  event_id: string;
+  /** @minimum 1 */
+  total_guests?: number;
+  /** @minimum 0 */
+  total_revenue?: number;
+  /** @minimum 0 */
+  food_cost_per_person: number;
+  /** @minimum 0 */
+  beverage_cost_per_person: number;
+  /** @minimum 0 */
+  fixed_extra_costs: number;
+}
+
+export interface EventCostSnapshot {
+  id: string;
+  event_id: string;
+  /** @nullable */
+  event_type?: string | null;
+  snapshot_date: string;
+  total_guests: number;
+  food_cost_per_person: number;
+  beverage_cost_per_person: number;
+  fixed_extra_costs: number;
+  total_revenue: number;
+  calculated_margin_total: number;
+  calculated_margin_percentage: number;
+}
+
+export interface MarginReportRow {
+  month_start: string;
+  month_label: string;
+  /** @nullable */
+  event_type?: string | null;
+  snapshot_count: number;
+  total_revenue: number;
+  average_margin_total: number;
+  average_margin_percentage: number;
+  average_profit_per_person: number;
+  average_food_cost_incidence: number;
+  average_total_guests?: number;
+}
+
 export type CalendarAvailabilityProvider = typeof CalendarAvailabilityProvider[keyof typeof CalendarAvailabilityProvider];
 
 
@@ -1361,6 +1404,12 @@ data_a?: string;
 export type GetAttivitaRecenteParams = {
 data_da?: string;
 data_a?: string;
+};
+
+export type GetMarginReportsParams = {
+startDate?: string;
+endDate?: string;
+eventType?: string;
 };
 
 export type CheckCalendarAvailabilityParams = {

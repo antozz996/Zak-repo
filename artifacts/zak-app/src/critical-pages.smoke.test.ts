@@ -31,6 +31,10 @@ assertIncludes(preventivi, "getDownloadPreventivoPdfUrl", "Preventivi exposes PD
 assertIncludes(preventivi, "useSendPreventivoWhatsApp", "Preventivi exposes WhatsApp send");
 assertIncludes(preventivi, "useConfirmPreventivoDigitale", "Preventivi exposes digital confirmation");
 
+const reports = readSource("src/pages/reports.tsx");
+assertIncludes(reports, "useGetMarginReports", "Reports page loads margin analytics");
+assertIncludes(reports, "ResponsiveContainer", "Reports page renders real charts");
+
 const task = readSource("src/pages/task.tsx");
 assertIncludes(task, "useListTaskPersonali", "Task page loads personal tasks");
 assertIncludes(task, "useCreateTaskPersonale", "Task page creates personal tasks");
@@ -42,6 +46,7 @@ assertIncludes(app, 'path="/login"', "Router exposes real Login");
 assertIncludes(app, "ProtectedRoute", "Router protects real app routes");
 assertIncludes(app, 'path="/inbox"', "Router exposes Inbox");
 assertIncludes(app, 'path="/preventivi"', "Router exposes Preventivi");
+assertIncludes(app, 'path="/reports"', "Router exposes margin reports");
 assertIncludes(app, 'path="/task"', "Router exposes Task");
 assertIncludes(app, 'path="/go-live"', "Router exposes Go-live readiness center");
 assertIncludes(app, 'path="/agenda/importa-numbers"', "Router exposes Apple Numbers agenda import");

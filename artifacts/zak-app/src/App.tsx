@@ -21,6 +21,7 @@ import AuditLog from "@/pages/audit-log";
 import B2BCompetitor from "@/pages/b2b-competitor";
 import GoLive from "@/pages/go-live";
 import Login from "@/pages/login";
+import Reports from "@/pages/reports";
 
 const queryClient = new QueryClient();
 configureAuthTokenGetter();
@@ -41,6 +42,7 @@ function Router() {
       <Route path="/contatti/nuovo">{withAuth(<ContattiNuovo />)}</Route>
       <Route path="/contatti">{withAuth(<Contatti />)}</Route>
       <Route path="/preventivi">{withAuth(<Preventivi />)}</Route>
+      <Route path="/reports">{withAuth(<Reports />, "manager")}</Route>
       <Route path="/agenda">{withAuth(<Agenda />)}</Route>
       <Route path="/agenda/importa-numbers">{withAuth(<AgendaImportNumbers />, "manager")}</Route>
       <Route path="/task">{withAuth(<Task />)}</Route>
