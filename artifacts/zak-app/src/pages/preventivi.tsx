@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "wouter";
 import { SidebarLayout } from "@/components/layout/sidebar-layout";
 import {
   useListPreventivi,
@@ -26,7 +27,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
-import { Plus, Pencil, Trash2, AlertCircle, FileText, Calculator, Send, CheckCircle2 } from "lucide-react";
+import { Plus, Pencil, Trash2, AlertCircle, FileText, Calculator, Send, CheckCircle2, ArrowUpRight } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 type Preventivo = {
@@ -37,9 +38,10 @@ type Preventivo = {
   numero_invitati?: number | null;
   budget_stimato?: number | string | null;
   note?: string | null;
-  stato_evento: string;
+  stato_evento: StatoEvento;
   data_creazione: string;
 };
+type StatoEvento = "opzionato" | "confermato" | "rifiutato";
 
 const statoColore: Record<string, string> = {
   opzionato: "bg-amber-100 text-amber-800",
@@ -59,7 +61,7 @@ const vuoto = {
   numero_invitati: "",
   budget_stimato: "",
   note: "",
-  stato_evento: "opzionato",
+  stato_evento: "opzionato" as StatoEvento,
 };
 
 const pricingExtras: Array<{ value: NonNullable<PreventivoPricingInput["extra"]>[number]; label: string }> = [
@@ -411,6 +413,11 @@ export default function Preventivi() {
                         <Button size="icon" variant="ghost" onClick={() => apriModifica(p as Preventivo)}>
                           <Pencil className="w-4 h-4" />
                         </Button>
+                        <Button size="icon" variant="ghost" asChild title="Apri scheda evento">
+                          <Link href={`/events/${p.id}`}>
+                            <ArrowUpRight className="w-4 h-4" />
+                          </Link>
+                        </Button>
                         <Button
                           size="icon"
                           variant="ghost"
@@ -695,7 +702,7 @@ export default function Preventivi() {
             </div>
             <div className="space-y-1.5">
               <Label>Stato</Label>
-              <Select value={form.stato_evento} onValueChange={(v) => setForm((f) => ({ ...f, stato_evento: v }))}>
+              <Select value={form.stato_evento} onValueChange={(v) => setForm((f) => ({ ...f, stato_evento: v as StatoEvento }))}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="opzionato">Opzionato</SelectItem>

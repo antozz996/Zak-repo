@@ -210,6 +210,26 @@ export interface ContattoUpdate {
   operatore_assegnato_id?: string;
 }
 
+export type PreventivoStatoEvento = typeof PreventivoStatoEvento[keyof typeof PreventivoStatoEvento];
+
+
+export const PreventivoStatoEvento = {
+  opzionato: 'opzionato',
+  confermato: 'confermato',
+  rifiutato: 'rifiutato',
+} as const;
+
+export type PreventivoEventStage = typeof PreventivoEventStage[keyof typeof PreventivoEventStage];
+
+
+export const PreventivoEventStage = {
+  draft: 'draft',
+  quoted: 'quoted',
+  confirmed: 'confirmed',
+  in_production: 'in_production',
+  closed: 'closed',
+} as const;
+
 /**
  * @nullable
  */
@@ -237,8 +257,17 @@ export interface Preventivo {
   budget_stimato?: number | null;
   /** @nullable */
   note?: string | null;
-  stato_evento: string;
+  stato_evento: PreventivoStatoEvento;
+  event_stage?: PreventivoEventStage;
   data_creazione: string;
+  /** @nullable */
+  menu_cibo?: string | null;
+  /** @nullable */
+  menu_bevande?: string | null;
+  /** @nullable */
+  note_allergie?: string | null;
+  /** @nullable */
+  note_logistica?: string | null;
   /** @nullable */
   google_calendar_id?: string | null;
   /** @nullable */
@@ -248,6 +277,26 @@ export interface Preventivo {
   /** @nullable */
   google_last_synced_at?: string | null;
 }
+
+export type PreventivoInputStatoEvento = typeof PreventivoInputStatoEvento[keyof typeof PreventivoInputStatoEvento];
+
+
+export const PreventivoInputStatoEvento = {
+  opzionato: 'opzionato',
+  confermato: 'confermato',
+  rifiutato: 'rifiutato',
+} as const;
+
+export type PreventivoInputEventStage = typeof PreventivoInputEventStage[keyof typeof PreventivoInputEventStage];
+
+
+export const PreventivoInputEventStage = {
+  draft: 'draft',
+  quoted: 'quoted',
+  confirmed: 'confirmed',
+  in_production: 'in_production',
+  closed: 'closed',
+} as const;
 
 export type PreventivoInputGoogleSyncStatus = typeof PreventivoInputGoogleSyncStatus[keyof typeof PreventivoInputGoogleSyncStatus];
 
@@ -266,11 +315,36 @@ export interface PreventivoInput {
   numero_invitati?: number;
   budget_stimato?: number;
   note?: string;
-  stato_evento: string;
+  stato_evento: PreventivoInputStatoEvento;
+  event_stage?: PreventivoInputEventStage;
+  menu_cibo?: string;
+  menu_bevande?: string;
+  note_allergie?: string;
+  note_logistica?: string;
   google_calendar_id?: string;
   google_event_id?: string;
   google_sync_status?: PreventivoInputGoogleSyncStatus;
 }
+
+export type PreventivoUpdateStatoEvento = typeof PreventivoUpdateStatoEvento[keyof typeof PreventivoUpdateStatoEvento];
+
+
+export const PreventivoUpdateStatoEvento = {
+  opzionato: 'opzionato',
+  confermato: 'confermato',
+  rifiutato: 'rifiutato',
+} as const;
+
+export type PreventivoUpdateEventStage = typeof PreventivoUpdateEventStage[keyof typeof PreventivoUpdateEventStage];
+
+
+export const PreventivoUpdateEventStage = {
+  draft: 'draft',
+  quoted: 'quoted',
+  confirmed: 'confirmed',
+  in_production: 'in_production',
+  closed: 'closed',
+} as const;
 
 export type PreventivoUpdateGoogleSyncStatus = typeof PreventivoUpdateGoogleSyncStatus[keyof typeof PreventivoUpdateGoogleSyncStatus];
 
@@ -288,10 +362,152 @@ export interface PreventivoUpdate {
   numero_invitati?: number;
   budget_stimato?: number;
   note?: string;
-  stato_evento?: string;
+  stato_evento?: PreventivoUpdateStatoEvento;
+  event_stage?: PreventivoUpdateEventStage;
+  menu_cibo?: string;
+  menu_bevande?: string;
+  note_allergie?: string;
+  note_logistica?: string;
   google_calendar_id?: string;
   google_event_id?: string;
   google_sync_status?: PreventivoUpdateGoogleSyncStatus;
+}
+
+export type EventPaymentPaymentType = typeof EventPaymentPaymentType[keyof typeof EventPaymentPaymentType];
+
+
+export const EventPaymentPaymentType = {
+  acconto_1: 'acconto_1',
+  acconto_2: 'acconto_2',
+  saldo: 'saldo',
+} as const;
+
+export type EventPaymentStatus = typeof EventPaymentStatus[keyof typeof EventPaymentStatus];
+
+
+export const EventPaymentStatus = {
+  pending: 'pending',
+  paid: 'paid',
+} as const;
+
+export interface EventPayment {
+  id: string;
+  event_id: string;
+  payment_type: EventPaymentPaymentType;
+  amount: number;
+  due_date: string;
+  status: EventPaymentStatus;
+  /** @nullable */
+  paid_at?: string | null;
+  /** @nullable */
+  payment_method?: string | null;
+  data_creazione: string;
+}
+
+export type EventPaymentInputPaymentType = typeof EventPaymentInputPaymentType[keyof typeof EventPaymentInputPaymentType];
+
+
+export const EventPaymentInputPaymentType = {
+  acconto_1: 'acconto_1',
+  acconto_2: 'acconto_2',
+  saldo: 'saldo',
+} as const;
+
+export type EventPaymentInputStatus = typeof EventPaymentInputStatus[keyof typeof EventPaymentInputStatus];
+
+
+export const EventPaymentInputStatus = {
+  pending: 'pending',
+  paid: 'paid',
+} as const;
+
+export interface EventPaymentInput {
+  payment_type: EventPaymentInputPaymentType;
+  /** @minimum 0 */
+  amount: number;
+  due_date: string;
+  status?: EventPaymentInputStatus;
+  payment_method?: string;
+}
+
+export type EventPaymentUpdatePaymentType = typeof EventPaymentUpdatePaymentType[keyof typeof EventPaymentUpdatePaymentType];
+
+
+export const EventPaymentUpdatePaymentType = {
+  acconto_1: 'acconto_1',
+  acconto_2: 'acconto_2',
+  saldo: 'saldo',
+} as const;
+
+export type EventPaymentUpdateStatus = typeof EventPaymentUpdateStatus[keyof typeof EventPaymentUpdateStatus];
+
+
+export const EventPaymentUpdateStatus = {
+  pending: 'pending',
+  paid: 'paid',
+} as const;
+
+export interface EventPaymentUpdate {
+  payment_type?: EventPaymentUpdatePaymentType;
+  /** @minimum 0 */
+  amount?: number;
+  due_date?: string;
+  status?: EventPaymentUpdateStatus;
+  payment_method?: string;
+}
+
+export interface EventStaffAllocation {
+  id: string;
+  event_id: string;
+  user_id: string;
+  user_nome: string;
+  /** @nullable */
+  user_ruolo?: string | null;
+  role_allocated: string;
+  data_creazione: string;
+}
+
+export interface EventStaffAllocationInput {
+  user_id: string;
+  role_allocated: string;
+}
+
+export interface EventStaffAllocationUpdate {
+  user_id?: string;
+  role_allocated?: string;
+}
+
+export interface EventFinancialSummary {
+  budget_totale: number;
+  totale_pagato: number;
+  saldo_residuo: number;
+  /** @nullable */
+  prossima_scadenza?: string | null;
+}
+
+export type EventDetail = Preventivo & ({
+  /** @nullable */
+  contatto_telefono?: string | null;
+  /** @nullable */
+  tipo_evento?: string | null;
+  pagamenti: EventPayment[];
+  staff_allocato: EventStaffAllocation[];
+  financial_summary: EventFinancialSummary;
+});
+
+export type EventStatusUpdateInputEventStage = typeof EventStatusUpdateInputEventStage[keyof typeof EventStatusUpdateInputEventStage];
+
+
+export const EventStatusUpdateInputEventStage = {
+  draft: 'draft',
+  quoted: 'quoted',
+  confirmed: 'confirmed',
+  in_production: 'in_production',
+  closed: 'closed',
+} as const;
+
+export interface EventStatusUpdateInput {
+  event_stage: EventStatusUpdateInputEventStage;
 }
 
 export type PreventivoPricingInputPacchetto = typeof PreventivoPricingInputPacchetto[keyof typeof PreventivoPricingInputPacchetto];

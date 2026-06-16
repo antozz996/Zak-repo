@@ -58,6 +58,14 @@ import type {
   DashboardStats,
   EventCostSnapshot,
   EventCostSnapshotInput,
+  EventDetail,
+  EventPayment,
+  EventPaymentInput,
+  EventPaymentUpdate,
+  EventStaffAllocation,
+  EventStaffAllocationInput,
+  EventStaffAllocationUpdate,
+  EventStatusUpdateInput,
   EventiMeseCount,
   GetAttivitaRecenteParams,
   GetChatInboxParams,
@@ -2417,6 +2425,745 @@ export const useDeletePreventivo = <TError = ErrorType<unknown>,
         TContext
       > => {
       return useMutation(getDeletePreventivoMutationOptions(options));
+    }
+
+export const getGetEventDetailUrl = (id: string,) => {
+
+
+
+
+  return `/api/events/${id}`
+}
+
+/**
+ * @summary Get full operational event detail
+ */
+export const getEventDetail = async (id: string, options?: RequestInit): Promise<EventDetail> => {
+
+  return customFetch<EventDetail>(getGetEventDetailUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetEventDetailQueryKey = (id: string,) => {
+    return [
+    `/api/events/${id}`
+    ] as const;
+    }
+
+
+export const getGetEventDetailQueryOptions = <TData = Awaited<ReturnType<typeof getEventDetail>>, TError = ErrorType<void>>(id: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getEventDetail>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetEventDetailQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getEventDetail>>> = ({ signal }) => getEventDetail(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getEventDetail>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetEventDetailQueryResult = NonNullable<Awaited<ReturnType<typeof getEventDetail>>>
+export type GetEventDetailQueryError = ErrorType<void>
+
+
+/**
+ * @summary Get full operational event detail
+ */
+
+export function useGetEventDetail<TData = Awaited<ReturnType<typeof getEventDetail>>, TError = ErrorType<void>>(
+ id: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getEventDetail>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetEventDetailQueryOptions(id,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getUpdateEventStatusUrl = (id: string,) => {
+
+
+
+
+  return `/api/events/${id}/status`
+}
+
+/**
+ * @summary Update operational event stage
+ */
+export const updateEventStatus = async (id: string,
+    eventStatusUpdateInput: EventStatusUpdateInput, options?: RequestInit): Promise<EventDetail> => {
+
+  return customFetch<EventDetail>(getUpdateEventStatusUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      eventStatusUpdateInput,)
+  }
+);}
+
+
+
+
+export const getUpdateEventStatusMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateEventStatus>>, TError,{id: string;data: BodyType<EventStatusUpdateInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateEventStatus>>, TError,{id: string;data: BodyType<EventStatusUpdateInput>}, TContext> => {
+
+const mutationKey = ['updateEventStatus'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateEventStatus>>, {id: string;data: BodyType<EventStatusUpdateInput>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  updateEventStatus(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateEventStatusMutationResult = NonNullable<Awaited<ReturnType<typeof updateEventStatus>>>
+    export type UpdateEventStatusMutationBody = BodyType<EventStatusUpdateInput>
+    export type UpdateEventStatusMutationError = ErrorType<void>
+
+    /**
+ * @summary Update operational event stage
+ */
+export const useUpdateEventStatus = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateEventStatus>>, TError,{id: string;data: BodyType<EventStatusUpdateInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateEventStatus>>,
+        TError,
+        {id: string;data: BodyType<EventStatusUpdateInput>},
+        TContext
+      > => {
+      return useMutation(getUpdateEventStatusMutationOptions(options));
+    }
+
+export const getListEventPaymentsUrl = (id: string,) => {
+
+
+
+
+  return `/api/events/${id}/payments`
+}
+
+/**
+ * @summary List event payment schedule rows
+ */
+export const listEventPayments = async (id: string, options?: RequestInit): Promise<EventPayment[]> => {
+
+  return customFetch<EventPayment[]>(getListEventPaymentsUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListEventPaymentsQueryKey = (id: string,) => {
+    return [
+    `/api/events/${id}/payments`
+    ] as const;
+    }
+
+
+export const getListEventPaymentsQueryOptions = <TData = Awaited<ReturnType<typeof listEventPayments>>, TError = ErrorType<unknown>>(id: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listEventPayments>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListEventPaymentsQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listEventPayments>>> = ({ signal }) => listEventPayments(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listEventPayments>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListEventPaymentsQueryResult = NonNullable<Awaited<ReturnType<typeof listEventPayments>>>
+export type ListEventPaymentsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List event payment schedule rows
+ */
+
+export function useListEventPayments<TData = Awaited<ReturnType<typeof listEventPayments>>, TError = ErrorType<unknown>>(
+ id: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listEventPayments>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListEventPaymentsQueryOptions(id,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getCreateEventPaymentUrl = (id: string,) => {
+
+
+
+
+  return `/api/events/${id}/payments`
+}
+
+/**
+ * @summary Create a payment schedule row for an event
+ */
+export const createEventPayment = async (id: string,
+    eventPaymentInput: EventPaymentInput, options?: RequestInit): Promise<EventPayment> => {
+
+  return customFetch<EventPayment>(getCreateEventPaymentUrl(id),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      eventPaymentInput,)
+  }
+);}
+
+
+
+
+export const getCreateEventPaymentMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createEventPayment>>, TError,{id: string;data: BodyType<EventPaymentInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createEventPayment>>, TError,{id: string;data: BodyType<EventPaymentInput>}, TContext> => {
+
+const mutationKey = ['createEventPayment'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createEventPayment>>, {id: string;data: BodyType<EventPaymentInput>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  createEventPayment(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateEventPaymentMutationResult = NonNullable<Awaited<ReturnType<typeof createEventPayment>>>
+    export type CreateEventPaymentMutationBody = BodyType<EventPaymentInput>
+    export type CreateEventPaymentMutationError = ErrorType<void>
+
+    /**
+ * @summary Create a payment schedule row for an event
+ */
+export const useCreateEventPayment = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createEventPayment>>, TError,{id: string;data: BodyType<EventPaymentInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createEventPayment>>,
+        TError,
+        {id: string;data: BodyType<EventPaymentInput>},
+        TContext
+      > => {
+      return useMutation(getCreateEventPaymentMutationOptions(options));
+    }
+
+export const getUpdateEventPaymentUrl = (id: string,
+    paymentId: string,) => {
+
+
+
+
+  return `/api/events/${id}/payments/${paymentId}`
+}
+
+/**
+ * @summary Update a payment schedule row
+ */
+export const updateEventPayment = async (id: string,
+    paymentId: string,
+    eventPaymentUpdate: EventPaymentUpdate, options?: RequestInit): Promise<EventPayment> => {
+
+  return customFetch<EventPayment>(getUpdateEventPaymentUrl(id,paymentId),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      eventPaymentUpdate,)
+  }
+);}
+
+
+
+
+export const getUpdateEventPaymentMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateEventPayment>>, TError,{id: string;paymentId: string;data: BodyType<EventPaymentUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateEventPayment>>, TError,{id: string;paymentId: string;data: BodyType<EventPaymentUpdate>}, TContext> => {
+
+const mutationKey = ['updateEventPayment'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateEventPayment>>, {id: string;paymentId: string;data: BodyType<EventPaymentUpdate>}> = (props) => {
+          const {id,paymentId,data} = props ?? {};
+
+          return  updateEventPayment(id,paymentId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateEventPaymentMutationResult = NonNullable<Awaited<ReturnType<typeof updateEventPayment>>>
+    export type UpdateEventPaymentMutationBody = BodyType<EventPaymentUpdate>
+    export type UpdateEventPaymentMutationError = ErrorType<void>
+
+    /**
+ * @summary Update a payment schedule row
+ */
+export const useUpdateEventPayment = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateEventPayment>>, TError,{id: string;paymentId: string;data: BodyType<EventPaymentUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateEventPayment>>,
+        TError,
+        {id: string;paymentId: string;data: BodyType<EventPaymentUpdate>},
+        TContext
+      > => {
+      return useMutation(getUpdateEventPaymentMutationOptions(options));
+    }
+
+export const getDeleteEventPaymentUrl = (id: string,
+    paymentId: string,) => {
+
+
+
+
+  return `/api/events/${id}/payments/${paymentId}`
+}
+
+/**
+ * @summary Delete a payment schedule row
+ */
+export const deleteEventPayment = async (id: string,
+    paymentId: string, options?: RequestInit): Promise<void> => {
+
+  return customFetch<void>(getDeleteEventPaymentUrl(id,paymentId),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+export const getDeleteEventPaymentMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteEventPayment>>, TError,{id: string;paymentId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteEventPayment>>, TError,{id: string;paymentId: string}, TContext> => {
+
+const mutationKey = ['deleteEventPayment'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteEventPayment>>, {id: string;paymentId: string}> = (props) => {
+          const {id,paymentId} = props ?? {};
+
+          return  deleteEventPayment(id,paymentId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteEventPaymentMutationResult = NonNullable<Awaited<ReturnType<typeof deleteEventPayment>>>
+
+    export type DeleteEventPaymentMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Delete a payment schedule row
+ */
+export const useDeleteEventPayment = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteEventPayment>>, TError,{id: string;paymentId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof deleteEventPayment>>,
+        TError,
+        {id: string;paymentId: string},
+        TContext
+      > => {
+      return useMutation(getDeleteEventPaymentMutationOptions(options));
+    }
+
+export const getListEventStaffAllocationUrl = (id: string,) => {
+
+
+
+
+  return `/api/events/${id}/staff`
+}
+
+/**
+ * @summary List event staff allocations
+ */
+export const listEventStaffAllocation = async (id: string, options?: RequestInit): Promise<EventStaffAllocation[]> => {
+
+  return customFetch<EventStaffAllocation[]>(getListEventStaffAllocationUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListEventStaffAllocationQueryKey = (id: string,) => {
+    return [
+    `/api/events/${id}/staff`
+    ] as const;
+    }
+
+
+export const getListEventStaffAllocationQueryOptions = <TData = Awaited<ReturnType<typeof listEventStaffAllocation>>, TError = ErrorType<unknown>>(id: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listEventStaffAllocation>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListEventStaffAllocationQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listEventStaffAllocation>>> = ({ signal }) => listEventStaffAllocation(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listEventStaffAllocation>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListEventStaffAllocationQueryResult = NonNullable<Awaited<ReturnType<typeof listEventStaffAllocation>>>
+export type ListEventStaffAllocationQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List event staff allocations
+ */
+
+export function useListEventStaffAllocation<TData = Awaited<ReturnType<typeof listEventStaffAllocation>>, TError = ErrorType<unknown>>(
+ id: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listEventStaffAllocation>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListEventStaffAllocationQueryOptions(id,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getCreateEventStaffAllocationUrl = (id: string,) => {
+
+
+
+
+  return `/api/events/${id}/staff`
+}
+
+/**
+ * @summary Create an event staff allocation
+ */
+export const createEventStaffAllocation = async (id: string,
+    eventStaffAllocationInput: EventStaffAllocationInput, options?: RequestInit): Promise<EventStaffAllocation> => {
+
+  return customFetch<EventStaffAllocation>(getCreateEventStaffAllocationUrl(id),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      eventStaffAllocationInput,)
+  }
+);}
+
+
+
+
+export const getCreateEventStaffAllocationMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createEventStaffAllocation>>, TError,{id: string;data: BodyType<EventStaffAllocationInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createEventStaffAllocation>>, TError,{id: string;data: BodyType<EventStaffAllocationInput>}, TContext> => {
+
+const mutationKey = ['createEventStaffAllocation'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createEventStaffAllocation>>, {id: string;data: BodyType<EventStaffAllocationInput>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  createEventStaffAllocation(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateEventStaffAllocationMutationResult = NonNullable<Awaited<ReturnType<typeof createEventStaffAllocation>>>
+    export type CreateEventStaffAllocationMutationBody = BodyType<EventStaffAllocationInput>
+    export type CreateEventStaffAllocationMutationError = ErrorType<void>
+
+    /**
+ * @summary Create an event staff allocation
+ */
+export const useCreateEventStaffAllocation = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createEventStaffAllocation>>, TError,{id: string;data: BodyType<EventStaffAllocationInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof createEventStaffAllocation>>,
+        TError,
+        {id: string;data: BodyType<EventStaffAllocationInput>},
+        TContext
+      > => {
+      return useMutation(getCreateEventStaffAllocationMutationOptions(options));
+    }
+
+export const getUpdateEventStaffAllocationUrl = (id: string,
+    allocationId: string,) => {
+
+
+
+
+  return `/api/events/${id}/staff/${allocationId}`
+}
+
+/**
+ * @summary Update an event staff allocation
+ */
+export const updateEventStaffAllocation = async (id: string,
+    allocationId: string,
+    eventStaffAllocationUpdate: EventStaffAllocationUpdate, options?: RequestInit): Promise<EventStaffAllocation> => {
+
+  return customFetch<EventStaffAllocation>(getUpdateEventStaffAllocationUrl(id,allocationId),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      eventStaffAllocationUpdate,)
+  }
+);}
+
+
+
+
+export const getUpdateEventStaffAllocationMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateEventStaffAllocation>>, TError,{id: string;allocationId: string;data: BodyType<EventStaffAllocationUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateEventStaffAllocation>>, TError,{id: string;allocationId: string;data: BodyType<EventStaffAllocationUpdate>}, TContext> => {
+
+const mutationKey = ['updateEventStaffAllocation'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateEventStaffAllocation>>, {id: string;allocationId: string;data: BodyType<EventStaffAllocationUpdate>}> = (props) => {
+          const {id,allocationId,data} = props ?? {};
+
+          return  updateEventStaffAllocation(id,allocationId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateEventStaffAllocationMutationResult = NonNullable<Awaited<ReturnType<typeof updateEventStaffAllocation>>>
+    export type UpdateEventStaffAllocationMutationBody = BodyType<EventStaffAllocationUpdate>
+    export type UpdateEventStaffAllocationMutationError = ErrorType<void>
+
+    /**
+ * @summary Update an event staff allocation
+ */
+export const useUpdateEventStaffAllocation = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateEventStaffAllocation>>, TError,{id: string;allocationId: string;data: BodyType<EventStaffAllocationUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateEventStaffAllocation>>,
+        TError,
+        {id: string;allocationId: string;data: BodyType<EventStaffAllocationUpdate>},
+        TContext
+      > => {
+      return useMutation(getUpdateEventStaffAllocationMutationOptions(options));
+    }
+
+export const getDeleteEventStaffAllocationUrl = (id: string,
+    allocationId: string,) => {
+
+
+
+
+  return `/api/events/${id}/staff/${allocationId}`
+}
+
+/**
+ * @summary Delete an event staff allocation
+ */
+export const deleteEventStaffAllocation = async (id: string,
+    allocationId: string, options?: RequestInit): Promise<void> => {
+
+  return customFetch<void>(getDeleteEventStaffAllocationUrl(id,allocationId),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+export const getDeleteEventStaffAllocationMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteEventStaffAllocation>>, TError,{id: string;allocationId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteEventStaffAllocation>>, TError,{id: string;allocationId: string}, TContext> => {
+
+const mutationKey = ['deleteEventStaffAllocation'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteEventStaffAllocation>>, {id: string;allocationId: string}> = (props) => {
+          const {id,allocationId} = props ?? {};
+
+          return  deleteEventStaffAllocation(id,allocationId,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteEventStaffAllocationMutationResult = NonNullable<Awaited<ReturnType<typeof deleteEventStaffAllocation>>>
+
+    export type DeleteEventStaffAllocationMutationError = ErrorType<unknown>
+
+    /**
+ * @summary Delete an event staff allocation
+ */
+export const useDeleteEventStaffAllocation = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteEventStaffAllocation>>, TError,{id: string;allocationId: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof deleteEventStaffAllocation>>,
+        TError,
+        {id: string;allocationId: string},
+        TContext
+      > => {
+      return useMutation(getDeleteEventStaffAllocationMutationOptions(options));
     }
 
 export const getListAgendaUrl = (params?: ListAgendaParams,) => {

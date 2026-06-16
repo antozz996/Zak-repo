@@ -5,7 +5,9 @@
  * Zak Ecosystem AI - CRM Omnicanale API
  * OpenAPI spec version: 0.1.0
  */
+import type { PreventivoEventStage } from './preventivoEventStage';
 import type { PreventivoGoogleSyncStatus } from './preventivoGoogleSyncStatus';
+import type { PreventivoStatoEvento } from './preventivoStatoEvento';
 
 export interface Preventivo {
   id: string;
@@ -20,8 +22,17 @@ export interface Preventivo {
   budget_stimato?: number | null;
   /** @nullable */
   note?: string | null;
-  stato_evento: string;
+  stato_evento: PreventivoStatoEvento;
+  event_stage?: PreventivoEventStage;
   data_creazione: string;
+  /** @nullable */
+  menu_cibo?: string | null;
+  /** @nullable */
+  menu_bevande?: string | null;
+  /** @nullable */
+  note_allergie?: string | null;
+  /** @nullable */
+  note_logistica?: string | null;
   /** @nullable */
   google_calendar_id?: string | null;
   /** @nullable */

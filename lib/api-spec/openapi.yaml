@@ -18,6 +18,8 @@ tags:
     description: CRM contacts and leads
   - name: preventivi
     description: Event quotes
+  - name: events
+    description: Operational event management built on top of quotes
   - name: agenda
     description: Personal agenda
   - name: task
@@ -677,6 +679,254 @@ paths:
       summary: Delete an event quote
       parameters:
         - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
+
+  /events/{id}:
+    get:
+      operationId: getEventDetail
+      tags: [events]
+      summary: Get full operational event detail
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EventDetail"
+        "404":
+          description: Event not found
+
+  /events/{id}/status:
+    patch:
+      operationId: updateEventStatus
+      tags: [events]
+      summary: Update operational event stage
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EventStatusUpdateInput"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EventDetail"
+        "400":
+          description: Invalid transition
+        "403":
+          description: Insufficient permissions for override
+        "404":
+          description: Event not found
+
+  /events/{id}/payments:
+    get:
+      operationId: listEventPayments
+      tags: [events]
+      summary: List event payment schedule rows
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/EventPayment"
+    post:
+      operationId: createEventPayment
+      tags: [events]
+      summary: Create a payment schedule row for an event
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EventPaymentInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EventPayment"
+        "404":
+          description: Event not found
+
+  /events/{id}/payments/{paymentId}:
+    patch:
+      operationId: updateEventPayment
+      tags: [events]
+      summary: Update a payment schedule row
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: paymentId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EventPaymentUpdate"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EventPayment"
+        "404":
+          description: Payment not found
+    delete:
+      operationId: deleteEventPayment
+      tags: [events]
+      summary: Delete a payment schedule row
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: paymentId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "204":
+          description: Deleted
+
+  /events/{id}/staff:
+    get:
+      operationId: listEventStaffAllocation
+      tags: [events]
+      summary: List event staff allocations
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/EventStaffAllocation"
+    post:
+      operationId: createEventStaffAllocation
+      tags: [events]
+      summary: Create an event staff allocation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EventStaffAllocationInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EventStaffAllocation"
+        "404":
+          description: Event not found
+        "409":
+          description: Duplicate allocation
+
+  /events/{id}/staff/{allocationId}:
+    patch:
+      operationId: updateEventStaffAllocation
+      tags: [events]
+      summary: Update an event staff allocation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: allocationId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EventStaffAllocationUpdate"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EventStaffAllocation"
+        "404":
+          description: Allocation not found
+        "409":
+          description: Duplicate allocation
+    delete:
+      operationId: deleteEventStaffAllocation
+      tags: [events]
+      summary: Delete an event staff allocation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: allocationId
           in: path
           required: true
           schema:
@@ -2130,8 +2380,20 @@ components:
           type: ["string", "null"]
         stato_evento:
           type: string
+          enum: [opzionato, confermato, rifiutato]
+        event_stage:
+          type: string
+          enum: [draft, quoted, confirmed, in_production, closed]
         data_creazione:
           type: string
+        menu_cibo:
+          type: ["string", "null"]
+        menu_bevande:
+          type: ["string", "null"]
+        note_allergie:
+          type: ["string", "null"]
+        note_logistica:
+          type: ["string", "null"]
         google_calendar_id:
           type: ["string", "null"]
         google_event_id:
@@ -2158,6 +2420,18 @@ components:
           type: string
         stato_evento:
           type: string
+          enum: [opzionato, confermato, rifiutato]
+        event_stage:
+          type: string
+          enum: [draft, quoted, confirmed, in_production, closed]
+        menu_cibo:
+          type: string
+        menu_bevande:
+          type: string
+        note_allergie:
+          type: string
+        note_logistica:
+          type: string
         google_calendar_id:
           type: string
         google_event_id:
@@ -2179,6 +2453,18 @@ components:
           type: string
         stato_evento:
           type: string
+          enum: [opzionato, confermato, rifiutato]
+        event_stage:
+          type: string
+          enum: [draft, quoted, confirmed, in_production, closed]
+        menu_cibo:
+          type: string
+        menu_bevande:
+          type: string
+        note_allergie:
+          type: string
+        note_logistica:
+          type: string
         google_calendar_id:
           type: string
         google_event_id:
@@ -2186,6 +2472,144 @@ components:
         google_sync_status:
           type: string
           enum: [non_configurato, pending, synced, conflict, error]
+
+    EventPayment:
+      type: object
+      required: [id, event_id, payment_type, amount, due_date, status, data_creazione]
+      properties:
+        id:
+          type: string
+        event_id:
+          type: string
+        payment_type:
+          type: string
+          enum: [acconto_1, acconto_2, saldo]
+        amount:
+          type: number
+        due_date:
+          type: string
+        status:
+          type: string
+          enum: [pending, paid]
+        paid_at:
+          type: ["string", "null"]
+        payment_method:
+          type: ["string", "null"]
+        data_creazione:
+          type: string
+
+    EventPaymentInput:
+      type: object
+      required: [payment_type, amount, due_date]
+      properties:
+        payment_type:
+          type: string
+          enum: [acconto_1, acconto_2, saldo]
+        amount:
+          type: number
+          minimum: 0
+        due_date:
+          type: string
+        status:
+          type: string
+          enum: [pending, paid]
+        payment_method:
+          type: string
+
+    EventPaymentUpdate:
+      type: object
+      properties:
+        payment_type:
+          type: string
+          enum: [acconto_1, acconto_2, saldo]
+        amount:
+          type: number
+          minimum: 0
+        due_date:
+          type: string
+        status:
+          type: string
+          enum: [pending, paid]
+        payment_method:
+          type: string
+
+    EventStaffAllocation:
+      type: object
+      required: [id, event_id, user_id, user_nome, role_allocated, data_creazione]
+      properties:
+        id:
+          type: string
+        event_id:
+          type: string
+        user_id:
+          type: string
+        user_nome:
+          type: string
+        user_ruolo:
+          type: ["string", "null"]
+        role_allocated:
+          type: string
+        data_creazione:
+          type: string
+
+    EventStaffAllocationInput:
+      type: object
+      required: [user_id, role_allocated]
+      properties:
+        user_id:
+          type: string
+        role_allocated:
+          type: string
+
+    EventStaffAllocationUpdate:
+      type: object
+      properties:
+        user_id:
+          type: string
+        role_allocated:
+          type: string
+
+    EventFinancialSummary:
+      type: object
+      required: [budget_totale, totale_pagato, saldo_residuo]
+      properties:
+        budget_totale:
+          type: number
+        totale_pagato:
+          type: number
+        saldo_residuo:
+          type: number
+        prossima_scadenza:
+          type: ["string", "null"]
+
+    EventDetail:
+      allOf:
+        - $ref: "#/components/schemas/Preventivo"
+        - type: object
+          required: [pagamenti, staff_allocato, financial_summary]
+          properties:
+            contatto_telefono:
+              type: ["string", "null"]
+            tipo_evento:
+              type: ["string", "null"]
+            pagamenti:
+              type: array
+              items:
+                $ref: "#/components/schemas/EventPayment"
+            staff_allocato:
+              type: array
+              items:
+                $ref: "#/components/schemas/EventStaffAllocation"
+            financial_summary:
+              $ref: "#/components/schemas/EventFinancialSummary"
+
+    EventStatusUpdateInput:
+      type: object
+      required: [event_stage]
+      properties:
+        event_stage:
+          type: string
+          enum: [draft, quoted, confirmed, in_production, closed]
 
     # ── AGENDA ────────────────────────────────────────────────────────────────
     PreventivoPricingInput:

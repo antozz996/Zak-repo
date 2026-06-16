@@ -12,6 +12,7 @@ import Inbox from "@/pages/inbox";
 import Contatti from "@/pages/contatti";
 import ContattiNuovo from "@/pages/contatti-nuovo";
 import Preventivi from "@/pages/preventivi";
+import EventDetailPage from "@/pages/event-detail";
 import Agenda from "@/pages/agenda";
 import AgendaImportNumbers from "@/pages/agenda-import-numbers";
 import Task from "@/pages/task";
@@ -42,6 +43,7 @@ function Router() {
       <Route path="/contatti/nuovo">{withAuth(<ContattiNuovo />)}</Route>
       <Route path="/contatti">{withAuth(<Contatti />)}</Route>
       <Route path="/preventivi">{withAuth(<Preventivi />)}</Route>
+      <Route path="/events/:id">{withAuth(<EventDetailPage />)}</Route>
       <Route path="/reports">{withAuth(<Reports />, "manager")}</Route>
       <Route path="/agenda">{withAuth(<Agenda />)}</Route>
       <Route path="/agenda/importa-numbers">{withAuth(<AgendaImportNumbers />, "manager")}</Route>

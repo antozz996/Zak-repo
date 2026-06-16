@@ -240,8 +240,13 @@ export const ConfirmPreventivoDigitaleResponse = zod.object({
   "numero_invitati": zod.number().nullish(),
   "budget_stimato": zod.number().nullish(),
   "note": zod.string().nullish(),
-  "stato_evento": zod.string(),
+  "stato_evento": zod.enum(['opzionato', 'confermato', 'rifiutato']),
+  "event_stage": zod.enum(['draft', 'quoted', 'confirmed', 'in_production', 'closed']).optional(),
   "data_creazione": zod.string(),
+  "menu_cibo": zod.string().nullish(),
+  "menu_bevande": zod.string().nullish(),
+  "note_allergie": zod.string().nullish(),
+  "note_logistica": zod.string().nullish(),
   "google_calendar_id": zod.string().nullish(),
   "google_event_id": zod.string().nullish(),
   "google_sync_status": zod.union([zod.literal('non_configurato'),zod.literal('pending'),zod.literal('synced'),zod.literal('conflict'),zod.literal('error'),zod.literal(null)]).nullish(),
@@ -481,8 +486,13 @@ export const ListPreventiviResponseItem = zod.object({
   "numero_invitati": zod.number().nullish(),
   "budget_stimato": zod.number().nullish(),
   "note": zod.string().nullish(),
-  "stato_evento": zod.string(),
+  "stato_evento": zod.enum(['opzionato', 'confermato', 'rifiutato']),
+  "event_stage": zod.enum(['draft', 'quoted', 'confirmed', 'in_production', 'closed']).optional(),
   "data_creazione": zod.string(),
+  "menu_cibo": zod.string().nullish(),
+  "menu_bevande": zod.string().nullish(),
+  "note_allergie": zod.string().nullish(),
+  "note_logistica": zod.string().nullish(),
   "google_calendar_id": zod.string().nullish(),
   "google_event_id": zod.string().nullish(),
   "google_sync_status": zod.union([zod.literal('non_configurato'),zod.literal('pending'),zod.literal('synced'),zod.literal('conflict'),zod.literal('error'),zod.literal(null)]).nullish(),
@@ -500,7 +510,12 @@ export const CreatePreventivoBody = zod.object({
   "numero_invitati": zod.number().optional(),
   "budget_stimato": zod.number().optional(),
   "note": zod.string().optional(),
-  "stato_evento": zod.string(),
+  "stato_evento": zod.enum(['opzionato', 'confermato', 'rifiutato']),
+  "event_stage": zod.enum(['draft', 'quoted', 'confirmed', 'in_production', 'closed']).optional(),
+  "menu_cibo": zod.string().optional(),
+  "menu_bevande": zod.string().optional(),
+  "note_allergie": zod.string().optional(),
+  "note_logistica": zod.string().optional(),
   "google_calendar_id": zod.string().optional(),
   "google_event_id": zod.string().optional(),
   "google_sync_status": zod.enum(['non_configurato', 'pending', 'synced', 'conflict', 'error']).optional()
@@ -594,8 +609,13 @@ export const GetPreventivoResponse = zod.object({
   "numero_invitati": zod.number().nullish(),
   "budget_stimato": zod.number().nullish(),
   "note": zod.string().nullish(),
-  "stato_evento": zod.string(),
+  "stato_evento": zod.enum(['opzionato', 'confermato', 'rifiutato']),
+  "event_stage": zod.enum(['draft', 'quoted', 'confirmed', 'in_production', 'closed']).optional(),
   "data_creazione": zod.string(),
+  "menu_cibo": zod.string().nullish(),
+  "menu_bevande": zod.string().nullish(),
+  "note_allergie": zod.string().nullish(),
+  "note_logistica": zod.string().nullish(),
   "google_calendar_id": zod.string().nullish(),
   "google_event_id": zod.string().nullish(),
   "google_sync_status": zod.union([zod.literal('non_configurato'),zod.literal('pending'),zod.literal('synced'),zod.literal('conflict'),zod.literal('error'),zod.literal(null)]).nullish(),
@@ -615,7 +635,12 @@ export const UpdatePreventivoBody = zod.object({
   "numero_invitati": zod.number().optional(),
   "budget_stimato": zod.number().optional(),
   "note": zod.string().optional(),
-  "stato_evento": zod.string().optional(),
+  "stato_evento": zod.enum(['opzionato', 'confermato', 'rifiutato']).optional(),
+  "event_stage": zod.enum(['draft', 'quoted', 'confirmed', 'in_production', 'closed']).optional(),
+  "menu_cibo": zod.string().optional(),
+  "menu_bevande": zod.string().optional(),
+  "note_allergie": zod.string().optional(),
+  "note_logistica": zod.string().optional(),
   "google_calendar_id": zod.string().optional(),
   "google_event_id": zod.string().optional(),
   "google_sync_status": zod.enum(['non_configurato', 'pending', 'synced', 'conflict', 'error']).optional()
@@ -629,8 +654,13 @@ export const UpdatePreventivoResponse = zod.object({
   "numero_invitati": zod.number().nullish(),
   "budget_stimato": zod.number().nullish(),
   "note": zod.string().nullish(),
-  "stato_evento": zod.string(),
+  "stato_evento": zod.enum(['opzionato', 'confermato', 'rifiutato']),
+  "event_stage": zod.enum(['draft', 'quoted', 'confirmed', 'in_production', 'closed']).optional(),
   "data_creazione": zod.string(),
+  "menu_cibo": zod.string().nullish(),
+  "menu_bevande": zod.string().nullish(),
+  "note_allergie": zod.string().nullish(),
+  "note_logistica": zod.string().nullish(),
   "google_calendar_id": zod.string().nullish(),
   "google_event_id": zod.string().nullish(),
   "google_sync_status": zod.union([zod.literal('non_configurato'),zod.literal('pending'),zod.literal('synced'),zod.literal('conflict'),zod.literal('error'),zod.literal(null)]).nullish(),
@@ -643,6 +673,274 @@ export const UpdatePreventivoResponse = zod.object({
  */
 export const DeletePreventivoParams = zod.object({
   "id": zod.coerce.string()
+})
+
+
+/**
+ * @summary Get full operational event detail
+ */
+export const GetEventDetailParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+export const GetEventDetailResponse = zod.object({
+  "id": zod.string(),
+  "contatto_id": zod.string(),
+  "contatto_nome": zod.string().nullish(),
+  "data_evento_richiesta": zod.string().nullish(),
+  "numero_invitati": zod.number().nullish(),
+  "budget_stimato": zod.number().nullish(),
+  "note": zod.string().nullish(),
+  "stato_evento": zod.enum(['opzionato', 'confermato', 'rifiutato']),
+  "event_stage": zod.enum(['draft', 'quoted', 'confirmed', 'in_production', 'closed']).optional(),
+  "data_creazione": zod.string(),
+  "menu_cibo": zod.string().nullish(),
+  "menu_bevande": zod.string().nullish(),
+  "note_allergie": zod.string().nullish(),
+  "note_logistica": zod.string().nullish(),
+  "google_calendar_id": zod.string().nullish(),
+  "google_event_id": zod.string().nullish(),
+  "google_sync_status": zod.union([zod.literal('non_configurato'),zod.literal('pending'),zod.literal('synced'),zod.literal('conflict'),zod.literal('error'),zod.literal(null)]).nullish(),
+  "google_last_synced_at": zod.string().nullish()
+}).and(zod.object({
+  "contatto_telefono": zod.string().nullish(),
+  "tipo_evento": zod.string().nullish(),
+  "pagamenti": zod.array(zod.object({
+  "id": zod.string(),
+  "event_id": zod.string(),
+  "payment_type": zod.enum(['acconto_1', 'acconto_2', 'saldo']),
+  "amount": zod.number(),
+  "due_date": zod.string(),
+  "status": zod.enum(['pending', 'paid']),
+  "paid_at": zod.string().nullish(),
+  "payment_method": zod.string().nullish(),
+  "data_creazione": zod.string()
+})),
+  "staff_allocato": zod.array(zod.object({
+  "id": zod.string(),
+  "event_id": zod.string(),
+  "user_id": zod.string(),
+  "user_nome": zod.string(),
+  "user_ruolo": zod.string().nullish(),
+  "role_allocated": zod.string(),
+  "data_creazione": zod.string()
+})),
+  "financial_summary": zod.object({
+  "budget_totale": zod.number(),
+  "totale_pagato": zod.number(),
+  "saldo_residuo": zod.number(),
+  "prossima_scadenza": zod.string().nullish()
+})
+}))
+
+
+/**
+ * @summary Update operational event stage
+ */
+export const UpdateEventStatusParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+export const UpdateEventStatusBody = zod.object({
+  "event_stage": zod.enum(['draft', 'quoted', 'confirmed', 'in_production', 'closed'])
+})
+
+export const UpdateEventStatusResponse = zod.object({
+  "id": zod.string(),
+  "contatto_id": zod.string(),
+  "contatto_nome": zod.string().nullish(),
+  "data_evento_richiesta": zod.string().nullish(),
+  "numero_invitati": zod.number().nullish(),
+  "budget_stimato": zod.number().nullish(),
+  "note": zod.string().nullish(),
+  "stato_evento": zod.enum(['opzionato', 'confermato', 'rifiutato']),
+  "event_stage": zod.enum(['draft', 'quoted', 'confirmed', 'in_production', 'closed']).optional(),
+  "data_creazione": zod.string(),
+  "menu_cibo": zod.string().nullish(),
+  "menu_bevande": zod.string().nullish(),
+  "note_allergie": zod.string().nullish(),
+  "note_logistica": zod.string().nullish(),
+  "google_calendar_id": zod.string().nullish(),
+  "google_event_id": zod.string().nullish(),
+  "google_sync_status": zod.union([zod.literal('non_configurato'),zod.literal('pending'),zod.literal('synced'),zod.literal('conflict'),zod.literal('error'),zod.literal(null)]).nullish(),
+  "google_last_synced_at": zod.string().nullish()
+}).and(zod.object({
+  "contatto_telefono": zod.string().nullish(),
+  "tipo_evento": zod.string().nullish(),
+  "pagamenti": zod.array(zod.object({
+  "id": zod.string(),
+  "event_id": zod.string(),
+  "payment_type": zod.enum(['acconto_1', 'acconto_2', 'saldo']),
+  "amount": zod.number(),
+  "due_date": zod.string(),
+  "status": zod.enum(['pending', 'paid']),
+  "paid_at": zod.string().nullish(),
+  "payment_method": zod.string().nullish(),
+  "data_creazione": zod.string()
+})),
+  "staff_allocato": zod.array(zod.object({
+  "id": zod.string(),
+  "event_id": zod.string(),
+  "user_id": zod.string(),
+  "user_nome": zod.string(),
+  "user_ruolo": zod.string().nullish(),
+  "role_allocated": zod.string(),
+  "data_creazione": zod.string()
+})),
+  "financial_summary": zod.object({
+  "budget_totale": zod.number(),
+  "totale_pagato": zod.number(),
+  "saldo_residuo": zod.number(),
+  "prossima_scadenza": zod.string().nullish()
+})
+}))
+
+
+/**
+ * @summary List event payment schedule rows
+ */
+export const ListEventPaymentsParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+export const ListEventPaymentsResponseItem = zod.object({
+  "id": zod.string(),
+  "event_id": zod.string(),
+  "payment_type": zod.enum(['acconto_1', 'acconto_2', 'saldo']),
+  "amount": zod.number(),
+  "due_date": zod.string(),
+  "status": zod.enum(['pending', 'paid']),
+  "paid_at": zod.string().nullish(),
+  "payment_method": zod.string().nullish(),
+  "data_creazione": zod.string()
+})
+export const ListEventPaymentsResponse = zod.array(ListEventPaymentsResponseItem)
+
+
+/**
+ * @summary Create a payment schedule row for an event
+ */
+export const CreateEventPaymentParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+export const createEventPaymentBodyAmountMin = 0;
+
+
+
+export const CreateEventPaymentBody = zod.object({
+  "payment_type": zod.enum(['acconto_1', 'acconto_2', 'saldo']),
+  "amount": zod.number().min(createEventPaymentBodyAmountMin),
+  "due_date": zod.string(),
+  "status": zod.enum(['pending', 'paid']).optional(),
+  "payment_method": zod.string().optional()
+})
+
+
+/**
+ * @summary Update a payment schedule row
+ */
+export const UpdateEventPaymentParams = zod.object({
+  "id": zod.coerce.string(),
+  "paymentId": zod.coerce.string()
+})
+
+export const updateEventPaymentBodyAmountMin = 0;
+
+
+
+export const UpdateEventPaymentBody = zod.object({
+  "payment_type": zod.enum(['acconto_1', 'acconto_2', 'saldo']).optional(),
+  "amount": zod.number().min(updateEventPaymentBodyAmountMin).optional(),
+  "due_date": zod.string().optional(),
+  "status": zod.enum(['pending', 'paid']).optional(),
+  "payment_method": zod.string().optional()
+})
+
+export const UpdateEventPaymentResponse = zod.object({
+  "id": zod.string(),
+  "event_id": zod.string(),
+  "payment_type": zod.enum(['acconto_1', 'acconto_2', 'saldo']),
+  "amount": zod.number(),
+  "due_date": zod.string(),
+  "status": zod.enum(['pending', 'paid']),
+  "paid_at": zod.string().nullish(),
+  "payment_method": zod.string().nullish(),
+  "data_creazione": zod.string()
+})
+
+
+/**
+ * @summary Delete a payment schedule row
+ */
+export const DeleteEventPaymentParams = zod.object({
+  "id": zod.coerce.string(),
+  "paymentId": zod.coerce.string()
+})
+
+
+/**
+ * @summary List event staff allocations
+ */
+export const ListEventStaffAllocationParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+export const ListEventStaffAllocationResponseItem = zod.object({
+  "id": zod.string(),
+  "event_id": zod.string(),
+  "user_id": zod.string(),
+  "user_nome": zod.string(),
+  "user_ruolo": zod.string().nullish(),
+  "role_allocated": zod.string(),
+  "data_creazione": zod.string()
+})
+export const ListEventStaffAllocationResponse = zod.array(ListEventStaffAllocationResponseItem)
+
+
+/**
+ * @summary Create an event staff allocation
+ */
+export const CreateEventStaffAllocationParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+export const CreateEventStaffAllocationBody = zod.object({
+  "user_id": zod.string(),
+  "role_allocated": zod.string()
+})
+
+
+/**
+ * @summary Update an event staff allocation
+ */
+export const UpdateEventStaffAllocationParams = zod.object({
+  "id": zod.coerce.string(),
+  "allocationId": zod.coerce.string()
+})
+
+export const UpdateEventStaffAllocationBody = zod.object({
+  "user_id": zod.string().optional(),
+  "role_allocated": zod.string().optional()
+})
+
+export const UpdateEventStaffAllocationResponse = zod.object({
+  "id": zod.string(),
+  "event_id": zod.string(),
+  "user_id": zod.string(),
+  "user_nome": zod.string(),
+  "user_ruolo": zod.string().nullish(),
+  "role_allocated": zod.string(),
+  "data_creazione": zod.string()
+})
+
+
+/**
+ * @summary Delete an event staff allocation
+ */
+export const DeleteEventStaffAllocationParams = zod.object({
+  "id": zod.coerce.string(),
+  "allocationId": zod.coerce.string()
 })
 
 

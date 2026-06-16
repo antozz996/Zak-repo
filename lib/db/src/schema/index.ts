@@ -15,3 +15,5 @@ export * from "./b2b_materiali";
 export * from "./b2b_template";
 export * from "./google_calendar_sync";
 export * from "./event_cost_snapshots";
+export * from "./event_payments";
+export * from "./event_staff_allocation";

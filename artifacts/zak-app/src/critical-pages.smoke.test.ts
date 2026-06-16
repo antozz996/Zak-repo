@@ -35,6 +35,12 @@ const reports = readSource("src/pages/reports.tsx");
 assertIncludes(reports, "useGetMarginReports", "Reports page loads margin analytics");
 assertIncludes(reports, "ResponsiveContainer", "Reports page renders real charts");
 
+const eventDetail = readSource("src/pages/event-detail.tsx");
+assertIncludes(eventDetail, "useGetEventDetail", "Event detail page loads operational event data");
+assertIncludes(eventDetail, "TabsTrigger", "Event detail page uses tabs for operations");
+assertIncludes(eventDetail, "useCreateEventPayment", "Event detail page manages payments");
+assertIncludes(eventDetail, "useCreateEventStaffAllocation", "Event detail page manages staff allocations");
+
 const task = readSource("src/pages/task.tsx");
 assertIncludes(task, "useListTaskPersonali", "Task page loads personal tasks");
 assertIncludes(task, "useCreateTaskPersonale", "Task page creates personal tasks");
@@ -46,6 +52,7 @@ assertIncludes(app, 'path="/login"', "Router exposes real Login");
 assertIncludes(app, "ProtectedRoute", "Router protects real app routes");
 assertIncludes(app, 'path="/inbox"', "Router exposes Inbox");
 assertIncludes(app, 'path="/preventivi"', "Router exposes Preventivi");
+assertIncludes(app, 'path="/events/:id"', "Router exposes event detail");
 assertIncludes(app, 'path="/reports"', "Router exposes margin reports");
 assertIncludes(app, 'path="/task"', "Router exposes Task");
 assertIncludes(app, 'path="/go-live"', "Router exposes Go-live readiness center");

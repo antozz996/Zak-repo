@@ -233,6 +233,11 @@ router.get("/preventivi", async (req, res) => {
       budget_stimato: preventiviEventiTable.budget_stimato,
       note: preventiviEventiTable.note,
       stato_evento: preventiviEventiTable.stato_evento,
+      event_stage: preventiviEventiTable.event_stage,
+      menu_cibo: preventiviEventiTable.menu_cibo,
+      menu_bevande: preventiviEventiTable.menu_bevande,
+      note_allergie: preventiviEventiTable.note_allergie,
+      note_logistica: preventiviEventiTable.note_logistica,
       data_creazione: preventiviEventiTable.data_creazione,
       google_calendar_id: preventiviEventiTable.google_calendar_id,
       google_event_id: preventiviEventiTable.google_event_id,
@@ -261,7 +266,10 @@ router.post("/preventivi", async (req, res) => {
     return;
   }
 
-  const [row] = await db.insert(preventiviEventiTable).values(parsed.data).returning();
+  const [row] = await db.insert(preventiviEventiTable).values({
+    ...parsed.data,
+    event_stage: parsed.data.event_stage ?? "quoted",
+  }).returning();
   if (row.stato_evento === "confermato") {
     await syncPreventivoToGoogle({ ...row, contatto_nome: null });
   }
@@ -516,6 +524,7 @@ router.post("/preventivi/:id/conferma-digitale", async (req, res) => {
     .update(preventiviEventiTable)
     .set({
       stato_evento: "confermato",
+      event_stage: "confirmed",
       note: nextNote,
     })
     .where(eq(preventiviEventiTable.id, req.params.id))
@@ -599,6 +608,11 @@ router.post("/preventivi/:id/versioni", async (req, res) => {
         budget_stimato: preventivo.budget_stimato,
         note: preventivo.note,
         stato_evento: preventivo.stato_evento,
+        event_stage: preventivo.event_stage,
+        menu_cibo: preventivo.menu_cibo,
+        menu_bevande: preventivo.menu_bevande,
+        note_allergie: preventivo.note_allergie,
+        note_logistica: preventivo.note_logistica,
         data_creazione: preventivo.data_creazione,
       },
       nota,
@@ -668,6 +682,11 @@ router.get("/preventivi/:id", async (req, res) => {
       budget_stimato: preventiviEventiTable.budget_stimato,
       note: preventiviEventiTable.note,
       stato_evento: preventiviEventiTable.stato_evento,
+      event_stage: preventiviEventiTable.event_stage,
+      menu_cibo: preventiviEventiTable.menu_cibo,
+      menu_bevande: preventiviEventiTable.menu_bevande,
+      note_allergie: preventiviEventiTable.note_allergie,
+      note_logistica: preventiviEventiTable.note_logistica,
       data_creazione: preventiviEventiTable.data_creazione,
     })
     .from(preventiviEventiTable)
@@ -705,7 +724,16 @@ router.patch("/preventivi/:id", async (req, res) => {
     return;
   }
 
-  const [row] = await db.update(preventiviEventiTable).set(parsed.data).where(eq(preventiviEventiTable.id, req.params.id)).returning();
+  const nextEventStage =
+    parsed.data.event_stage
+      ?? (nextState === "confermato"
+        ? (current.event_stage === "draft" || current.event_stage === "quoted" ? "confirmed" : current.event_stage)
+        : current.event_stage);
+
+  const [row] = await db.update(preventiviEventiTable).set({
+    ...parsed.data,
+    event_stage: nextEventStage,
+  }).where(eq(preventiviEventiTable.id, req.params.id)).returning();
   if (row.stato_evento === "confermato") {
     await syncPreventivoToGoogle({ ...row, contatto_nome: null });
   }
