@@ -12,6 +12,7 @@ import {
 } from "../lib/numbers-agenda-import";
 import { parseLimit, parseOffset } from "../lib/pagination";
 import { requireRole } from "../lib/auth";
+import { syncPreventivoFromImportedAgenda } from "../lib/preventivo-links";
 
 const router = Router();
 
@@ -138,6 +139,17 @@ router.post("/agenda/import-numbers-csv", requireRole("manager"), async (req, re
         data_ora_fine: new Date(item.data_ora_fine),
         categoria: parsedBody.data.categoria ?? "lavoro",
       }).returning();
+
+      const matchedPreventivo = await syncPreventivoFromImportedAgenda({
+        titolo: item.titolo,
+        dataEvento: item.data,
+      });
+      if (matchedPreventivo?.contatto_id) {
+        await db
+          .update(agendaPersonaleTable)
+          .set({ contatto_id: matchedPreventivo.contatto_id })
+          .where(eq(agendaPersonaleTable.id, row.id));
+      }
 
       await syncAgendaItemToGoogle(row);
       creati++;

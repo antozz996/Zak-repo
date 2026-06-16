@@ -1,25 +1,32 @@
 import { useEffect, useMemo, useState } from "react";
 import { format } from "date-fns";
-import { AlertCircle, Bot, FileText, MessageCircle, Phone, Send, User } from "lucide-react";
+import { Link } from "wouter";
+import { AlertCircle, ArrowUpRight, Bot, FileText, MessageCircle, PanelRightClose, PanelRightOpen, Phone, Send, User } from "lucide-react";
 import { FaFacebookMessenger, FaInstagram, FaWhatsapp } from "react-icons/fa";
 import { useQueryClient } from "@tanstack/react-query";
 import {
+  getGetEventDetailQueryKey,
   getGetChatInboxQueryKey,
   getGetContattoQueryKey,
   getListChatTypingQueryKey,
   getListMessaggiQueryKey,
   getListPreventiviQueryKey,
+  getListTaskPersonaliQueryKey,
   getStreamChatEventsUrl,
   useAssignChat,
+  useGetEventDetail,
   useGetChatInbox,
   useGetContatto,
   useListChatTyping,
   useListMessaggi,
   useListPreventivi,
+  useListTaskPersonali,
   useListUtenti,
   useMarkMessaggioRead,
   useSendMessaggio,
   useUpdateChatTyping,
+  useUpdateEventPayment,
+  useUpdateEventStatus,
 } from "@workspace/api-client-react";
 import { SidebarLayout } from "@/components/layout/sidebar-layout";
 import { getStoredAuthToken } from "@/lib/auth-session";
@@ -46,6 +53,13 @@ const getChannelIcon = (canale: string) => {
 
 const INBOX_PAGE_SIZE = 80;
 const MESSAGES_PAGE_SIZE = 100;
+const eventStageLabels: Record<string, string> = {
+  draft: "Draft",
+  quoted: "Quoted",
+  confirmed: "Confirmed",
+  in_production: "In produzione",
+  closed: "Chiuso",
+};
 
 export default function Inbox() {
   const queryClient = useQueryClient();
@@ -58,6 +72,7 @@ export default function Inbox() {
   const [filterOperator, setFilterOperator] = useState<string>("all");
   const [inboxLimit, setInboxLimit] = useState(INBOX_PAGE_SIZE);
   const [messagesLimit, setMessagesLimit] = useState(MESSAGES_PAGE_SIZE);
+  const [isContextOpen, setIsContextOpen] = useState(true);
 
   const inboxFilters = useMemo(() => ({
     canale: filterChannel === "all" ? undefined : filterChannel,
@@ -99,14 +114,30 @@ export default function Inbox() {
       enabled: !!selectedContactId && !!selectedChannel,
     },
   });
+  const selectedEntry = inbox?.find((entry) => entry.contatto_id === selectedContactId && entry.canale === selectedChannel);
+  const preventivoAttivo = preventiviContatto?.find((preventivo) => preventivo.stato_evento === "opzionato") ?? preventiviContatto?.[0];
+  const { data: eventContext } = useGetEventDetail(preventivoAttivo?.id || "", {
+    query: {
+      queryKey: getGetEventDetailQueryKey(preventivoAttivo?.id || ""),
+      enabled: !!preventivoAttivo?.id,
+    },
+  });
+  const { data: taskContatto = [] } = useListTaskPersonali(
+    { contatto_id: selectedContactId || undefined, stato: "aperto" },
+    {
+      query: {
+        queryKey: getListTaskPersonaliQueryKey({ contatto_id: selectedContactId || undefined, stato: "aperto" }),
+        enabled: !!selectedContactId,
+      },
+    },
+  );
 
   const sendMessage = useSendMessaggio();
   const assignChat = useAssignChat();
   const markMessaggioRead = useMarkMessaggioRead();
   const updateChatTyping = useUpdateChatTyping();
-
-  const selectedEntry = inbox?.find((entry) => entry.contatto_id === selectedContactId && entry.canale === selectedChannel);
-  const preventivoAttivo = preventiviContatto?.find((preventivo) => preventivo.stato_evento === "opzionato") ?? preventiviContatto?.[0];
+  const updateEventStatus = useUpdateEventStatus();
+  const updateEventPayment = useUpdateEventPayment();
 
   const leadStatuses = useMemo(() => {
     return Array.from(new Set(inboxEntries.map((entry) => entry.stato_lead))).filter(Boolean);
@@ -269,6 +300,26 @@ export default function Inbox() {
     return format(new Date(value), "d MMM yyyy");
   };
 
+  const handleEventStageChange = async (eventStage: string) => {
+    if (!eventContext?.id) return;
+    await updateEventStatus.mutateAsync({
+      id: eventContext.id,
+      data: { event_stage: eventStage as "draft" | "quoted" | "confirmed" | "in_production" | "closed" },
+    });
+    await queryClient.invalidateQueries({ queryKey: getGetEventDetailQueryKey(eventContext.id) });
+    await queryClient.invalidateQueries({ queryKey: getListPreventiviQueryKey(preventiviParams) });
+  };
+
+  const handleMarkPaymentPaid = async (paymentId: string) => {
+    if (!eventContext?.id) return;
+    await updateEventPayment.mutateAsync({
+      id: eventContext.id,
+      paymentId,
+      data: { status: "paid" },
+    });
+    await queryClient.invalidateQueries({ queryKey: getGetEventDetailQueryKey(eventContext.id) });
+  };
+
   return (
     <SidebarLayout>
       <div className="flex h-full">
@@ -385,6 +436,15 @@ export default function Inbox() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
+                  {eventContext?.id ? (
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => setIsContextOpen((current) => !current)}
+                    >
+                      {isContextOpen ? <PanelRightClose className="h-4 w-4" /> : <PanelRightOpen className="h-4 w-4" />}
+                    </Button>
+                  ) : null}
                   {selectedEntry?.handoff_richiesto ? (
                     <Badge variant="secondary" className="gap-1 bg-amber-100 text-amber-800">
                       <AlertCircle className="h-3 w-3" />
@@ -465,7 +525,7 @@ export default function Inbox() {
           )}
         </div>
 
-        {selectedContactId && selectedEntry && (
+        {selectedContactId && selectedEntry && isContextOpen && (
           <div className="flex w-72 flex-col gap-6 border-l bg-card p-4">
             <div>
               <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
@@ -496,6 +556,77 @@ export default function Inbox() {
               <div>
                 <p className="mb-1 text-xs uppercase tracking-wider text-muted-foreground">DATA RICHIESTA</p>
                 <p className="text-sm">{formatShortDate(preventivoAttivo?.data_evento_richiesta)}</p>
+              </div>
+              {eventContext ? (
+                <>
+                  <div>
+                    <p className="mb-2 text-xs uppercase tracking-wider text-muted-foreground">STATO OPERATIVO</p>
+                    <Select value={eventContext.event_stage} onValueChange={(value) => void handleEventStageChange(value)}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Object.entries(eventStageLabels).map(([value, label]) => (
+                          <SelectItem key={value} value={value}>{label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="rounded-lg border bg-muted/30 p-3">
+                    <div className="mb-2 flex items-center justify-between">
+                      <p className="text-xs uppercase tracking-wider text-muted-foreground">Evento</p>
+                      <Link href={`/events/${eventContext.id}`} className="inline-flex items-center gap-1 text-xs font-medium text-primary">
+                        Apri
+                        <ArrowUpRight className="h-3.5 w-3.5" />
+                      </Link>
+                    </div>
+                    <p className="text-sm font-medium">
+                      Pagato {Number(eventContext.financial_summary?.totale_pagato ?? 0).toLocaleString("it-IT", { style: "currency", currency: "EUR" })}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Saldo {Number(eventContext.financial_summary?.saldo_residuo ?? 0).toLocaleString("it-IT", { style: "currency", currency: "EUR" })}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="mb-2 text-xs uppercase tracking-wider text-muted-foreground">Rate Evento</p>
+                    <div className="space-y-2">
+                      {eventContext.pagamenti?.length ? eventContext.pagamenti.map((payment) => (
+                        <div key={payment.id} className="rounded-lg border p-3">
+                          <div className="flex items-center justify-between gap-2">
+                            <div>
+                              <p className="text-sm font-medium">{payment.payment_type}</p>
+                              <p className="text-xs text-muted-foreground">
+                                {Number(payment.amount).toLocaleString("it-IT", { style: "currency", currency: "EUR" })} · scade {formatShortDate(payment.due_date)}
+                              </p>
+                            </div>
+                            {payment.status === "pending" ? (
+                              <Button size="sm" variant="outline" onClick={() => void handleMarkPaymentPaid(payment.id)}>
+                                Segna pagato
+                              </Button>
+                            ) : (
+                              <Badge className="bg-green-100 text-green-700">Pagato</Badge>
+                            )}
+                          </div>
+                        </div>
+                      )) : (
+                        <p className="text-sm text-muted-foreground">Nessuna rata collegata.</p>
+                      )}
+                    </div>
+                  </div>
+                </>
+              ) : null}
+              <div>
+                <p className="mb-2 text-xs uppercase tracking-wider text-muted-foreground">Task aperti</p>
+                <div className="space-y-2">
+                  {taskContatto.length > 0 ? taskContatto.slice(0, 4).map((task) => (
+                    <div key={task.id} className="rounded-lg border p-3">
+                      <p className="text-sm font-medium">{task.titolo}</p>
+                      <p className="text-xs text-muted-foreground">{task.scadenza ? formatShortDate(task.scadenza) : "Senza scadenza"}</p>
+                    </div>
+                  )) : (
+                    <p className="text-sm text-muted-foreground">Nessun task aperto collegato a questo contatto.</p>
+                  )}
+                </div>
               </div>
               <div>
                 <p className="mb-1 text-xs uppercase tracking-wider text-muted-foreground">INVITATI</p>

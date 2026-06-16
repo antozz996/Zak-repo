@@ -247,6 +247,11 @@ export const ConfirmPreventivoDigitaleResponse = zod.object({
   "menu_bevande": zod.string().nullish(),
   "note_allergie": zod.string().nullish(),
   "note_logistica": zod.string().nullish(),
+  "public_token": zod.string().nullish(),
+  "accepted_at": zod.string().nullish(),
+  "signature_name": zod.string().nullish(),
+  "signature_svg": zod.string().nullish(),
+  "customer_ip": zod.string().nullish(),
   "google_calendar_id": zod.string().nullish(),
   "google_event_id": zod.string().nullish(),
   "google_sync_status": zod.union([zod.literal('non_configurato'),zod.literal('pending'),zod.literal('synced'),zod.literal('conflict'),zod.literal('error'),zod.literal(null)]).nullish(),
@@ -493,6 +498,11 @@ export const ListPreventiviResponseItem = zod.object({
   "menu_bevande": zod.string().nullish(),
   "note_allergie": zod.string().nullish(),
   "note_logistica": zod.string().nullish(),
+  "public_token": zod.string().nullish(),
+  "accepted_at": zod.string().nullish(),
+  "signature_name": zod.string().nullish(),
+  "signature_svg": zod.string().nullish(),
+  "customer_ip": zod.string().nullish(),
   "google_calendar_id": zod.string().nullish(),
   "google_event_id": zod.string().nullish(),
   "google_sync_status": zod.union([zod.literal('non_configurato'),zod.literal('pending'),zod.literal('synced'),zod.literal('conflict'),zod.literal('error'),zod.literal(null)]).nullish(),
@@ -516,6 +526,7 @@ export const CreatePreventivoBody = zod.object({
   "menu_bevande": zod.string().optional(),
   "note_allergie": zod.string().optional(),
   "note_logistica": zod.string().optional(),
+  "public_token": zod.string().optional(),
   "google_calendar_id": zod.string().optional(),
   "google_event_id": zod.string().optional(),
   "google_sync_status": zod.enum(['non_configurato', 'pending', 'synced', 'conflict', 'error']).optional()
@@ -616,6 +627,11 @@ export const GetPreventivoResponse = zod.object({
   "menu_bevande": zod.string().nullish(),
   "note_allergie": zod.string().nullish(),
   "note_logistica": zod.string().nullish(),
+  "public_token": zod.string().nullish(),
+  "accepted_at": zod.string().nullish(),
+  "signature_name": zod.string().nullish(),
+  "signature_svg": zod.string().nullish(),
+  "customer_ip": zod.string().nullish(),
   "google_calendar_id": zod.string().nullish(),
   "google_event_id": zod.string().nullish(),
   "google_sync_status": zod.union([zod.literal('non_configurato'),zod.literal('pending'),zod.literal('synced'),zod.literal('conflict'),zod.literal('error'),zod.literal(null)]).nullish(),
@@ -641,6 +657,11 @@ export const UpdatePreventivoBody = zod.object({
   "menu_bevande": zod.string().optional(),
   "note_allergie": zod.string().optional(),
   "note_logistica": zod.string().optional(),
+  "public_token": zod.string().optional(),
+  "accepted_at": zod.string().optional(),
+  "signature_name": zod.string().optional(),
+  "signature_svg": zod.string().optional(),
+  "customer_ip": zod.string().optional(),
   "google_calendar_id": zod.string().optional(),
   "google_event_id": zod.string().optional(),
   "google_sync_status": zod.enum(['non_configurato', 'pending', 'synced', 'conflict', 'error']).optional()
@@ -661,6 +682,11 @@ export const UpdatePreventivoResponse = zod.object({
   "menu_bevande": zod.string().nullish(),
   "note_allergie": zod.string().nullish(),
   "note_logistica": zod.string().nullish(),
+  "public_token": zod.string().nullish(),
+  "accepted_at": zod.string().nullish(),
+  "signature_name": zod.string().nullish(),
+  "signature_svg": zod.string().nullish(),
+  "customer_ip": zod.string().nullish(),
   "google_calendar_id": zod.string().nullish(),
   "google_event_id": zod.string().nullish(),
   "google_sync_status": zod.union([zod.literal('non_configurato'),zod.literal('pending'),zod.literal('synced'),zod.literal('conflict'),zod.literal('error'),zod.literal(null)]).nullish(),
@@ -698,6 +724,11 @@ export const GetEventDetailResponse = zod.object({
   "menu_bevande": zod.string().nullish(),
   "note_allergie": zod.string().nullish(),
   "note_logistica": zod.string().nullish(),
+  "public_token": zod.string().nullish(),
+  "accepted_at": zod.string().nullish(),
+  "signature_name": zod.string().nullish(),
+  "signature_svg": zod.string().nullish(),
+  "customer_ip": zod.string().nullish(),
   "google_calendar_id": zod.string().nullish(),
   "google_event_id": zod.string().nullish(),
   "google_sync_status": zod.union([zod.literal('non_configurato'),zod.literal('pending'),zod.literal('synced'),zod.literal('conflict'),zod.literal('error'),zod.literal(null)]).nullish(),
@@ -760,6 +791,11 @@ export const UpdateEventStatusResponse = zod.object({
   "menu_bevande": zod.string().nullish(),
   "note_allergie": zod.string().nullish(),
   "note_logistica": zod.string().nullish(),
+  "public_token": zod.string().nullish(),
+  "accepted_at": zod.string().nullish(),
+  "signature_name": zod.string().nullish(),
+  "signature_svg": zod.string().nullish(),
+  "customer_ip": zod.string().nullish(),
   "google_calendar_id": zod.string().nullish(),
   "google_event_id": zod.string().nullish(),
   "google_sync_status": zod.union([zod.literal('non_configurato'),zod.literal('pending'),zod.literal('synced'),zod.literal('conflict'),zod.literal('error'),zod.literal(null)]).nullish(),
@@ -941,6 +977,87 @@ export const UpdateEventStaffAllocationResponse = zod.object({
 export const DeleteEventStaffAllocationParams = zod.object({
   "id": zod.coerce.string(),
   "allocationId": zod.coerce.string()
+})
+
+
+/**
+ * @summary Get the public confirmation view for a quote token
+ */
+export const GetPublicQuoteParams = zod.object({
+  "token": zod.coerce.string()
+})
+
+export const GetPublicQuoteResponse = zod.object({
+  "id": zod.string(),
+  "contatto_id": zod.string(),
+  "contatto_nome": zod.string().nullish(),
+  "data_evento_richiesta": zod.string().nullish(),
+  "numero_invitati": zod.number().nullish(),
+  "budget_stimato": zod.number().nullish(),
+  "note": zod.string().nullish(),
+  "stato_evento": zod.enum(['opzionato', 'confermato', 'rifiutato']),
+  "event_stage": zod.enum(['draft', 'quoted', 'confirmed', 'in_production', 'closed']).optional(),
+  "data_creazione": zod.string(),
+  "menu_cibo": zod.string().nullish(),
+  "menu_bevande": zod.string().nullish(),
+  "note_allergie": zod.string().nullish(),
+  "note_logistica": zod.string().nullish(),
+  "public_token": zod.string().nullish(),
+  "accepted_at": zod.string().nullish(),
+  "signature_name": zod.string().nullish(),
+  "signature_svg": zod.string().nullish(),
+  "customer_ip": zod.string().nullish(),
+  "google_calendar_id": zod.string().nullish(),
+  "google_event_id": zod.string().nullish(),
+  "google_sync_status": zod.union([zod.literal('non_configurato'),zod.literal('pending'),zod.literal('synced'),zod.literal('conflict'),zod.literal('error'),zod.literal(null)]).nullish(),
+  "google_last_synced_at": zod.string().nullish()
+}).and(zod.object({
+  "contatto_nome": zod.string().nullish(),
+  "contatto_telefono": zod.string().nullish(),
+  "tipo_evento": zod.string().nullish()
+}))
+
+
+/**
+ * @summary Accept and digitally confirm a quote from the public link
+ */
+export const AcceptPublicQuoteParams = zod.object({
+  "token": zod.coerce.string()
+})
+
+export const AcceptPublicQuoteBody = zod.object({
+  "signature_name": zod.string(),
+  "signature_svg": zod.string().optional()
+})
+
+export const AcceptPublicQuoteResponse = zod.object({
+  "preventivo": zod.object({
+  "id": zod.string(),
+  "contatto_id": zod.string(),
+  "contatto_nome": zod.string().nullish(),
+  "data_evento_richiesta": zod.string().nullish(),
+  "numero_invitati": zod.number().nullish(),
+  "budget_stimato": zod.number().nullish(),
+  "note": zod.string().nullish(),
+  "stato_evento": zod.enum(['opzionato', 'confermato', 'rifiutato']),
+  "event_stage": zod.enum(['draft', 'quoted', 'confirmed', 'in_production', 'closed']).optional(),
+  "data_creazione": zod.string(),
+  "menu_cibo": zod.string().nullish(),
+  "menu_bevande": zod.string().nullish(),
+  "note_allergie": zod.string().nullish(),
+  "note_logistica": zod.string().nullish(),
+  "public_token": zod.string().nullish(),
+  "accepted_at": zod.string().nullish(),
+  "signature_name": zod.string().nullish(),
+  "signature_svg": zod.string().nullish(),
+  "customer_ip": zod.string().nullish(),
+  "google_calendar_id": zod.string().nullish(),
+  "google_event_id": zod.string().nullish(),
+  "google_sync_status": zod.union([zod.literal('non_configurato'),zod.literal('pending'),zod.literal('synced'),zod.literal('conflict'),zod.literal('error'),zod.literal(null)]).nullish(),
+  "google_last_synced_at": zod.string().nullish()
+}),
+  "message": zod.string(),
+  "payment_created": zod.boolean()
 })
 
 
@@ -2001,6 +2118,117 @@ export const TriggerAutomazioneBody = zod.object({
 export const TriggerAutomazioneResponse = zod.object({
   "eseguiti": zod.number(),
   "dettagli": zod.array(zod.string()).optional()
+})
+
+
+/**
+ * @summary List internal WhatsApp template mappings by trigger
+ */
+export const ListWhatsappTemplatesResponseItem = zod.object({
+  "id": zod.string(),
+  "trigger_key": zod.enum(['nuovo_lead', 'promemoria_pagamento', 'invio_preventivo']),
+  "display_name": zod.string(),
+  "template_name": zod.string().nullish(),
+  "status": zod.enum(['approved', 'pending', 'disabled']),
+  "language_code": zod.string(),
+  "body_preview": zod.string().nullish(),
+  "data_creazione": zod.string(),
+  "aggiornato_il": zod.string()
+})
+export const ListWhatsappTemplatesResponse = zod.array(ListWhatsappTemplatesResponseItem)
+
+
+/**
+ * @summary Update a WhatsApp template mapping
+ */
+export const UpdateWhatsappTemplateParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+export const UpdateWhatsappTemplateBody = zod.object({
+  "display_name": zod.string().optional(),
+  "template_name": zod.string().optional(),
+  "status": zod.enum(['approved', 'pending', 'disabled']).optional(),
+  "language_code": zod.string().optional(),
+  "body_preview": zod.string().optional()
+})
+
+export const UpdateWhatsappTemplateResponse = zod.object({
+  "id": zod.string(),
+  "trigger_key": zod.enum(['nuovo_lead', 'promemoria_pagamento', 'invio_preventivo']),
+  "display_name": zod.string(),
+  "template_name": zod.string().nullish(),
+  "status": zod.enum(['approved', 'pending', 'disabled']),
+  "language_code": zod.string(),
+  "body_preview": zod.string().nullish(),
+  "data_creazione": zod.string(),
+  "aggiornato_il": zod.string()
+})
+
+
+/**
+ * @summary List WhatsApp template delivery logs
+ */
+export const listWhatsappLogsQueryLimitMax = 200;
+
+
+
+export const ListWhatsappLogsQueryParams = zod.object({
+  "trigger_key": zod.coerce.string().optional(),
+  "contatto_id": zod.coerce.string().optional(),
+  "event_id": zod.coerce.string().optional(),
+  "limit": zod.coerce.number().min(1).max(listWhatsappLogsQueryLimitMax).optional()
+})
+
+export const ListWhatsappLogsResponseItem = zod.object({
+  "id": zod.string(),
+  "template_id": zod.string().nullish(),
+  "template_name": zod.string().nullish(),
+  "trigger_key": zod.string().nullish(),
+  "destinatario": zod.string(),
+  "contatto_id": zod.string().nullish(),
+  "event_id": zod.string().nullish(),
+  "stato_invio": zod.enum(['pending', 'sent', 'skipped', 'failed']),
+  "provider_message_id": zod.string().nullish(),
+  "errore": zod.string().nullish(),
+  "payload_json": zod.string().nullish(),
+  "data_creazione": zod.string()
+})
+export const ListWhatsappLogsResponse = zod.array(ListWhatsappLogsResponseItem)
+
+
+/**
+ * @summary List unread notifications for the authenticated user
+ */
+export const GetUnreadNotificationsResponseItem = zod.object({
+  "id": zod.string(),
+  "user_id": zod.string(),
+  "title": zod.string(),
+  "message": zod.string(),
+  "type": zod.enum(['info', 'success', 'warning', 'danger']),
+  "link": zod.string().nullish(),
+  "is_read": zod.boolean(),
+  "created_at": zod.string()
+})
+export const GetUnreadNotificationsResponse = zod.array(GetUnreadNotificationsResponseItem)
+
+
+/**
+ * @summary Mark one notification as read
+ */
+export const MarkNotificationReadParams = zod.object({
+  "id": zod.coerce.string()
+})
+
+export const MarkNotificationReadResponse = zod.object({
+  "id": zod.string(),
+  "user_id": zod.string(),
+  "title": zod.string(),
+  "message": zod.string(),
+  "type": zod.enum(['info', 'success', 'warning', 'danger']),
+  "link": zod.string().nullish(),
+  "is_read": zod.boolean(),
+  "created_at": zod.string()
 })
 
 

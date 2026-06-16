@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { db, taskPersonaliTable, contattiCrmTable, insertTaskPersonaleSchema, updateTaskPersonaleSchema } from "@workspace/db";
-import { and, desc, eq, type SQL } from "drizzle-orm";
+import { and, desc, eq, isNull, or, type SQL } from "drizzle-orm";
 import { logAuditAction } from "../lib/audit-log";
 
 const router = Router();
@@ -15,6 +15,12 @@ router.get("/task-personali", async (req, res) => {
   if (stato) conditions.push(eq(taskPersonaliTable.stato, stato));
   if (priorita) conditions.push(eq(taskPersonaliTable.priorita, priorita));
   if (contatto_id) conditions.push(eq(taskPersonaliTable.contatto_id, contatto_id));
+  if (req.authUser?.id) {
+    conditions.push(or(
+      eq(taskPersonaliTable.user_id, req.authUser.id),
+      isNull(taskPersonaliTable.user_id),
+    ) as SQL);
+  }
 
   const rows = await db
     .select({
@@ -48,7 +54,10 @@ router.post("/task-personali", async (req, res) => {
     return;
   }
 
-  const [row] = await db.insert(taskPersonaliTable).values(parsed.data).returning();
+  const [row] = await db.insert(taskPersonaliTable).values({
+    ...parsed.data,
+    user_id: parsed.data.user_id ?? req.authUser?.id ?? null,
+  }).returning();
   await logAuditAction({ req, azione: "create", entita: "task", entitaId: row.id, dettagli: { titolo: row.titolo, fonte: row.fonte } });
   res.status(201).json({ ...row, contatto_nome: null });
 });

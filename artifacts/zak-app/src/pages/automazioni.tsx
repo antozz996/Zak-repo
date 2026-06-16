@@ -9,6 +9,11 @@ import {
   getListAutomazioniLogQueryKey,
   getListAutomazioniConfigQueryKey,
   getGetAutomazioniPerformanceQueryKey,
+  getListWhatsappTemplatesQueryKey,
+  getListWhatsappLogsQueryKey,
+  useListWhatsappTemplates,
+  useListWhatsappLogs,
+  useUpdateWhatsappTemplate,
 } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -16,18 +21,20 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { format } from "date-fns";
 import { it } from "date-fns/locale";
-import { Play, RefreshCw, CheckCircle, AlertCircle, Settings2, ClipboardList } from "lucide-react";
+import { Play, RefreshCw, CheckCircle, AlertCircle, Settings2, ClipboardList, MessageSquareShare } from "lucide-react";
 
 const tipoLabel: Record<string, string> = {
   reengagement: "Re-engagement Lead Persi",
   ricorrenza: "Fidelizzazione Ricorrenza",
   promemoria: "Promemoria Agenda",
+  promemoria_pagamento: "Promemoria Pagamento",
 };
 
 const tipoColore: Record<string, string> = {
   reengagement: "bg-amber-100 text-amber-800 border-amber-200",
   ricorrenza: "bg-purple-100 text-purple-800 border-purple-200",
   promemoria: "bg-blue-100 text-blue-800 border-blue-200",
+  promemoria_pagamento: "bg-emerald-100 text-emerald-800 border-emerald-200",
 };
 
 const configLabel: Record<string, string> = {
@@ -39,6 +46,8 @@ const configLabel: Record<string, string> = {
   ricorrenza_tipi_evento: "Tipi evento per ricorrenze",
   promemoria_attivo: "Promemoria agenda attivi (true/false)",
   promemoria_minuti_anticipo: "Minuti anticipo promemoria agenda",
+  promemoria_pagamenti_attivo: "Promemoria pagamenti attivi (true/false)",
+  promemoria_pagamenti_giorni_anticipo: "Giorni anticipo promemoria pagamenti",
   booking_assistant_template_nome: "Zak AI - richiesta nome",
   booking_assistant_template_tipo_evento: "Zak AI - richiesta tipo evento",
   booking_assistant_template_data_evento: "Zak AI - richiesta data evento",
@@ -53,6 +62,7 @@ const configHelp: Record<string, string> = {
   reengagement_tipi_evento: "Usa all per tutti oppure valori separati da virgola: diciottesimo, laurea, compleanno, matrimonio, aziendale.",
   ricorrenza_tipi_evento: "Usa all per tutti oppure limita le ricorrenze a specifici tipi evento.",
   promemoria_minuti_anticipo: "Il job registra promemoria per eventi agenda futuri entro questa finestra.",
+  promemoria_pagamenti_giorni_anticipo: "Finestra giorni entro cui inviare il template Meta di promemoria rata.",
   booking_assistant_template_nome: "Placeholder disponibili: {{nome}}.",
   booking_assistant_template_tipo_evento: "Placeholder disponibili: {{nome}}.",
   booking_assistant_template_data_evento: "Placeholder disponibili: {{nome}}, {{tipo_evento}}.",
@@ -66,10 +76,10 @@ const configHelp: Record<string, string> = {
 function validateConfigValue(chiave: string, valore: string) {
   const normalized = valore.trim();
   if (!normalized) return "Valore obbligatorio.";
-  if (["reengagement_attivo", "ricorrenza_attiva", "promemoria_attivo"].includes(chiave)) {
+  if (["reengagement_attivo", "ricorrenza_attiva", "promemoria_attivo", "promemoria_pagamenti_attivo"].includes(chiave)) {
     return ["true", "false"].includes(normalized.toLowerCase()) ? null : "Usa solo true oppure false.";
   }
-  if (["reengagement_mesi", "ricorrenza_mesi_anticipo"].includes(chiave)) {
+  if (["reengagement_mesi", "ricorrenza_mesi_anticipo", "promemoria_pagamenti_giorni_anticipo"].includes(chiave)) {
     const months = Number(normalized);
     return Number.isInteger(months) && months >= 1 && months <= 60 ? null : "Inserisci un numero intero tra 1 e 60.";
   }
@@ -90,9 +100,12 @@ export default function Automazioni() {
   const { data: logs, isLoading: logsLoading, refetch: refetchLogs } = useListAutomazioniLog({ limit: 30 });
   const { data: configs } = useListAutomazioniConfig();
   const { data: performance, isLoading: performanceLoading } = useGetAutomazioniPerformance();
+  const { data: whatsappTemplates = [] } = useListWhatsappTemplates();
+  const { data: whatsappLogs = [] } = useListWhatsappLogs({ limit: 6 });
 
   const updateConfig = useUpdateAutomazioneConfig();
   const triggerJob = useTriggerAutomazione();
+  const updateWhatsappTemplate = useUpdateWhatsappTemplate();
 
   const salvaConfig = async (chiave: string) => {
     const nuovoValore = editingConfig[chiave];
@@ -119,6 +132,15 @@ export default function Automazioni() {
     } finally {
       setTriggering(null);
     }
+  };
+
+  const salvaTemplate = async (id: string, field: "template_name" | "status" | "body_preview", value: string) => {
+    await updateWhatsappTemplate.mutateAsync({
+      id,
+      data: { [field]: value },
+    });
+    await qc.invalidateQueries({ queryKey: getListWhatsappTemplatesQueryKey() });
+    await qc.invalidateQueries({ queryKey: getListWhatsappLogsQueryKey({ limit: 6 }) });
   };
 
   return (
@@ -337,6 +359,84 @@ export default function Automazioni() {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <MessageSquareShare className="w-5 h-5 text-muted-foreground" />
+            <h2 className="text-lg font-semibold">Template WhatsApp</h2>
+          </div>
+          <div className="space-y-3">
+            {whatsappTemplates.map((template) => (
+              <div key={template.id} className="rounded-lg border bg-background p-4">
+                <div className="grid gap-4 lg:grid-cols-[220px_1fr_160px]">
+                  <div>
+                    <p className="font-medium text-sm">{template.display_name}</p>
+                    <p className="text-xs text-muted-foreground mt-1">{template.trigger_key}</p>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Nome template Meta</Label>
+                    <Input
+                      defaultValue={template.template_name ?? ""}
+                      placeholder="es. invio_preventivo_zak"
+                      onBlur={(event) => void salvaTemplate(template.id, "template_name", event.target.value)}
+                    />
+                    <Label>Preview</Label>
+                    <Input
+                      defaultValue={template.body_preview ?? ""}
+                      placeholder="Testo con placeholder approvato in Meta"
+                      onBlur={(event) => void salvaTemplate(template.id, "body_preview", event.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Stato</Label>
+                    <select
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 text-sm"
+                      defaultValue={template.status}
+                      onChange={(event) => void salvaTemplate(template.id, "status", event.target.value)}
+                    >
+                      <option value="pending">pending</option>
+                      <option value="approved">approved</option>
+                      <option value="disabled">disabled</option>
+                    </select>
+                    <p className="text-xs text-muted-foreground">
+                      I trigger live usano queste mappature per `nuovo_lead`, `promemoria_pagamento` e `invio_preventivo`.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className="rounded-lg border bg-background">
+            <div className="border-b px-4 py-3">
+              <p className="font-medium text-sm">Ultimi log template</p>
+            </div>
+            <div className="divide-y">
+              {whatsappLogs.length === 0 ? (
+                <div className="px-4 py-6 text-sm text-muted-foreground">Nessun invio template registrato.</div>
+              ) : (
+                whatsappLogs.map((log) => (
+                  <div key={log.id} className="flex items-start justify-between gap-3 px-4 py-3 text-sm">
+                    <div>
+                      <p className="font-medium">{log.trigger_key || log.template_name || "template"}</p>
+                      <p className="text-xs text-muted-foreground">{log.destinatario}</p>
+                    </div>
+                    <span className={`rounded-full px-2 py-0.5 text-xs ${
+                      log.stato_invio === "sent"
+                        ? "bg-green-100 text-green-700"
+                        : log.stato_invio === "failed"
+                          ? "bg-red-100 text-red-700"
+                          : "bg-amber-100 text-amber-700"
+                    }`}
+                    >
+                      {log.stato_invio}
+                    </span>
+                  </div>
+                ))
+              )}
+            </div>
           </div>
         </div>
 

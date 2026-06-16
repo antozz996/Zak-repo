@@ -20,6 +20,11 @@ export interface PreventivoUpdate {
   menu_bevande?: string;
   note_allergie?: string;
   note_logistica?: string;
+  public_token?: string;
+  accepted_at?: string;
+  signature_name?: string;
+  signature_svg?: string;
+  customer_ip?: string;
   google_calendar_id?: string;
   google_event_id?: string;
   google_sync_status?: PreventivoUpdateGoogleSyncStatus;

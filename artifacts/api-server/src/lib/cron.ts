@@ -1,6 +1,7 @@
 import cron from "node-cron";
 import { logger } from "./logger";
-import { runPromemoriaAgenda, runReengagement, runRicorrenze } from "../routes/automazioni";
+import { runPromemoriaAgenda, runPromemoriaPagamenti, runReengagement, runRicorrenze } from "../routes/automazioni";
+import { runOperationalNotifications } from "./notifications";
 
 const runningJobs = new Set<string>();
 
@@ -56,5 +57,31 @@ export function startCronJobs() {
     }
   });
 
-  logger.info("Cron jobs avviati: re-engagement (09:00), ricorrenze (10:00), promemoria agenda (ogni 15 minuti)");
+  // Ogni giorno alle 11:00 — invia promemoria pagamento tramite template Meta se configurato
+  cron.schedule("0 11 * * *", async () => {
+    try {
+      const result = await runCronJob("promemoria_pagamento", runPromemoriaPagamenti);
+      if (!result) return;
+      if (result.eseguiti > 0) {
+        logger.info({ eseguiti: result.eseguiti }, "Cron: promemoria pagamenti elaborati");
+      }
+    } catch (err) {
+      logger.error({ err }, "Cron: errore nel job promemoria pagamenti");
+    }
+  });
+
+  // Ogni 30 minuti — alimenta le notifiche operative interne
+  cron.schedule("*/30 * * * *", async () => {
+    try {
+      const result = await runCronJob("notifiche_interne", runOperationalNotifications);
+      if (!result) return;
+      if (result.eseguiti > 0) {
+        logger.info({ eseguiti: result.eseguiti }, "Cron: notifiche operative aggiornate");
+      }
+    } catch (err) {
+      logger.error({ err }, "Cron: errore nel job notifiche operative");
+    }
+  });
+
+  logger.info("Cron jobs avviati: re-engagement (09:00), ricorrenze (10:00), promemoria pagamenti (11:00), promemoria agenda (ogni 15 minuti), notifiche operative (ogni 30 minuti)");
 }

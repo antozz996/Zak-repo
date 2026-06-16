@@ -20,6 +20,8 @@ tags:
     description: Event quotes
   - name: events
     description: Operational event management built on top of quotes
+  - name: public
+    description: Public quote confirmation flows
   - name: agenda
     description: Personal agenda
   - name: task
@@ -36,6 +38,10 @@ tags:
     description: External webhook receivers
   - name: automazioni
     description: CRM automation jobs and configuration
+  - name: whatsapp
+    description: WhatsApp template mappings and delivery logs
+  - name: notifications
+    description: Internal staff notifications
   - name: audit
     description: Staff action audit log
   - name: production
@@ -934,6 +940,56 @@ paths:
       responses:
         "204":
           description: Deleted
+
+  /public/quotes/{token}:
+    get:
+      operationId: getPublicQuote
+      tags: [public]
+      summary: Get the public confirmation view for a quote token
+      parameters:
+        - name: token
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PublicQuoteDetail"
+        "404":
+          description: Quote token not found
+
+  /public/quotes/{token}/accept:
+    post:
+      operationId: acceptPublicQuote
+      tags: [public]
+      summary: Accept and digitally confirm a quote from the public link
+      parameters:
+        - name: token
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PublicQuoteAcceptInput"
+      responses:
+        "200":
+          description: Accepted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PublicQuoteAcceptResult"
+        "404":
+          description: Quote token not found
+        "409":
+          description: Quote already accepted or conflicting with another confirmed event
 
   # ── AGENDA PERSONALE ─────────────────────────────────────────────────────────
   /agenda:
@@ -1999,6 +2055,118 @@ paths:
               schema:
                 $ref: "#/components/schemas/TriggerManualResponse"
 
+  /whatsapp/templates:
+    get:
+      operationId: listWhatsappTemplates
+      tags: [whatsapp]
+      summary: List internal WhatsApp template mappings by trigger
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/WhatsappTemplate"
+
+  /whatsapp/templates/{id}:
+    patch:
+      operationId: updateWhatsappTemplate
+      tags: [whatsapp]
+      summary: Update a WhatsApp template mapping
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WhatsappTemplateUpdate"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WhatsappTemplate"
+        "404":
+          description: Template mapping not found
+
+  /whatsapp/logs:
+    get:
+      operationId: listWhatsappLogs
+      tags: [whatsapp]
+      summary: List WhatsApp template delivery logs
+      parameters:
+        - name: trigger_key
+          in: query
+          schema:
+            type: string
+        - name: contatto_id
+          in: query
+          schema:
+            type: string
+        - name: event_id
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/WhatsappLog"
+
+  /notifications/unread:
+    get:
+      operationId: getUnreadNotifications
+      tags: [notifications]
+      summary: List unread notifications for the authenticated user
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UserNotification"
+
+  /notifications/{id}/read:
+    patch:
+      operationId: markNotificationRead
+      tags: [notifications]
+      summary: Mark one notification as read
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserNotification"
+        "404":
+          description: Notification not found
+
   /audit-log:
     get:
       operationId: listAuditLog
@@ -2394,6 +2562,16 @@ components:
           type: ["string", "null"]
         note_logistica:
           type: ["string", "null"]
+        public_token:
+          type: ["string", "null"]
+        accepted_at:
+          type: ["string", "null"]
+        signature_name:
+          type: ["string", "null"]
+        signature_svg:
+          type: ["string", "null"]
+        customer_ip:
+          type: ["string", "null"]
         google_calendar_id:
           type: ["string", "null"]
         google_event_id:
@@ -2432,6 +2610,8 @@ components:
           type: string
         note_logistica:
           type: string
+        public_token:
+          type: string
         google_calendar_id:
           type: string
         google_event_id:
@@ -2464,6 +2644,16 @@ components:
         note_allergie:
           type: string
         note_logistica:
+          type: string
+        public_token:
+          type: string
+        accepted_at:
+          type: string
+        signature_name:
+          type: string
+        signature_svg:
+          type: string
+        customer_ip:
           type: string
         google_calendar_id:
           type: string
@@ -2610,6 +2800,131 @@ components:
         event_stage:
           type: string
           enum: [draft, quoted, confirmed, in_production, closed]
+
+    PublicQuoteDetail:
+      allOf:
+        - $ref: "#/components/schemas/Preventivo"
+        - type: object
+          required: [id, contatto_id, stato_evento, event_stage, data_creazione]
+          properties:
+            contatto_nome:
+              type: ["string", "null"]
+            contatto_telefono:
+              type: ["string", "null"]
+            tipo_evento:
+              type: ["string", "null"]
+
+    PublicQuoteAcceptInput:
+      type: object
+      required: [signature_name]
+      properties:
+        signature_name:
+          type: string
+        signature_svg:
+          type: string
+
+    PublicQuoteAcceptResult:
+      type: object
+      required: [preventivo, message, payment_created]
+      properties:
+        preventivo:
+          $ref: "#/components/schemas/Preventivo"
+        message:
+          type: string
+        payment_created:
+          type: boolean
+
+    WhatsappTemplate:
+      type: object
+      required: [id, trigger_key, display_name, status, language_code, data_creazione, aggiornato_il]
+      properties:
+        id:
+          type: string
+        trigger_key:
+          type: string
+          enum: [nuovo_lead, promemoria_pagamento, invio_preventivo]
+        display_name:
+          type: string
+        template_name:
+          type: ["string", "null"]
+        status:
+          type: string
+          enum: [approved, pending, disabled]
+        language_code:
+          type: string
+        body_preview:
+          type: ["string", "null"]
+        data_creazione:
+          type: string
+        aggiornato_il:
+          type: string
+
+    WhatsappTemplateUpdate:
+      type: object
+      properties:
+        display_name:
+          type: string
+        template_name:
+          type: string
+        status:
+          type: string
+          enum: [approved, pending, disabled]
+        language_code:
+          type: string
+        body_preview:
+          type: string
+
+    WhatsappLog:
+      type: object
+      required: [id, destinatario, stato_invio, data_creazione]
+      properties:
+        id:
+          type: string
+        template_id:
+          type: ["string", "null"]
+        template_name:
+          type: ["string", "null"]
+        trigger_key:
+          type: ["string", "null"]
+        destinatario:
+          type: string
+        contatto_id:
+          type: ["string", "null"]
+        event_id:
+          type: ["string", "null"]
+        stato_invio:
+          type: string
+          enum: [pending, sent, skipped, failed]
+        provider_message_id:
+          type: ["string", "null"]
+        errore:
+          type: ["string", "null"]
+        payload_json:
+          type: ["string", "null"]
+        data_creazione:
+          type: string
+
+    UserNotification:
+      type: object
+      required: [id, user_id, title, message, type, is_read, created_at]
+      properties:
+        id:
+          type: string
+        user_id:
+          type: string
+        title:
+          type: string
+        message:
+          type: string
+        type:
+          type: string
+          enum: [info, success, warning, danger]
+        link:
+          type: ["string", "null"]
+        is_read:
+          type: boolean
+        created_at:
+          type: string
 
     # ── AGENDA ────────────────────────────────────────────────────────────────
     PreventivoPricingInput:

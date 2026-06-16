@@ -17,3 +17,6 @@ export * from "./google_calendar_sync";
 export * from "./event_cost_snapshots";
 export * from "./event_payments";
 export * from "./event_staff_allocation";
+export * from "./whatsapp_templates";
+export * from "./whatsapp_logs";
+export * from "./user_notifications";

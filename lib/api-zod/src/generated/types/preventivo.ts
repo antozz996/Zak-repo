@@ -34,6 +34,16 @@ export interface Preventivo {
   /** @nullable */
   note_logistica?: string | null;
   /** @nullable */
+  public_token?: string | null;
+  /** @nullable */
+  accepted_at?: string | null;
+  /** @nullable */
+  signature_name?: string | null;
+  /** @nullable */
+  signature_svg?: string | null;
+  /** @nullable */
+  customer_ip?: string | null;
+  /** @nullable */
   google_calendar_id?: string | null;
   /** @nullable */
   google_event_id?: string | null;

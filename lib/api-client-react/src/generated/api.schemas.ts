@@ -269,6 +269,16 @@ export interface Preventivo {
   /** @nullable */
   note_logistica?: string | null;
   /** @nullable */
+  public_token?: string | null;
+  /** @nullable */
+  accepted_at?: string | null;
+  /** @nullable */
+  signature_name?: string | null;
+  /** @nullable */
+  signature_svg?: string | null;
+  /** @nullable */
+  customer_ip?: string | null;
+  /** @nullable */
   google_calendar_id?: string | null;
   /** @nullable */
   google_event_id?: string | null;
@@ -321,6 +331,7 @@ export interface PreventivoInput {
   menu_bevande?: string;
   note_allergie?: string;
   note_logistica?: string;
+  public_token?: string;
   google_calendar_id?: string;
   google_event_id?: string;
   google_sync_status?: PreventivoInputGoogleSyncStatus;
@@ -368,6 +379,11 @@ export interface PreventivoUpdate {
   menu_bevande?: string;
   note_allergie?: string;
   note_logistica?: string;
+  public_token?: string;
+  accepted_at?: string;
+  signature_name?: string;
+  signature_svg?: string;
+  customer_ip?: string;
   google_calendar_id?: string;
   google_event_id?: string;
   google_sync_status?: PreventivoUpdateGoogleSyncStatus;
@@ -508,6 +524,130 @@ export const EventStatusUpdateInputEventStage = {
 
 export interface EventStatusUpdateInput {
   event_stage: EventStatusUpdateInputEventStage;
+}
+
+export type PublicQuoteDetail = Preventivo & ({
+  /** @nullable */
+  contatto_nome?: string | null;
+  /** @nullable */
+  contatto_telefono?: string | null;
+  /** @nullable */
+  tipo_evento?: string | null;
+});
+
+export interface PublicQuoteAcceptInput {
+  signature_name: string;
+  signature_svg?: string;
+}
+
+export interface PublicQuoteAcceptResult {
+  preventivo: Preventivo;
+  message: string;
+  payment_created: boolean;
+}
+
+export type WhatsappTemplateTriggerKey = typeof WhatsappTemplateTriggerKey[keyof typeof WhatsappTemplateTriggerKey];
+
+
+export const WhatsappTemplateTriggerKey = {
+  nuovo_lead: 'nuovo_lead',
+  promemoria_pagamento: 'promemoria_pagamento',
+  invio_preventivo: 'invio_preventivo',
+} as const;
+
+export type WhatsappTemplateStatus = typeof WhatsappTemplateStatus[keyof typeof WhatsappTemplateStatus];
+
+
+export const WhatsappTemplateStatus = {
+  approved: 'approved',
+  pending: 'pending',
+  disabled: 'disabled',
+} as const;
+
+export interface WhatsappTemplate {
+  id: string;
+  trigger_key: WhatsappTemplateTriggerKey;
+  display_name: string;
+  /** @nullable */
+  template_name?: string | null;
+  status: WhatsappTemplateStatus;
+  language_code: string;
+  /** @nullable */
+  body_preview?: string | null;
+  data_creazione: string;
+  aggiornato_il: string;
+}
+
+export type WhatsappTemplateUpdateStatus = typeof WhatsappTemplateUpdateStatus[keyof typeof WhatsappTemplateUpdateStatus];
+
+
+export const WhatsappTemplateUpdateStatus = {
+  approved: 'approved',
+  pending: 'pending',
+  disabled: 'disabled',
+} as const;
+
+export interface WhatsappTemplateUpdate {
+  display_name?: string;
+  template_name?: string;
+  status?: WhatsappTemplateUpdateStatus;
+  language_code?: string;
+  body_preview?: string;
+}
+
+export type WhatsappLogStatoInvio = typeof WhatsappLogStatoInvio[keyof typeof WhatsappLogStatoInvio];
+
+
+export const WhatsappLogStatoInvio = {
+  pending: 'pending',
+  sent: 'sent',
+  skipped: 'skipped',
+  failed: 'failed',
+} as const;
+
+export interface WhatsappLog {
+  id: string;
+  /** @nullable */
+  template_id?: string | null;
+  /** @nullable */
+  template_name?: string | null;
+  /** @nullable */
+  trigger_key?: string | null;
+  destinatario: string;
+  /** @nullable */
+  contatto_id?: string | null;
+  /** @nullable */
+  event_id?: string | null;
+  stato_invio: WhatsappLogStatoInvio;
+  /** @nullable */
+  provider_message_id?: string | null;
+  /** @nullable */
+  errore?: string | null;
+  /** @nullable */
+  payload_json?: string | null;
+  data_creazione: string;
+}
+
+export type UserNotificationType = typeof UserNotificationType[keyof typeof UserNotificationType];
+
+
+export const UserNotificationType = {
+  info: 'info',
+  success: 'success',
+  warning: 'warning',
+  danger: 'danger',
+} as const;
+
+export interface UserNotification {
+  id: string;
+  user_id: string;
+  title: string;
+  message: string;
+  type: UserNotificationType;
+  /** @nullable */
+  link?: string | null;
+  is_read: boolean;
+  created_at: string;
 }
 
 export type PreventivoPricingInputPacchetto = typeof PreventivoPricingInputPacchetto[keyof typeof PreventivoPricingInputPacchetto];
@@ -1654,6 +1794,17 @@ limit?: number;
  * @minimum 0
  */
 offset?: number;
+};
+
+export type ListWhatsappLogsParams = {
+trigger_key?: string;
+contatto_id?: string;
+event_id?: string;
+/**
+ * @minimum 1
+ * @maximum 200
+ */
+limit?: number;
 };
 
 export type ListAuditLogParams = {

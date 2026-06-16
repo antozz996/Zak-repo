@@ -21,6 +21,7 @@ export interface PreventivoInput {
   menu_bevande?: string;
   note_allergie?: string;
   note_logistica?: string;
+  public_token?: string;
   google_calendar_id?: string;
   google_event_id?: string;
   google_sync_status?: PreventivoInputGoogleSyncStatus;

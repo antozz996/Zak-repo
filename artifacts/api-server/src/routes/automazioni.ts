@@ -1,11 +1,12 @@
 import { Router } from "express";
-import { db, agendaPersonaleTable, automazioniLogTable, automazioniConfigTable, contattiCrmTable, messaggiTable } from "@workspace/db";
+import { db, agendaPersonaleTable, automazioniLogTable, automazioniConfigTable, contattiCrmTable, eventPaymentsTable, messaggiTable, preventiviEventiTable } from "@workspace/db";
 import { eq, and, gte, lte, desc, sql } from "drizzle-orm";
 import { sendWhatsAppTemplateSafely, sendWhatsAppTextSafely } from "../lib/whatsapp";
 import { logWhatsAppOutbound } from "../lib/whatsapp-outbound-log";
 import { getWhatsAppConversationWindow } from "../lib/whatsapp-conversation-window";
 import { logAuditAction } from "../lib/audit-log";
 import { parseLimit, parseOffset } from "../lib/pagination";
+import { dispatchWhatsAppTriggerTemplate } from "../lib/whatsapp-template-service";
 
 const router = Router();
 
@@ -49,6 +50,16 @@ const defaultAutomationConfigs = [
     chiave: "promemoria_minuti_anticipo",
     valore: "60",
     descrizione: "Minuti di anticipo con cui registrare i promemoria agenda imminenti.",
+  },
+  {
+    chiave: "promemoria_pagamenti_attivo",
+    valore: "true",
+    descrizione: "Abilita l'invio di template Meta per rate in scadenza.",
+  },
+  {
+    chiave: "promemoria_pagamenti_giorni_anticipo",
+    valore: "2",
+    descrizione: "Giorni di anticipo con cui inviare il promemoria rata.",
   },
   {
     chiave: "booking_assistant_template_nome",
@@ -127,12 +138,12 @@ function normalizeConfigValue(chiave: string, valore: unknown): string | null {
   const raw = String(valore ?? "").trim();
   if (!raw) return null;
 
-  if (["reengagement_attivo", "ricorrenza_attiva", "promemoria_attivo"].includes(chiave)) {
+  if (["reengagement_attivo", "ricorrenza_attiva", "promemoria_attivo", "promemoria_pagamenti_attivo"].includes(chiave)) {
     const normalized = raw.toLowerCase();
     return ["true", "false"].includes(normalized) ? normalized : null;
   }
 
-  if (["reengagement_mesi", "ricorrenza_mesi_anticipo"].includes(chiave)) {
+  if (["reengagement_mesi", "ricorrenza_mesi_anticipo", "promemoria_pagamenti_giorni_anticipo"].includes(chiave)) {
     const months = parseInt(raw, 10);
     return Number.isInteger(months) && months >= 1 && months <= 60 ? String(months) : null;
   }
@@ -418,6 +429,81 @@ export async function runPromemoriaAgenda(): Promise<{ eseguiti: number; dettagl
   return { eseguiti: eventi.length, dettagli };
 }
 
+function formatMoney(value: string | number | null) {
+  const numeric = typeof value === "number" ? value : Number.parseFloat(value ?? "0");
+  return numeric.toLocaleString("it-IT", { style: "currency", currency: "EUR" });
+}
+
+export async function runPromemoriaPagamenti(): Promise<{ eseguiti: number; dettagli: string[] }> {
+  const attivo = await isConfigEnabled("promemoria_pagamenti_attivo", true);
+  if (!attivo) {
+    await logAutomazione("promemoria_pagamento", null, null, "Job saltato: promemoria pagamento disattivati", "saltato");
+    return { eseguiti: 0, dettagli: ["Promemoria pagamento disattivati"] };
+  }
+
+  const giorniStr = await getConfigValue("promemoria_pagamenti_giorni_anticipo", "2");
+  const giorni = Math.max(parseInt(giorniStr, 10) || 2, 0);
+  const oggi = new Date();
+  const fineFinestra = new Date(oggi.getTime() + giorni * 24 * 60 * 60 * 1000);
+
+  const righe = await db
+    .select({
+      payment_id: eventPaymentsTable.id,
+      event_id: eventPaymentsTable.event_id,
+      payment_type: eventPaymentsTable.payment_type,
+      amount: eventPaymentsTable.amount,
+      due_date: eventPaymentsTable.due_date,
+      contatto_id: preventiviEventiTable.contatto_id,
+      contatto_nome: contattiCrmTable.nome,
+      telefono: contattiCrmTable.telefono,
+    })
+    .from(eventPaymentsTable)
+    .innerJoin(preventiviEventiTable, eq(preventiviEventiTable.id, eventPaymentsTable.event_id))
+    .innerJoin(contattiCrmTable, eq(contattiCrmTable.id, preventiviEventiTable.contatto_id))
+    .where(and(
+      eq(eventPaymentsTable.status, "pending"),
+      gte(eventPaymentsTable.due_date, oggi.toISOString().slice(0, 10)),
+      lte(eventPaymentsTable.due_date, fineFinestra.toISOString().slice(0, 10)),
+    ));
+
+  const dettagli: string[] = [];
+  for (const row of righe) {
+    if (!row.telefono) {
+      await logAutomazione("promemoria_pagamento", row.contatto_id, row.contatto_nome, `Promemoria pagamento saltato: telefono mancante per ${row.contatto_nome}`, "saltato");
+      continue;
+    }
+
+    const result = await dispatchWhatsAppTriggerTemplate({
+      triggerKey: "promemoria_pagamento",
+      to: row.telefono,
+      variables: [
+        row.contatto_nome,
+        row.payment_type.replace("_", " "),
+        formatMoney(row.amount),
+      ],
+      contattoId: row.contatto_id,
+      eventId: row.event_id,
+    });
+
+    if (result.status === "sent") {
+      await db.insert(messaggiTable).values({
+        contatto_id: row.contatto_id,
+        canale: "whatsapp",
+        direzione: "outbound",
+        testo: `Promemoria pagamento ${row.payment_type} inviato per ${formatMoney(row.amount)} con scadenza ${row.due_date}.`,
+        mittente_nome: "Automazione CRM",
+      });
+      await logAutomazione("promemoria_pagamento", row.contatto_id, row.contatto_nome, `Promemoria pagamento inviato a ${row.contatto_nome}`);
+      dettagli.push(`Promemoria inviato a ${row.contatto_nome}`);
+    } else {
+      await logAutomazione("promemoria_pagamento", row.contatto_id, row.contatto_nome, `Promemoria pagamento non inviato per ${row.contatto_nome}: ${result.reason}`, result.status === "failed" ? "errore" : "saltato");
+      dettagli.push(`Promemoria non inviato a ${row.contatto_nome}`);
+    }
+  }
+
+  return { eseguiti: righe.length, dettagli };
+}
+
 router.get("/automazioni/log", async (req, res) => {
   const { tipo, limit, offset } = req.query as { tipo?: string; limit?: string; offset?: string };
   const lim = parseLimit(limit, 50, 200);
@@ -523,6 +609,8 @@ router.post("/automazioni/trigger", async (req, res) => {
     result = await runRicorrenze();
   } else if (tipo === "promemoria") {
     result = await runPromemoriaAgenda();
+  } else if (tipo === "promemoria_pagamento") {
+    result = await runPromemoriaPagamenti();
   } else {
     res.status(400).json({ error: `Tipo sconosciuto: ${tipo}` });
     return;

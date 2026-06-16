@@ -1,0 +1,2139 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Zak Ecosystem AI — Guida Utente Completa</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  :root {
+    --primary: #6d28d9;
+    --primary-light: #8b5cf6;
+    --accent: #10b981;
+    --accent2: #f59e0b;
+    --dark: #0f172a;
+    --text: #1e293b;
+    --text-muted: #64748b;
+    --border: #e2e8f0;
+    --bg-light: #f8fafc;
+    --bg-purple: #f5f3ff;
+    --bg-green: #ecfdf5;
+    --bg-amber: #fffbeb;
+    --bg-blue: #eff6ff;
+    --danger: #ef4444;
+    --danger-bg: #fef2f2;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    font-size: 10pt;
+    line-height: 1.65;
+    color: var(--text);
+    background: white;
+  }
+
+  /* ─── PRINT ─── */
+  @media print {
+    body { font-size: 9pt; }
+    .no-print { display: none; }
+    .page-break { page-break-before: always; }
+    .page-break-avoid { page-break-inside: avoid; }
+    h1, h2, h3 { page-break-after: avoid; }
+    .cover { page-break-after: always; }
+    @page { margin: 2cm 2.5cm; }
+    @page :first { margin: 0; }
+  }
+
+  /* ─── COVER PAGE ─── */
+  .cover {
+    background: linear-gradient(135deg, #0f0f1a 0%, #1a0a2e 40%, #0d1b3e 100%);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 80px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cover::before {
+    content: '';
+    position: absolute;
+    top: -100px; right: -100px;
+    width: 500px; height: 500px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(109,40,217,0.3) 0%, transparent 70%);
+  }
+
+  .cover::after {
+    content: '';
+    position: absolute;
+    bottom: -50px; left: 200px;
+    width: 350px; height: 350px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(16,185,129,0.2) 0%, transparent 70%);
+  }
+
+  .cover-badge {
+    display: inline-block;
+    background: rgba(109,40,217,0.3);
+    border: 1px solid rgba(139,92,246,0.5);
+    color: #a78bfa;
+    padding: 6px 16px;
+    border-radius: 20px;
+    font-size: 8pt;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 24px;
+  }
+
+  .cover h1 {
+    font-size: 52pt;
+    font-weight: 800;
+    color: white;
+    line-height: 1.1;
+    margin-bottom: 8px;
+    letter-spacing: -1px;
+  }
+
+  .cover-subtitle {
+    font-size: 20pt;
+    font-weight: 300;
+    color: #94a3b8;
+    margin-bottom: 40px;
+  }
+
+  .cover-desc {
+    font-size: 11pt;
+    color: #64748b;
+    max-width: 500px;
+    line-height: 1.8;
+    margin-bottom: 48px;
+  }
+
+  .cover-meta {
+    display: flex;
+    gap: 40px;
+  }
+
+  .cover-meta-item label {
+    display: block;
+    font-size: 7pt;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #475569;
+    margin-bottom: 4px;
+  }
+
+  .cover-meta-item span {
+    font-size: 9pt;
+    font-weight: 500;
+    color: #94a3b8;
+  }
+
+  .cover-url {
+    margin-top: 48px;
+    padding: 16px 24px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9pt;
+    color: #10b981;
+  }
+
+  /* ─── TOC ─── */
+  .toc-page {
+    padding: 60px 80px;
+    min-height: 100vh;
+    background: var(--bg-light);
+  }
+
+  .toc-title {
+    font-size: 22pt;
+    font-weight: 700;
+    color: var(--dark);
+    margin-bottom: 32px;
+    padding-bottom: 16px;
+    border-bottom: 3px solid var(--primary);
+  }
+
+  .toc-section {
+    margin-bottom: 8px;
+  }
+
+  .toc-section a {
+    display: flex;
+    align-items: baseline;
+    text-decoration: none;
+    color: var(--text);
+    padding: 6px 0;
+  }
+
+  .toc-section a:hover { color: var(--primary); }
+
+  .toc-num {
+    font-weight: 700;
+    font-size: 10pt;
+    color: var(--primary);
+    width: 30px;
+    flex-shrink: 0;
+  }
+
+  .toc-label {
+    font-size: 10pt;
+    font-weight: 500;
+  }
+
+  .toc-dots {
+    flex: 1;
+    border-bottom: 1px dotted var(--border);
+    margin: 0 8px;
+    position: relative;
+    top: -3px;
+  }
+
+  .toc-page-num {
+    font-size: 9pt;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+
+  .toc-sub {
+    padding-left: 30px;
+  }
+
+  .toc-sub .toc-num {
+    color: var(--text-muted);
+    font-weight: 400;
+    font-size: 9pt;
+  }
+
+  .toc-sub .toc-label {
+    font-size: 9pt;
+    font-weight: 400;
+    color: var(--text-muted);
+  }
+
+  /* ─── CONTENT LAYOUT ─── */
+  .content {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 60px 80px;
+  }
+
+  /* ─── SECTION HEADER ─── */
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 32px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid var(--border);
+  }
+
+  .section-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+
+  .section-num {
+    font-size: 9pt;
+    font-weight: 700;
+    color: var(--primary);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 2px;
+  }
+
+  h2.section-title {
+    font-size: 22pt;
+    font-weight: 700;
+    color: var(--dark);
+    line-height: 1.2;
+  }
+
+  h3 {
+    font-size: 13pt;
+    font-weight: 600;
+    color: var(--dark);
+    margin: 28px 0 12px;
+  }
+
+  h4 {
+    font-size: 10pt;
+    font-weight: 600;
+    color: var(--primary);
+    margin: 20px 0 8px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  p {
+    margin-bottom: 12px;
+    color: var(--text);
+    line-height: 1.7;
+  }
+
+  /* ─── CARDS ─── */
+  .card {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin-bottom: 16px;
+    background: white;
+    page-break-inside: avoid;
+  }
+
+  .card-title {
+    font-size: 11pt;
+    font-weight: 600;
+    color: var(--dark);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .card p { margin-bottom: 6px; font-size: 9.5pt; }
+
+  .card-purple { border-left: 4px solid var(--primary); background: var(--bg-purple); }
+  .card-green { border-left: 4px solid var(--accent); background: var(--bg-green); }
+  .card-amber { border-left: 4px solid var(--accent2); background: var(--bg-amber); }
+  .card-blue { border-left: 4px solid #3b82f6; background: var(--bg-blue); }
+  .card-red { border-left: 4px solid var(--danger); background: var(--danger-bg); }
+
+  /* ─── STEP BOXES ─── */
+  .steps {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin: 16px 0;
+  }
+
+  .step {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    page-break-inside: avoid;
+  }
+
+  .step-num {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: white;
+    font-size: 10pt;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .step-content strong {
+    display: block;
+    font-size: 10pt;
+    font-weight: 600;
+    color: var(--dark);
+    margin-bottom: 3px;
+  }
+
+  .step-content span { font-size: 9.5pt; color: var(--text-muted); }
+
+  /* ─── FEATURE GRID ─── */
+  .feature-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 16px 0;
+  }
+
+  .feature-item {
+    background: var(--bg-light);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    page-break-inside: avoid;
+  }
+
+  .feature-item .fi-label {
+    font-size: 9pt;
+    font-weight: 600;
+    color: var(--dark);
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .feature-item .fi-desc {
+    font-size: 8.5pt;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  /* ─── API TABLE ─── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 9pt;
+    page-break-inside: avoid;
+  }
+
+  th {
+    background: var(--dark);
+    color: white;
+    padding: 8px 12px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 8.5pt;
+    letter-spacing: 0.5px;
+  }
+
+  td {
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+
+  tr:nth-child(even) td { background: var(--bg-light); }
+
+  .method {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 7.5pt;
+    font-weight: 600;
+  }
+
+  .method-get { background: #dbeafe; color: #1d4ed8; }
+  .method-post { background: #dcfce7; color: #15803d; }
+  .method-patch { background: #fef9c3; color: #854d0e; }
+  .method-delete { background: #fee2e2; color: #991b1b; }
+
+  code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 8pt;
+    background: #f1f5f9;
+    padding: 1px 5px;
+    border-radius: 3px;
+    color: #7c3aed;
+  }
+
+  .code-block {
+    background: #0f172a;
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin: 12px 0;
+    overflow: hidden;
+    page-break-inside: avoid;
+  }
+
+  .code-block code {
+    background: none;
+    color: #e2e8f0;
+    font-size: 8pt;
+    display: block;
+    line-height: 1.8;
+    white-space: pre;
+  }
+
+  /* ─── BADGE ─── */
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 7.5pt;
+    font-weight: 600;
+  }
+
+  .badge-green { background: #dcfce7; color: #15803d; }
+  .badge-purple { background: #ede9fe; color: #6d28d9; }
+  .badge-amber { background: #fef9c3; color: #92400e; }
+  .badge-red { background: #fee2e2; color: #991b1b; }
+  .badge-blue { background: #dbeafe; color: #1d4ed8; }
+  .badge-gray { background: #f1f5f9; color: #475569; }
+
+  /* ─── CALLOUT ─── */
+  .callout {
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin: 16px 0;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    page-break-inside: avoid;
+  }
+
+  .callout-icon { font-size: 16px; flex-shrink: 0; margin-top: 1px; }
+
+  .callout-tip { background: var(--bg-green); border: 1px solid #a7f3d0; }
+  .callout-warning { background: var(--bg-amber); border: 1px solid #fcd34d; }
+  .callout-info { background: var(--bg-blue); border: 1px solid #bfdbfe; }
+  .callout-danger { background: var(--danger-bg); border: 1px solid #fecaca; }
+
+  .callout p { margin: 0; font-size: 9.5pt; }
+
+  /* ─── CREDENTIALS BOX ─── */
+  .creds-box {
+    background: #0f172a;
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin: 16px 0;
+  }
+
+  .creds-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+
+  .creds-row:last-child { border-bottom: none; }
+
+  .creds-key {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 8pt;
+    color: #64748b;
+  }
+
+  .creds-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 8pt;
+    color: #10b981;
+    font-weight: 500;
+  }
+
+  /* ─── DIVIDER ─── */
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 32px 0;
+  }
+
+  /* ─── LISTS ─── */
+  ul, ol {
+    padding-left: 20px;
+    margin: 8px 0 12px;
+  }
+
+  li {
+    margin-bottom: 5px;
+    font-size: 9.5pt;
+    line-height: 1.6;
+  }
+
+  li strong { color: var(--dark); }
+
+  /* ─── HEADER ACCENT ─── */
+  .chapter-intro {
+    background: linear-gradient(135deg, var(--bg-purple) 0%, var(--bg-blue) 100%);
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin-bottom: 28px;
+    border: 1px solid rgba(109,40,217,0.15);
+  }
+
+  .chapter-intro p {
+    font-size: 10pt;
+    margin: 0;
+    color: var(--text);
+    line-height: 1.7;
+  }
+
+  /* ─── STATUS FLOW ─── */
+  .status-flow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin: 12px 0;
+  }
+
+  .status-node {
+    padding: 5px 12px;
+    border-radius: 6px;
+    font-size: 8.5pt;
+    font-weight: 600;
+  }
+
+  .status-arrow { color: var(--text-muted); font-size: 12pt; }
+
+  /* ─── FOOTER ─── */
+  .doc-footer {
+    margin-top: 60px;
+    padding: 24px 0;
+    border-top: 2px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 8pt;
+    color: var(--text-muted);
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════
+     COVER PAGE
+═══════════════════════════════════════════════════════════ -->
+<div class="cover">
+  <div class="cover-badge">Versione 1.0 — Giugno 2026</div>
+  <h1>Zak<br>Ecosystem<br>AI</h1>
+  <div class="cover-subtitle">Guida Utente Completa</div>
+  <p class="cover-desc">
+    Manuale operativo completo del CRM omnicanale AI per locali eventi italiani. 
+    Copre ogni funzionalità del sistema: dall'accesso al pannello fino alla configurazione 
+    delle automazioni, dell'AI e delle integrazioni esterne.
+  </p>
+  <div class="cover-meta">
+    <div class="cover-meta-item">
+      <label>Piattaforma</label>
+      <span>Web — Browser moderno</span>
+    </div>
+    <div class="cover-meta-item">
+      <label>Destinatari</label>
+      <span>Admin · Manager · Staff</span>
+    </div>
+    <div class="cover-meta-item">
+      <label>Data documento</label>
+      <span>9 Giugno 2026</span>
+    </div>
+  </div>
+  <div class="cover-url">🌐 https://zak-ecosystem-ai.onrender.com</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     INDICE
+═══════════════════════════════════════════════════════════ -->
+<div class="toc-page page-break">
+  <div class="toc-title">📋 Indice dei Contenuti</div>
+
+  <div class="toc-section">
+    <a href="#s1"><span class="toc-num">01</span><span class="toc-label">Introduzione e Accesso</span><span class="toc-dots"></span><span class="toc-page-num">3</span></a>
+  </div>
+  <div class="toc-section">
+    <a href="#s2"><span class="toc-num">02</span><span class="toc-label">Dashboard — Panoramica CRM</span><span class="toc-dots"></span><span class="toc-page-num">5</span></a>
+  </div>
+  <div class="toc-section">
+    <a href="#s3"><span class="toc-num">03</span><span class="toc-label">Inbox Omnicanale</span><span class="toc-dots"></span><span class="toc-page-num">7</span></a>
+  </div>
+  <div class="toc-section toc-sub">
+    <a href="#s3-1"><span class="toc-num">3.1</span><span class="toc-label">Zak AI — Booking Assistant</span><span class="toc-dots"></span><span class="toc-page-num">9</span></a>
+  </div>
+  <div class="toc-section">
+    <a href="#s4"><span class="toc-num">04</span><span class="toc-label">CRM Contatti</span><span class="toc-dots"></span><span class="toc-page-num">11</span></a>
+  </div>
+  <div class="toc-section">
+    <a href="#s5"><span class="toc-num">05</span><span class="toc-label">Preventivi ed Eventi</span><span class="toc-dots"></span><span class="toc-page-num">14</span></a>
+  </div>
+  <div class="toc-section">
+    <a href="#s6"><span class="toc-num">06</span><span class="toc-label">Agenda Personale</span><span class="toc-dots"></span><span class="toc-page-num">16</span></a>
+  </div>
+  <div class="toc-section">
+    <a href="#s7"><span class="toc-num">07</span><span class="toc-label">Task Personali</span><span class="toc-dots"></span><span class="toc-page-num">18</span></a>
+  </div>
+  <div class="toc-section">
+    <a href="#s8"><span class="toc-num">08</span><span class="toc-label">Automazioni CRM</span><span class="toc-dots"></span><span class="toc-page-num">19</span></a>
+  </div>
+  <div class="toc-section">
+    <a href="#s9"><span class="toc-num">09</span><span class="toc-label">Gestione Staff e Ruoli</span><span class="toc-dots"></span><span class="toc-page-num">22</span></a>
+  </div>
+  <div class="toc-section">
+    <a href="#s10"><span class="toc-num">10</span><span class="toc-label">Sezione B2B e Competitor</span><span class="toc-dots"></span><span class="toc-page-num">24</span></a>
+  </div>
+  <div class="toc-section">
+    <a href="#s11"><span class="toc-num">11</span><span class="toc-label">Audit Log — Sicurezza e Tracciamento</span><span class="toc-dots"></span><span class="toc-page-num">25</span></a>
+  </div>
+  <div class="toc-section">
+    <a href="#s12"><span class="toc-num">12</span><span class="toc-label">Integrazioni Esterne</span><span class="toc-dots"></span><span class="toc-page-num">26</span></a>
+  </div>
+  <div class="toc-section">
+    <a href="#s13"><span class="toc-num">13</span><span class="toc-label">Configurazione e Variabili Ambiente</span><span class="toc-dots"></span><span class="toc-page-num">28</span></a>
+  </div>
+  <div class="toc-section">
+    <a href="#s14"><span class="toc-num">14</span><span class="toc-label">Riferimento API Completo</span><span class="toc-dots"></span><span class="toc-page-num">30</span></a>
+  </div>
+  <div class="toc-section">
+    <a href="#s15"><span class="toc-num">15</span><span class="toc-label">Risoluzione Problemi Comuni</span><span class="toc-dots"></span><span class="toc-page-num">32</span></a>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SEZIONE 1 — INTRODUZIONE E ACCESSO
+═══════════════════════════════════════════════════════════ -->
+<div class="content page-break" id="s1">
+  <div class="section-header">
+    <div class="section-icon" style="background:#ede9fe;">🚀</div>
+    <div>
+      <div class="section-num">Sezione 01</div>
+      <h2 class="section-title">Introduzione e Accesso</h2>
+    </div>
+  </div>
+
+  <div class="chapter-intro">
+    <p><strong>Zak Ecosystem AI</strong> è un CRM omnicanale pensato per locali eventi italiani. Centralizza lead, messaggi WhatsApp e Instagram, preventivi, agenda, automazioni e un assistente AI per qualificare i clienti in modo automatico — tutto in un'unica piattaforma.</p>
+  </div>
+
+  <h3>1.1 Cos'è Zak Ecosystem AI</h3>
+  <div class="feature-grid">
+    <div class="feature-item">
+      <div class="fi-label">🤖 AI Booking Assistant</div>
+      <div class="fi-desc">Risponde automaticamente ai messaggi WhatsApp, raccoglie dati evento e crea preventivi senza intervento umano.</div>
+    </div>
+    <div class="feature-item">
+      <div class="fi-label">📥 Inbox Omnicanale</div>
+      <div class="fi-desc">Tutti i messaggi WhatsApp e Instagram in un unico pannello, assegnabili agli operatori.</div>
+    </div>
+    <div class="feature-item">
+      <div class="fi-label">👥 CRM Completo</div>
+      <div class="fi-desc">Gestione lead con storico stati, note staff, timeline e import CSV massivo.</div>
+    </div>
+    <div class="feature-item">
+      <div class="fi-label">📊 Dashboard KPI</div>
+      <div class="fi-desc">Metriche in tempo reale su conversioni, pipeline, budget e attività recenti.</div>
+    </div>
+    <div class="feature-item">
+      <div class="fi-label">⚡ Automazioni CRM</div>
+      <div class="fi-desc">Re-engagement automatico dei lead persi e promemoria anniversari annuali.</div>
+    </div>
+    <div class="feature-item">
+      <div class="fi-label">📅 Agenda + Google Calendar</div>
+      <div class="fi-desc">Agenda interna sincronizzabile con Google Calendar, con rilevamento disponibilità eventi.</div>
+    </div>
+  </div>
+
+  <h3>1.2 Accesso alla Piattaforma</h3>
+  <p>Apri il browser e vai all'indirizzo:</p>
+  <div class="code-block"><code>https://zak-ecosystem-ai.onrender.com</code></div>
+
+  <p>Verrai reindirizzato alla pagina di login. Inserisci le tue credenziali fornite dall'amministratore di sistema.</p>
+
+  <h4>Credenziali Admin Predefinite</h4>
+  <div class="creds-box">
+    <div class="creds-row">
+      <span class="creds-key">URL</span>
+      <span class="creds-val">https://zak-ecosystem-ai.onrender.com</span>
+    </div>
+    <div class="creds-row">
+      <span class="creds-key">Email</span>
+      <span class="creds-val">admin@zak.local</span>
+    </div>
+    <div class="creds-row">
+      <span class="creds-key">Password</span>
+      <span class="creds-val">Admin1234!</span>
+    </div>
+    <div class="creds-row">
+      <span class="creds-key">Ruolo</span>
+      <span class="creds-val">admin</span>
+    </div>
+  </div>
+
+  <div class="callout callout-warning">
+    <span class="callout-icon">⚠️</span>
+    <p><strong>Importante:</strong> Cambia la password admin immediatamente dopo il primo accesso tramite la pagina Impostazioni → Staff → modifica utente.</p>
+  </div>
+
+  <h3>1.3 Ruoli Utente</h3>
+  <table>
+    <thead>
+      <tr><th>Ruolo</th><th>Accesso</th><th>Funzionalità</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="badge badge-red">admin</span></td>
+        <td>Completo</td>
+        <td>Tutte le sezioni, gestione staff, audit log, configurazione sistema</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-amber">manager</span></td>
+        <td>Operativo</td>
+        <td>CRM, inbox, preventivi, agenda, automazioni. No gestione utenti admin</td>
+      </tr>
+      <tr>
+        <td><span class="badge badge-blue">staff</span></td>
+        <td>Limitato</td>
+        <td>Inbox, contatti assegnati, agenda personale, task propri</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>1.4 Navigazione del Pannello</h3>
+  <p>La sidebar sinistra contiene tutte le sezioni principali:</p>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">📊</div>
+      <div class="step-content"><strong>Dashboard</strong><span>Panoramica KPI, grafici e feed attività</span></div>
+    </div>
+    <div class="step">
+      <div class="step-num">📥</div>
+      <div class="step-content"><strong>Inbox</strong><span>Messaggi multi-canale unificati</span></div>
+    </div>
+    <div class="step">
+      <div class="step-num">👥</div>
+      <div class="step-content"><strong>Contatti</strong><span>Gestione lead e clienti CRM</span></div>
+    </div>
+    <div class="step">
+      <div class="step-num">📋</div>
+      <div class="step-content"><strong>Preventivi</strong><span>Offerte e conferme eventi</span></div>
+    </div>
+    <div class="step">
+      <div class="step-num">📅</div>
+      <div class="step-content"><strong>Agenda</strong><span>Calendario appuntamenti personali</span></div>
+    </div>
+    <div class="step">
+      <div class="step-num">✅</div>
+      <div class="step-content"><strong>Task</strong><span>Promemoria e attività da completare</span></div>
+    </div>
+    <div class="step">
+      <div class="step-num">⚡</div>
+      <div class="step-content"><strong>Automazioni</strong><span>Job CRM automatici e configurazione</span></div>
+    </div>
+    <div class="step">
+      <div class="step-num">⚙️</div>
+      <div class="step-content"><strong>Impostazioni</strong><span>Gestione staff e configurazione sistema</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SEZIONE 2 — DASHBOARD
+═══════════════════════════════════════════════════════════ -->
+<div class="content page-break" id="s2">
+  <div class="section-header">
+    <div class="section-icon" style="background:#dbeafe;">📊</div>
+    <div>
+      <div class="section-num">Sezione 02</div>
+      <h2 class="section-title">Dashboard — Panoramica CRM</h2>
+    </div>
+  </div>
+
+  <div class="chapter-intro">
+    <p>La Dashboard è il punto di ingresso principale del sistema. Mostra in tempo reale i KPI più importanti del locale, con filtri temporali, grafici di conversione e un feed delle attività recenti.</p>
+  </div>
+
+  <h3>2.1 KPI Principali</h3>
+  <div class="feature-grid">
+    <div class="feature-item">
+      <div class="fi-label">👥 Contatti Totali</div>
+      <div class="fi-desc">Numero totale di lead nel CRM. Include nuovi contatti del giorno corrente evidenziati in verde.</div>
+    </div>
+    <div class="feature-item">
+      <div class="fi-label">📋 Preventivi Attivi</div>
+      <div class="fi-desc">Preventivi in stato <em>aperto</em> o <em>opzionato</em> — trattative ancora in corso.</div>
+    </div>
+    <div class="feature-item">
+      <div class="fi-label">🎉 Eventi Confermati</div>
+      <div class="fi-desc">Numero di eventi con stato <em>confermato</em> nel periodo selezionato.</div>
+    </div>
+    <div class="feature-item">
+      <div class="fi-label">💰 Budget Confermato</div>
+      <div class="fi-desc">Somma del budget stimato di tutti gli eventi confermati. Aggiornato in tempo reale.</div>
+    </div>
+    <div class="feature-item">
+      <div class="fi-label">📩 Messaggi Non Letti</div>
+      <div class="fi-desc">Conteggio messaggi inbound non ancora aperti da nessun operatore.</div>
+    </div>
+    <div class="feature-item">
+      <div class="fi-label">🔄 Tasso Conversione</div>
+      <div class="fi-desc">Tre metriche: Lead → Preventivo, Preventivo → Confermato, Lead → Confermato.</div>
+    </div>
+  </div>
+
+  <h3>2.2 Filtri Temporali</h3>
+  <p>Tutti i KPI e i grafici supportano filtri per periodo. In alto a destra seleziona:</p>
+  <ul>
+    <li><strong>Oggi</strong> — dati del giorno corrente</li>
+    <li><strong>Ultimi 7 giorni</strong> — settimana corrente</li>
+    <li><strong>Ultimi 30 giorni</strong> — mese corrente (default)</li>
+    <li><strong>Ultimi 90 giorni</strong> — trimestre</li>
+    <li><strong>Personalizzato</strong> — intervallo con data inizio e fine a scelta</li>
+  </ul>
+
+  <div class="callout callout-tip">
+    <span class="callout-icon">💡</span>
+    <p>I dati della dashboard sono memorizzati in cache per 30 secondi. Per un aggiornamento immediato, aggiorna la pagina o cambia il filtro temporale.</p>
+  </div>
+
+  <h3>2.3 Grafici</h3>
+
+  <div class="card card-purple">
+    <div class="card-title">📈 Pipeline Lead</div>
+    <p>Grafico a barre che mostra il numero di lead per ogni stato: <em>nuovo → qualificato → preventivo → confermato → perso</em>. Permette di identificare immediatamente dove si perdono le trattative.</p>
+  </div>
+
+  <div class="card card-blue">
+    <div class="card-title">📅 Eventi per Mese</div>
+    <p>Grafico a linee degli eventi confermati per mese. Mostra stagionalità e picchi di prenotazione utili per pianificare le risorse.</p>
+  </div>
+
+  <h3>2.4 Feed Attività Recente</h3>
+  <p>Lista cronologica delle ultime azioni nel sistema:</p>
+  <ul>
+    <li>Nuovi messaggi WhatsApp ricevuti</li>
+    <li>Preventivi creati o modificati</li>
+    <li>Contatti aggiornati dall'AI o dallo staff</li>
+    <li>Automazioni eseguite</li>
+    <li>Handoff AI → operatore richiesti</li>
+  </ul>
+
+  <h3>2.5 Come Usare la Dashboard Efficacemente</h3>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content"><strong>Check mattutino</strong><span>Controlla i "Messaggi Non Letti" e il "Budget Confermato" ogni mattina per avere il polso della situazione.</span></div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content"><strong>Pipeline lead</strong><span>Se vedi molti lead in stato "qualificato" ma pochi preventivi, significa che l'AI ha raccolto dati ma lo staff non ha ancora seguito up.</span></div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content"><strong>Tasso conversione</strong><span>Un tasso Lead → Confermato sotto il 20% indica un problema nel processo di vendita o nei prezzi proposti.</span></div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-content"><strong>Export report</strong><span>Usa il pulsante "Esporta" in alto a destra per scaricare i dati in formato CSV da analizzare in Excel.</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SEZIONE 3 — INBOX
+═══════════════════════════════════════════════════════════ -->
+<div class="content page-break" id="s3">
+  <div class="section-header">
+    <div class="section-icon" style="background:#dcfce7;">📥</div>
+    <div>
+      <div class="section-num">Sezione 03</div>
+      <h2 class="section-title">Inbox Omnicanale</h2>
+    </div>
+  </div>
+
+  <div class="chapter-intro">
+    <p>L'Inbox è il cuore operativo del sistema. Raccoglie in un unico posto tutti i messaggi WhatsApp e Instagram ricevuti, permettendo allo staff di rispondere, assegnare conversazioni e coordinare il lavoro senza passare da un'app all'altra.</p>
+  </div>
+
+  <h3>3.1 Struttura dell'Inbox</h3>
+  <p>L'interfaccia è divisa in tre colonne:</p>
+
+  <div class="card">
+    <div class="card-title">🗂️ Colonna Sinistra — Lista Conversazioni</div>
+    <p>Elenco di tutti i contatti che hanno scritto, ordinati per ultimo messaggio. Ogni voce mostra: nome, canale (WhatsApp/Instagram), preview ultimo messaggio, stato lead e numero messaggi non letti.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">💬 Colonna Centrale — Chat</div>
+    <p>Storico completo della conversazione con il contatto selezionato. I messaggi inbound appaiono a sinistra, quelli outbound (staff o AI) a destra. Caricamento paginato: scorrendo verso l'alto vengono caricati messaggi precedenti.</p>
+  </div>
+
+  <div class="card">
+    <div class="card-title">📋 Colonna Destra — Scheda Lead</div>
+    <p>Pannello contestuale con: stato lead, tipo evento, data richiesta, numero invitati, operatore assegnato. Permette modifica rapida senza uscire dall'inbox.</p>
+  </div>
+
+  <h3>3.2 Filtri Inbox</h3>
+  <table>
+    <thead>
+      <tr><th>Filtro</th><th>Valori</th><th>Uso</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Canale</strong></td>
+        <td>Tutti / WhatsApp / Instagram / Voice</td>
+        <td>Isola i messaggi di un canale specifico</td>
+      </tr>
+      <tr>
+        <td><strong>Stato Lead</strong></td>
+        <td>Nuovo / Qualificato / Preventivo / Confermato / Perso</td>
+        <td>Filtra per fase della trattativa</td>
+      </tr>
+      <tr>
+        <td><strong>Operatore</strong></td>
+        <td>Tutti / Non assegnati / [nome staff]</td>
+        <td>Mostra solo le chat del singolo operatore</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3>3.3 Rispondere a un Messaggio</h3>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content"><strong>Seleziona la conversazione</strong><span>Clicca sul contatto nella lista sinistra. I messaggi non letti vengono marcati come letti automaticamente.</span></div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content"><strong>Scrivi il messaggio</strong><span>Usa il campo di testo in basso nella colonna centrale. Supporta testo libero.</span></div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content"><strong>Invia</strong><span>Premi Invio o il pulsante Invia. Il messaggio viene salvato in inbox e, se configurate le credenziali Meta, inviato realmente via WhatsApp.</span></div>
+    </div>
+  </div>
+
+  <div class="callout callout-warning">
+    <span class="callout-icon">⚠️</span>
+    <p><strong>Finestra di 24 ore WhatsApp:</strong> Meta permette l'invio di messaggi testuali liberi solo entro 24 ore dall'ultimo messaggio del cliente. Dopo tale finestra è necessario usare un template WhatsApp approvato.</p>
+  </div>
+
+  <h3>3.4 Assegnazione Conversazione</h3>
+  <p>Per prendere in carico una conversazione e bloccare l'AI:</p>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content"><strong>Apri la scheda lead</strong><span>Clicca sulla conversazione e guarda il pannello destro.</span></div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content"><strong>Assegna operatore</strong><span>Dal menu a tendina "Operatore", seleziona il tuo nome o quello di un collega. L'AI smetterà di rispondere automaticamente.</span></div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content"><strong>Rilascia (opzionale)</strong><span>Per riattivare l'AI, seleziona "Nessuno" nel menu operatore. Zak AI riprenderà a gestire la conversazione.</span></div>
+    </div>
+  </div>
+
+  <div class="callout callout-tip">
+    <span class="callout-icon">💡</span>
+    <p><strong>Quando assegnare manualmente:</strong> Assegna a un operatore quando il cliente chiede di parlare con una persona, quando la trattativa è in fase avanzata, o quando l'AI non riesce a rispondere in modo soddisfacente.</p>
+  </div>
+
+  <h3>3.5 Caricamento Messaggi Paginato</h3>
+  <p>Per evitare rallentamenti, la chat carica gli ultimi 20 messaggi. Per vedere i messaggi precedenti:</p>
+  <ul>
+    <li>Scorri verso l'alto nella chat</li>
+    <li>Clicca sul pulsante <strong>"Mostra messaggi precedenti"</strong> che appare in cima</li>
+  </ul>
+
+  <p>Allo stesso modo, la lista conversazioni nella colonna sinistra mostra le prime 30. Usa il pulsante <strong>"Mostra altre conversazioni"</strong> per caricare le successive.</p>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SEZIONE 3.1 — BOOKING ASSISTANT AI
+═══════════════════════════════════════════════════════════ -->
+<div class="content page-break" id="s3-1">
+  <div class="section-header">
+    <div class="section-icon" style="background:#fef3c7;">🤖</div>
+    <div>
+      <div class="section-num">Sezione 03.1</div>
+      <h2 class="section-title">Zak AI — Booking Assistant</h2>
+    </div>
+  </div>
+
+  <div class="chapter-intro">
+    <p><strong>Zak AI</strong> è l'assistente automatico che risponde ai messaggi WhatsApp inbound, raccoglie le informazioni sull'evento desiderato e crea o aggiorna il preventivo nel CRM — senza intervento umano.</p>
+  </div>
+
+  <h3>3.1.1 Come Funziona</h3>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content"><strong>Cliente scrive su WhatsApp</strong><span>Il messaggio arriva tramite webhook Meta e viene salvato in inbox.</span></div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content"><strong>Verifica assegnazione</strong><span>Se la chat non è assegnata a nessun operatore, l'AI si attiva. Se è assegnata, l'AI resta in silenzio.</span></div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content"><strong>Estrazione dati</strong><span>L'AI estrae: nome cliente, tipo evento (matrimonio, compleanno, azienda...), data richiesta, numero invitati.</span></div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-content"><strong>Aggiornamento CRM</strong><span>Crea o aggiorna automaticamente il contatto e il preventivo nel database.</span></div>
+    </div>
+    <div class="step">
+      <div class="step-num">5</div>
+      <div class="step-content"><strong>Risposta automatica</strong><span>Invia una risposta personalizzata basata sui template configurati. Propone date alternative se la data è già occupata.</span></div>
+    </div>
+  </div>
+
+  <h3>3.1.2 Dati Estratti Automaticamente</h3>
+  <div class="feature-grid">
+    <div class="feature-item">
+      <div class="fi-label">👤 Nome Cliente</div>
+      <div class="fi-desc">Estratto dal testo del messaggio o dal profilo WhatsApp.</div>
+    </div>
+    <div class="feature-item">
+      <div class="fi-label">🎭 Tipo Evento</div>
+      <div class="fi-desc">Matrimonio, compleanno, laurea, azienda, altro. Normalizzato e salvato nel CRM.</div>
+    </div>
+    <div class="feature-item">
+      <div class="fi-label">📅 Data Evento</div>
+      <div class="fi-desc">Riconoscimento intelligente di date in formato italiano (es. "sabato 15 luglio").</div>
+    </div>
+    <div class="feature-item">
+      <div class="fi-label">👥 N° Invitati</div>
+      <div class="fi-desc">Numero di ospiti. Usato per verificare capienza e calcolare budget base.</div>
+    </div>
+  </div>
+
+  <h3>3.1.3 Motore AI Doppio</h3>
+  <p>Zak AI usa due livelli di estrazione in cascade:</p>
+
+  <div class="card card-purple">
+    <div class="card-title">🧠 Livello 1 — LLM (Gemini)</div>
+    <p>Quando <code>ZAK_LLM_BOOKING_ENABLED=true</code> è configurato, Zak AI usa Gemini 1.5 Flash tramite API Google AI per comprendere messaggi complessi in linguaggio naturale. Produce JSON strutturato validato prima di salvare nel DB.</p>
+  </div>
+
+  <div class="card card-blue">
+    <div class="card-title">⚙️ Livello 2 — Rule-Based (Fallback)</div>
+    <p>Se il LLM non è configurato, va in timeout o produce dati non validi, il sistema usa parser basati su pattern testuali. Meno intelligente ma sempre funzionante — il flusso non si interrompe mai.</p>
+  </div>
+
+  <h3>3.1.4 Stato Conversazionale</h3>
+  <p>L'AI mantiene uno stato persistente per ogni conversazione. Se il cliente non ha ancora fornito tutti i dati necessari, l'AI:</p>
+  <ul>
+    <li>Ricorda cosa è già stato detto nelle conversazioni precedenti</li>
+    <li>Chiede solo le informazioni mancanti (non ripete domande già fatte)</li>
+    <li>Salva lo step corrente in database per persistere tra riavvii del server</li>
+  </ul>
+
+  <h3>3.1.5 Handoff AI → Operatore</h3>
+  <p>L'AI riconosce automaticamente quando il cliente vuole parlare con una persona umana e invia una notifica di handoff. Frasi come <em>"voglio parlare con qualcuno"</em>, <em>"potete chiamarmi?"</em>, <em>"ho bisogno di un operatore"</em> attivano il trasferimento.</p>
+
+  <div class="callout callout-info">
+    <span class="callout-icon">ℹ️</span>
+    <p>Dopo il handoff, la conversazione appare nell'inbox con il badge <strong>"Handoff richiesto"</strong>. Un operatore deve assegnarla a sé per iniziare a rispondere.</p>
+  </div>
+
+  <h3>3.1.6 Template di Risposta</h3>
+  <p>Le risposte dell'AI sono personalizzabili dalla pagina <strong>Automazioni → Template</strong>. I placeholder disponibili sono:</p>
+  <table>
+    <thead><tr><th>Placeholder</th><th>Sostituito con</th></tr></thead>
+    <tbody>
+      <tr><td><code>{{nome}}</code></td><td>Nome del cliente</td></tr>
+      <tr><td><code>{{tipo_evento}}</code></td><td>Tipo evento riconosciuto</td></tr>
+      <tr><td><code>{{data_evento}}</code></td><td>Data richiesta formattata in italiano</td></tr>
+      <tr><td><code>{{numero_invitati}}</code></td><td>Numero ospiti</td></tr>
+      <tr><td><code>{{alternative}}</code></td><td>Date alternative proposte se la data è occupata</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SEZIONE 4 — CRM CONTATTI
+═══════════════════════════════════════════════════════════ -->
+<div class="content page-break" id="s4">
+  <div class="section-header">
+    <div class="section-icon" style="background:#dcfce7;">👥</div>
+    <div>
+      <div class="section-num">Sezione 04</div>
+      <h2 class="section-title">CRM Contatti</h2>
+    </div>
+  </div>
+
+  <div class="chapter-intro">
+    <p>Il modulo CRM gestisce tutti i lead e clienti del locale. Ogni contatto tiene traccia dell'origine, dello stato nella pipeline di vendita, delle note interne dello staff e dell'intera timeline di comunicazioni e preventivi.</p>
+  </div>
+
+  <h3>4.1 Lista Contatti</h3>
+  <p>La pagina <strong>Contatti</strong> mostra tutti i lead con i filtri principali:</p>
+  <div class="feature-grid">
+    <div class="feature-item">
+      <div class="fi-label">🔍 Ricerca</div>
+      <div class="fi-desc">Ricerca per nome, telefono o username Instagram.</div>
+    </div>
+    <div class="feature-item">
+      <div class="fi-label">📊 Stato Lead</div>
+      <div class="fi-desc">Filtra per: nuovo, qualificato, preventivo, confermato, perso.</div>
+    </div>
+    <div class="feature-item">
+      <div class="fi-label">🎭 Tipo Evento</div>
+      <div class="fi-desc">Matrimonio, compleanno, laurea, azienda, altro.</div>
+    </div>
+    <div class="feature-item">
+      <div class="fi-label">🌐 Origine Lead</div>
+      <div class="fi-desc">WhatsApp, Instagram, telefono, referral, altro.</div>
+    </div>
+  </div>
+
+  <h3>4.2 Pipeline Stato Lead</h3>
+  <div class="status-flow">
+    <div class="status-node badge badge-gray">🆕 Nuovo</div>
+    <span class="status-arrow">→</span>
+    <div class="status-node badge badge-blue">🔍 Qualificato</div>
+    <span class="status-arrow">→</span>
+    <div class="status-node badge badge-amber">📋 Preventivo</div>
+    <span class="status-arrow">→</span>
+    <div class="status-node badge badge-green">✅ Confermato</div>
+    <span class="status-arrow">·</span>
+    <div class="status-node badge badge-red">❌ Perso</div>
+  </div>
+
+  <table style="margin-top:12px;">
+    <thead><tr><th>Stato</th><th>Significato</th><th>Azione consigliata</th></tr></thead>
+    <tbody>
+      <tr><td><span class="badge badge-gray">Nuovo</span></td><td>Lead appena entrato, dati minimi</td><td>Qualifica via AI o telefonata</td></tr>
+      <tr><td><span class="badge badge-blue">Qualificato</span></td><td>Dati evento raccolti</td><td>Crea preventivo</td></tr>
+      <tr><td><span class="badge badge-amber">Preventivo</span></td><td>Offerta inviata, in attesa risposta</td><td>Follow-up dopo 3-5 giorni</td></tr>
+      <tr><td><span class="badge badge-green">Confermato</span></td><td>Evento confermato e pagato</td><td>Inserisci in agenda, segna in calendario</td></tr>
+      <tr><td><span class="badge badge-red">Perso</span></td><td>Trattativa fallita</td><td>Automazione re-engagement dopo 30 giorni</td></tr>
+    </tbody>
+  </table>
+
+  <h3>4.3 Creare un Nuovo Contatto</h3>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content"><strong>Clicca "+ Nuovo Contatto"</strong><span>In alto a destra nella pagina Contatti.</span></div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content"><strong>Compila i dati obbligatori</strong><span>Nome (obbligatorio). Telefono e/o Instagram username (almeno uno raccomandato per evitare duplicati).</span></div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content"><strong>Imposta stato e origine</strong><span>Seleziona stato lead e canale di provenienza.</span></div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-content"><strong>Salva</strong><span>Il sistema verifica automaticamente i duplicati su telefono e Instagram prima di salvare.</span></div>
+    </div>
+  </div>
+
+  <div class="callout callout-tip">
+    <span class="callout-icon">💡</span>
+    <p><strong>Deduplicazione automatica:</strong> Il sistema normalizza il numero di telefono (es. +39 338... e 338... sono considerati uguali) e blocca la creazione di duplicati. Se il telefono esiste già, viene mostrato un avviso con link al contatto esistente.</p>
+  </div>
+
+  <h3>4.4 Dettaglio Contatto</h3>
+  <p>Cliccando su un contatto si apre il pannello laterale con:</p>
+
+  <div class="card card-purple">
+    <div class="card-title">📋 Scheda Anagrafica</div>
+    <p>Nome, telefono, Instagram, email, origine lead, tipo evento, stato lead, operatore assegnato, data creazione e ultimo contatto.</p>
+  </div>
+
+  <div class="card card-blue">
+    <div class="card-title">📝 Note Interne Staff</div>
+    <p>Campo di testo libero visibile solo allo staff (non al cliente). Salvato con doppio clic o pulsante "Salva note". Usato per annotazioni operative, preferenze cliente, feedback dopo chiamate.</p>
+  </div>
+
+  <div class="card card-green">
+    <div class="card-title">📜 Timeline Attività</div>
+    <p>Lista cronologica di tutti gli eventi del contatto: messaggi ricevuti/inviati, preventivi creati, cambiamenti di stato lead. Scorribile verso l'alto per la storia completa.</p>
+  </div>
+
+  <div class="card card-amber">
+    <div class="card-title">📊 Storico Cambi Stato</div>
+    <p>Log dedicato di ogni cambio di stato lead con: stato precedente, nuovo stato, data/ora e chi ha fatto la modifica (AI o nome staff).</p>
+  </div>
+
+  <h3>4.5 Import CSV Massivo</h3>
+  <p>Per importare molti contatti contemporaneamente:</p>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content"><strong>Prepara il file CSV</strong><span>Colonne: <code>nome</code>, <code>telefono</code>, <code>instagram_username</code>, <code>tipo_evento</code>, <code>origine_lead</code>, <code>stato_lead</code>.</span></div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content"><strong>Clicca "Importa CSV"</strong><span>Pulsante nella pagina Contatti, accanto a "+ Nuovo Contatto".</span></div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content"><strong>Carica il file</strong><span>Il sistema elabora ogni riga, deduplicando su telefono e Instagram. Restituisce un report con righe importate, saltate (duplicate) ed errori.</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SEZIONE 5 — PREVENTIVI
+═══════════════════════════════════════════════════════════ -->
+<div class="content page-break" id="s5">
+  <div class="section-header">
+    <div class="section-icon" style="background:#fef9c3;">📋</div>
+    <div>
+      <div class="section-num">Sezione 05</div>
+      <h2 class="section-title">Preventivi ed Eventi</h2>
+    </div>
+  </div>
+
+  <div class="chapter-intro">
+    <p>Il modulo Preventivi gestisce le offerte per gli eventi del locale. Ogni preventivo è collegato a un contatto CRM e traccia data, budget, numero invitati e stato dell'evento lungo tutto il ciclo di vita della trattativa.</p>
+  </div>
+
+  <h3>5.1 Stati di un Preventivo</h3>
+  <div class="status-flow">
+    <div class="status-node badge badge-gray">📝 Aperto</div>
+    <span class="status-arrow">→</span>
+    <div class="status-node badge badge-amber">⏳ Opzionato</div>
+    <span class="status-arrow">→</span>
+    <div class="status-node badge badge-green">✅ Confermato</div>
+    <span class="status-arrow">·</span>
+    <div class="status-node badge badge-red">❌ Rifiutato</div>
+  </div>
+
+  <table style="margin-top:12px;">
+    <thead><tr><th>Stato</th><th>Significato</th></tr></thead>
+    <tbody>
+      <tr><td><span class="badge badge-gray">Aperto</span></td><td>Trattativa in corso, date non bloccate</td></tr>
+      <tr><td><span class="badge badge-amber">Opzionato</span></td><td>Data tenuta in blocco per il cliente, in attesa di conferma</td></tr>
+      <tr><td><span class="badge badge-green">Confermato</span></td><td>Evento prenotato e confermato. Appare nel conteggio budget dashboard</td></tr>
+      <tr><td><span class="badge badge-red">Rifiutato</span></td><td>Trattativa persa. Il contatto viene segnato come "Perso"</td></tr>
+    </tbody>
+  </table>
+
+  <h3>5.2 Creare un Preventivo</h3>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content"><strong>Vai su "Preventivi" → "+ Nuovo"</strong><span>Oppure dalla scheda contatto clicca "Crea preventivo".</span></div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content"><strong>Collega al contatto</strong><span>Seleziona il contatto CRM dalla lista. Se il preventivo è stato creato dall'AI, è già precompilato.</span></div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content"><strong>Compila i dettagli</strong><span>Data evento, numero invitati, budget stimato, note aggiuntive.</span></div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-content"><strong>Verifica disponibilità</strong><span>Il sistema controlla automaticamente se la data è già occupata da altri eventi confermati o opzionati.</span></div>
+    </div>
+    <div class="step">
+      <div class="step-num">5</div>
+      <div class="step-content"><strong>Salva e invia</strong><span>Salva il preventivo. Dalla pagina dettaglio puoi generare il PDF e inviarlo via WhatsApp o email.</span></div>
+    </div>
+  </div>
+
+  <h3>5.3 Funzionalità Avanzate</h3>
+
+  <div class="card card-purple">
+    <div class="card-title">📄 Generazione PDF</div>
+    <p>Ogni preventivo può essere generato come documento PDF professionale con logo del locale, dettagli evento, prezzi e condizioni. Usa il pulsante "Genera PDF" nella pagina del preventivo.</p>
+  </div>
+
+  <div class="card card-green">
+    <div class="card-title">📤 Invio via WhatsApp/Email</div>
+    <p>Il PDF del preventivo può essere inviato direttamente via WhatsApp al numero del cliente (se le credenziali Meta sono configurate) o come link email.</p>
+  </div>
+
+  <div class="card card-blue">
+    <div class="card-title">📋 Versionamento</div>
+    <p>Ogni modifica al preventivo crea una nuova versione. Lo storico delle versioni è consultabile per confrontare le offerte nel tempo.</p>
+  </div>
+
+  <div class="card card-amber">
+    <div class="card-title">💰 Calcolo Pacchetti e Prezzi</div>
+    <p>Il sistema supporta la configurazione di pacchetti standard (base, premium, luxury) con calcolo automatico del prezzo finale in base al numero di invitati.</p>
+  </div>
+
+  <h3>5.4 Sincronizzazione Google Calendar</h3>
+  <p>Quando un preventivo viene portato allo stato <strong>Confermato</strong> e Google Calendar è abilitato, l'evento viene automaticamente creato nel calendario Google configurato, con tutti i dettagli dell'evento.</p>
+
+  <div class="callout callout-info">
+    <span class="callout-icon">ℹ️</span>
+    <p>Attualmente <code>ZAK_GOOGLE_CALENDAR_ENABLED=false</code>. Per abilitare la sincronizzazione Google, segui la procedura nella <strong>Sezione 12 — Integrazioni Esterne</strong>.</p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SEZIONE 6 — AGENDA
+═══════════════════════════════════════════════════════════ -->
+<div class="content page-break" id="s6">
+  <div class="section-header">
+    <div class="section-icon" style="background:#dbeafe;">📅</div>
+    <div>
+      <div class="section-num">Sezione 06</div>
+      <h2 class="section-title">Agenda Personale</h2>
+    </div>
+  </div>
+
+  <div class="chapter-intro">
+    <p>L'Agenda permette allo staff di gestire appuntamenti, sopralluoghi, chiamate e ogni altro impegno. Può sincronizzarsi con Google Calendar e riceve eventi automaticamente dal Voice Assistant.</p>
+  </div>
+
+  <h3>6.1 Tipi di Voci Agenda</h3>
+  <div class="feature-grid">
+    <div class="feature-item">
+      <div class="fi-label">🎉 Evento</div>
+      <div class="fi-desc">Evento del locale confermato. Collegabile a un contatto/preventivo CRM.</div>
+    </div>
+    <div class="feature-item">
+      <div class="fi-label">📞 Chiamata</div>
+      <div class="fi-desc">Chiamata programmata con cliente o fornitore.</div>
+    </div>
+    <div class="feature-item">
+      <div class="fi-label">🏃 Sopralluogo</div>
+      <div class="fi-desc">Visita al locale o location con potenziale cliente.</div>
+    </div>
+    <div class="feature-item">
+      <div class="fi-label">📝 Riunione</div>
+      <div class="fi-desc">Meeting interno staff o con fornitori.</div>
+    </div>
+    <div class="feature-item">
+      <div class="fi-label">🔒 Blocco</div>
+      <div class="fi-desc">Slot bloccato — il locale non è disponibile per eventi in questa finestra.</div>
+    </div>
+    <div class="feature-item">
+      <div class="fi-label">🤖 Voice</div>
+      <div class="fi-desc">Creato automaticamente dal Voice Assistant dopo una chiamata telefonica.</div>
+    </div>
+  </div>
+
+  <h3>6.2 Creare un Appuntamento</h3>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content"><strong>Vai su "Agenda" → "+ Nuovo"</strong><span>Si apre il form di creazione appuntamento.</span></div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content"><strong>Compila titolo, categoria, data e ora</strong><span>La data/ora di fine deve essere successiva a quella di inizio — il sistema lo verifica automaticamente.</span></div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content"><strong>Collega a contatto (opzionale)</strong><span>Se l'appuntamento è con un cliente, collegalo al contatto CRM per visualizzarlo nella timeline del cliente.</span></div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-content"><strong>Salva</strong><span>Se Google Calendar è abilitato, l'evento viene sincronizzato automaticamente nel calendario Google.</span></div>
+    </div>
+  </div>
+
+  <h3>6.3 Promemoria Automatici</h3>
+  <p>Il sistema invia promemoria automatici per gli appuntamenti imminenti. Il job di controllo parte <strong>ogni 15 minuti</strong> e invia notifiche per eventi nelle prossime ore.</p>
+
+  <div class="callout callout-tip">
+    <span class="callout-icon">💡</span>
+    <p><strong>Reset promemoria:</strong> Se rischedi un appuntamento futuro, il flag <em>promemoria_inviato</em> viene resettato automaticamente, garantendo che il promemoria venga inviato di nuovo alla nuova data.</p>
+  </div>
+
+  <h3>6.4 Controllo Disponibilità</h3>
+  <p>Prima di creare un preventivo, il sistema verifica la disponibilità della data richiesta controllando:</p>
+  <ul>
+    <li>Preventivi nello stato <em>opzionato</em> o <em>confermato</em> nella stessa data</li>
+    <li>Voci agenda di tipo <em>blocco</em> nella stessa finestra temporale</li>
+    <li>Se Google Calendar è abilitato: eventi Google nella stessa data via FreeBusy API</li>
+  </ul>
+
+  <h3>6.5 Sincronizzazione Google Calendar</h3>
+  <p>Quando <code>ZAK_GOOGLE_CALENDAR_ENABLED=true</code>:</p>
+  <ul>
+    <li><strong>ZAK → Google:</strong> Ogni evento creato/modificato/eliminato in agenda viene sincronizzato su Google Calendar</li>
+    <li><strong>Google → ZAK:</strong> Gli eventi Google possono essere importati tramite sync manuale dal pannello impostazioni</li>
+    <li><strong>Webhook push:</strong> Google invia notifiche push in tempo reale su ogni modifica del calendario</li>
+  </ul>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SEZIONE 7 — TASK
+═══════════════════════════════════════════════════════════ -->
+<div class="content page-break" id="s7">
+  <div class="section-header">
+    <div class="section-icon" style="background:#fef9c3;">✅</div>
+    <div>
+      <div class="section-num">Sezione 07</div>
+      <h2 class="section-title">Task Personali</h2>
+    </div>
+  </div>
+
+  <div class="chapter-intro">
+    <p>I Task sono promemoria e attività operative separate dall'agenda. Vengono creati manualmente dallo staff oppure automaticamente dal Voice Assistant quando riconosce frasi come "ricordami di richiamare", "da fare", "promemoria".</p>
+  </div>
+
+  <h3>7.1 Creare un Task</h3>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content"><strong>Vai su "Task" → "+ Nuovo Task"</strong><span>Form rapido in cima alla lista.</span></div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content"><strong>Inserisci titolo e descrizione</strong><span>Descrizione opzionale per dettagli aggiuntivi.</span></div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content"><strong>Imposta priorità e scadenza</strong><span>Priorità: bassa, media, alta, urgente. Scadenza opzionale per task con deadline.</span></div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-content"><strong>Collega a contatto (opzionale)</strong><span>Es. "Richiamare Mario Rossi" — collegando il contatto puoi accedervi con un click dalla lista task.</span></div>
+    </div>
+  </div>
+
+  <h3>7.2 Filtri Task</h3>
+  <table>
+    <thead><tr><th>Filtro</th><th>Opzioni</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Stato</strong></td><td>Da fare / In corso / Completato</td></tr>
+      <tr><td><strong>Priorità</strong></td><td>Bassa / Media / Alta / Urgente</td></tr>
+      <tr><td><strong>Contatto</strong></td><td>Ricerca per nome contatto collegato</td></tr>
+    </tbody>
+  </table>
+
+  <h3>7.3 Completare un Task</h3>
+  <p>Clicca il checkbox accanto al task nella lista. Il sistema registra automaticamente la data/ora di completamento (<code>completato_il</code>) e sposta il task nella sezione "Completati".</p>
+
+  <div class="callout callout-info">
+    <span class="callout-icon">ℹ️</span>
+    <p><strong>Voice → Task:</strong> Quando il Voice Assistant riceve una trascrizione telefonica con intenti di tipo "promemoria" o "da fare", crea automaticamente un task nella tua lista invece di un evento agenda.</p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SEZIONE 8 — AUTOMAZIONI
+═══════════════════════════════════════════════════════════ -->
+<div class="content page-break" id="s8">
+  <div class="section-header">
+    <div class="section-icon" style="background:#ede9fe;">⚡</div>
+    <div>
+      <div class="section-num">Sezione 08</div>
+      <h2 class="section-title">Automazioni CRM</h2>
+    </div>
+  </div>
+
+  <div class="chapter-intro">
+    <p>Le Automazioni eseguono azioni CRM in modo schedulato e automatico: re-engagement dei lead persi, promemoria anniversari annuali, e risposta automatica ai messaggi. Riducono drasticamente il lavoro manuale ripetitivo dello staff.</p>
+  </div>
+
+  <h3>8.1 Job Automatici Schedulati</h3>
+  <table>
+    <thead><tr><th>Job</th><th>Orario</th><th>Cosa fa</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><strong>Re-engagement Lead</strong></td>
+        <td>Ogni giorno alle 09:00</td>
+        <td>Invia messaggio WhatsApp ai lead in stato "perso" dopo 30+ giorni di inattività</td>
+      </tr>
+      <tr>
+        <td><strong>Ricorrenze Annuali</strong></td>
+        <td>Ogni giorno alle 10:00</td>
+        <td>Ricorda ai clienti confermati dell'anno scorso di prenotare per l'anniversario</td>
+      </tr>
+      <tr>
+        <td><strong>Promemoria Agenda</strong></td>
+        <td>Ogni 15 minuti</td>
+        <td>Invia notifiche per eventi in agenda imminenti (nelle prossime ore)</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="callout callout-info">
+    <span class="callout-icon">ℹ️</span>
+    <p><strong>Anti-overlap:</strong> I job sono protetti da un meccanismo anti-sovrapposizione. Se un job è ancora in esecuzione quando il cron lo schedula di nuovo, il secondo avvio viene saltato automaticamente.</p>
+  </div>
+
+  <h3>8.2 Configurazione Automazioni</h3>
+  <p>Dalla pagina <strong>Automazioni → Configurazione</strong> puoi modificare:</p>
+
+  <div class="feature-grid">
+    <div class="feature-item">
+      <div class="fi-label">🔄 Toggle Re-engagement</div>
+      <div class="fi-desc">Attiva/disattiva il job re-engagement. Se disattivo, il cron non invia nessun messaggio pur continuando a girare.</div>
+    </div>
+    <div class="feature-item">
+      <div class="fi-label">🎂 Toggle Ricorrenze</div>
+      <div class="fi-desc">Attiva/disattiva i promemoria anniversari annuali.</div>
+    </div>
+    <div class="feature-item">
+      <div class="fi-label">⏰ Finestra Inattività</div>
+      <div class="fi-desc">Numero di giorni dopo i quali un lead "perso" riceve il messaggio di re-engagement (default: 30 giorni).</div>
+    </div>
+    <div class="feature-item">
+      <div class="fi-label">🎭 Tipi Evento Inclusi</div>
+      <div class="fi-desc">Quali tipi di evento sono coperti dalle automazioni (es. escludere eventi aziendali dal re-engagement).</div>
+    </div>
+  </div>
+
+  <h3>8.3 Template Messaggi Automazioni</h3>
+  <p>Ogni automazione usa un template di messaggio personalizzabile. Dalla pagina <strong>Automazioni → Template</strong> puoi modificare i testi per:</p>
+  <ul>
+    <li><strong>Re-engagement:</strong> Messaggio per lead persi da riprendere</li>
+    <li><strong>Ricorrenza:</strong> Messaggio anniversario per clienti fidelizzati</li>
+    <li><strong>Booking AI (qualifica):</strong> Tutte le risposte dell'assistente AI di prenotazione</li>
+  </ul>
+
+  <h3>8.4 Trigger Manuale</h3>
+  <p>Puoi eseguire qualsiasi job manualmente senza aspettare il cron:</p>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content"><strong>Vai su "Automazioni"</strong><span>Nella sidebar sinistra.</span></div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content"><strong>Clicca "Esegui ora"</strong><span>Accanto al job che vuoi avviare manualmente (Re-engagement o Ricorrenze).</span></div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content"><strong>Controlla il log</strong><span>Il risultato dell'esecuzione appare immediatamente nel tab "Log".</span></div>
+    </div>
+  </div>
+
+  <h3>8.5 Dashboard Performance Automazioni</h3>
+  <p>La sezione Performance mostra metriche aggregate sull'efficacia delle automazioni:</p>
+  <ul>
+    <li><strong>Totale esecuzioni</strong> — quante volte ogni job è stato eseguito</li>
+    <li><strong>Tasso successo</strong> — percentuale esecuzioni completate senza errori</li>
+    <li><strong>Saltate</strong> — quante esecuzioni sono state skippate (toggle disattivo o anti-overlap)</li>
+    <li><strong>Errori</strong> — numero di fallimenti con dettaglio dell'errore</li>
+    <li><strong>Breakdown per tipo</strong> — statistiche separate per re-engagement e ricorrenze</li>
+  </ul>
+
+  <h3>8.6 Log Esecuzioni</h3>
+  <p>Il tab <strong>Log</strong> mostra ogni singola esecuzione con:</p>
+  <ul>
+    <li>Data/ora di esecuzione</li>
+    <li>Tipo di job (re-engagement / ricorrenza)</li>
+    <li>Stato (successo / errore / saltato)</li>
+    <li>Numero di contatti processati</li>
+    <li>Dettaglio errore (se presente)</li>
+  </ul>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SEZIONE 9 — GESTIONE STAFF
+═══════════════════════════════════════════════════════════ -->
+<div class="content page-break" id="s9">
+  <div class="section-header">
+    <div class="section-icon" style="background:#fee2e2;">⚙️</div>
+    <div>
+      <div class="section-num">Sezione 09</div>
+      <h2 class="section-title">Gestione Staff e Ruoli</h2>
+    </div>
+  </div>
+
+  <div class="chapter-intro">
+    <p>La sezione Impostazioni permette all'amministratore di gestire tutti gli account dello staff: creare nuovi utenti, modificare ruoli, attivare/disattivare account. Solo gli utenti con ruolo <strong>admin</strong> possono accedere a questa sezione.</p>
+  </div>
+
+  <h3>9.1 Creare un Nuovo Utente Staff</h3>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content"><strong>Vai su "Impostazioni" → "Staff"</strong><span>Lista di tutti gli utenti del sistema con stato e ruolo.</span></div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content"><strong>Clicca "+ Nuovo Utente"</strong><span>Form di creazione con: nome, email, password temporanea, ruolo.</span></div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content"><strong>Seleziona il ruolo</strong><span>admin, manager o staff — vedi tabella permessi nella Sezione 1.3.</span></div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-content"><strong>Salva e comunica le credenziali</strong><span>L'utente può effettuare il login con email e password temporanea, poi cambiarla dalle impostazioni.</span></div>
+    </div>
+  </div>
+
+  <h3>9.2 Attivare/Disattivare un Account</h3>
+  <p>Per disattivare temporaneamente un account staff (es. dipendente in pausa o uscito dall'azienda):</p>
+  <ul>
+    <li>Apri il profilo dell'utente dalla lista staff</li>
+    <li>Clicca il toggle <strong>Attivo/Disattivato</strong></li>
+    <li>L'utente disattivato non può più effettuare il login e viene bloccato anche se ha una sessione attiva</li>
+  </ul>
+
+  <div class="callout callout-danger">
+    <span class="callout-icon">🔴</span>
+    <p><strong>Non eliminare mai</strong> un account staff che ha gestito conversazioni o creato dati nel CRM. Disattiva l'account invece di eliminarlo, per preservare l'integrità dei dati storici.</p>
+  </div>
+
+  <h3>9.3 Matrice Permessi</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Funzionalità</th>
+        <th style="text-align:center">Admin</th>
+        <th style="text-align:center">Manager</th>
+        <th style="text-align:center">Staff</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>Dashboard completa</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td><td style="text-align:center">⚡ parziale</td></tr>
+      <tr><td>Inbox — tutte le chat</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td><td style="text-align:center">✅ solo assegnate</td></tr>
+      <tr><td>CRM contatti CRUD</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td></tr>
+      <tr><td>Preventivi CRUD</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td></tr>
+      <tr><td>Agenda personale</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td></tr>
+      <tr><td>Configurazione automazioni</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td><td style="text-align:center">❌</td></tr>
+      <tr><td>Gestione utenti staff</td><td style="text-align:center">✅</td><td style="text-align:center">❌</td><td style="text-align:center">❌</td></tr>
+      <tr><td>Audit log</td><td style="text-align:center">✅</td><td style="text-align:center">❌</td><td style="text-align:center">❌</td></tr>
+      <tr><td>Sezione B2B/Competitor</td><td style="text-align:center">✅</td><td style="text-align:center">✅</td><td style="text-align:center">❌</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SEZIONE 10 — B2B
+═══════════════════════════════════════════════════════════ -->
+<div class="content page-break" id="s10">
+  <div class="section-header">
+    <div class="section-icon" style="background:#fef9c3;">🏢</div>
+    <div>
+      <div class="section-num">Sezione 10</div>
+      <h2 class="section-title">Sezione B2B e Competitor</h2>
+    </div>
+  </div>
+
+  <div class="chapter-intro">
+    <p>La sezione B2B raccoglie l'intelligence competitiva del mercato: archivio competitor locali, materiali di analisi e template co-branding per partnership con scuole e aziende.</p>
+  </div>
+
+  <h3>10.1 Archivio Competitor</h3>
+  <p>Per ogni competitor puoi registrare:</p>
+  <ul>
+    <li><strong>Categoria</strong> — disco, matrimoni, eventi aziendali, etc.</li>
+    <li><strong>Città e Zona</strong> — localizzazione geografica</li>
+    <li><strong>Target</strong> — fascia cliente (lusso, media, economica)</li>
+    <li><strong>Prezzo medio</strong> — benchmark prezzi</li>
+    <li><strong>Rating</strong> — valutazione interna da 1 a 5</li>
+    <li><strong>Punti di forza e debolezza</strong> — analisi SWOT</li>
+    <li><strong>Sito web e Instagram</strong> — link diretti per monitoraggio</li>
+    <li><strong>Note</strong> — osservazioni qualitative dello staff</li>
+  </ul>
+
+  <h3>10.2 Materiali Competitor</h3>
+  <p>Registra e cataloga materiali raccolti sui competitor:</p>
+  <ul>
+    <li>Screenshots di campagne social</li>
+    <li>PDF listini prezzi</li>
+    <li>Materiale promozionale</li>
+    <li>Recensioni significative</li>
+  </ul>
+
+  <h3>10.3 Template Co-branding</h3>
+  <p>Archivio di template per proposte commerciali B2B verso scuole, università e aziende:</p>
+  <ul>
+    <li>Titolo e target della proposta</li>
+    <li>Messaggio commerciale personalizzabile</li>
+    <li>Vantaggi del pacchetto</li>
+    <li>Call to action</li>
+    <li>Contatore utilizzi per tracciare le proposte inviate</li>
+  </ul>
+
+  <h3>10.4 Prompt AI per Analisi</h3>
+  <p>Dalla sezione B2B puoi usare prompt preconfigurati per chiedere all'AI di:</p>
+  <ul>
+    <li>Analizzare i punti di forza del locale rispetto ai competitor</li>
+    <li>Suggerire strategie di pricing</li>
+    <li>Generare testi marketing differenziati</li>
+    <li>Proporre offerte per specifici segmenti target</li>
+  </ul>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SEZIONE 11 — AUDIT LOG
+═══════════════════════════════════════════════════════════ -->
+<div class="content page-break" id="s11">
+  <div class="section-header">
+    <div class="section-icon" style="background:#fee2e2;">🔒</div>
+    <div>
+      <div class="section-num">Sezione 11</div>
+      <h2 class="section-title">Audit Log — Sicurezza e Tracciamento</h2>
+    </div>
+  </div>
+
+  <div class="chapter-intro">
+    <p>L'Audit Log registra ogni azione operativa del sistema. Permette all'amministratore di tracciare chi ha fatto cosa e quando — essenziale per sicurezza, conformità e risoluzione problemi.</p>
+  </div>
+
+  <h3>11.1 Cosa viene registrato</h3>
+  <div class="feature-grid">
+    <div class="feature-item"><div class="fi-label">🔑 Autenticazione</div><div class="fi-desc">Login riusciti, login falliti, logout.</div></div>
+    <div class="feature-item"><div class="fi-label">👥 Contatti</div><div class="fi-desc">Creazione, modifica, eliminazione contatti CRM.</div></div>
+    <div class="feature-item"><div class="fi-label">📋 Preventivi</div><div class="fi-desc">Creazione, modifica stato, eliminazione preventivi.</div></div>
+    <div class="feature-item"><div class="fi-label">📅 Agenda</div><div class="fi-desc">Creazione, modifica, cancellazione eventi agenda.</div></div>
+    <div class="feature-item"><div class="fi-label">👤 Staff</div><div class="fi-desc">Creazione/modifica utenti, cambio ruolo, attivazione/disattivazione.</div></div>
+    <div class="feature-item"><div class="fi-label">💬 Messaggi</div><div class="fi-desc">Invio messaggi outbound, assegnazioni chat, handoff AI→operatore.</div></div>
+    <div class="feature-item"><div class="fi-label">⚡ Automazioni</div><div class="fi-desc">Trigger manuali, modifiche configurazione.</div></div>
+    <div class="feature-item"><div class="fi-label">✅ Task</div><div class="fi-desc">Creazione, completamento, eliminazione task personali.</div></div>
+  </div>
+
+  <h3>11.2 Dati Registrati per ogni Azione</h3>
+  <table>
+    <thead><tr><th>Campo</th><th>Contenuto</th></tr></thead>
+    <tbody>
+      <tr><td><code>azione</code></td><td>Tipo di azione (es. <em>login</em>, <em>contatto_modificato</em>)</td></tr>
+      <tr><td><code>entita</code></td><td>Modello coinvolto (utente, contatto, preventivo...)</td></tr>
+      <tr><td><code>entita_id</code></td><td>ID del record modificato</td></tr>
+      <tr><td><code>utente</code></td><td>Nome dell'operatore che ha eseguito l'azione (o "Zak AI")</td></tr>
+      <tr><td><code>dettagli</code></td><td>JSON con dati aggiuntivi specifici dell'azione</td></tr>
+      <tr><td><code>ip</code></td><td>Indirizzo IP del client</td></tr>
+      <tr><td><code>user_agent</code></td><td>Browser/dispositivo usato</td></tr>
+      <tr><td><code>data</code></td><td>Timestamp preciso dell'azione</td></tr>
+    </tbody>
+  </table>
+
+  <div class="callout callout-warning">
+    <span class="callout-icon">⚠️</span>
+    <p>L'Audit Log è <strong>in sola lettura</strong>. Nessun utente, nemmeno l'admin, può modificare o eliminare le voci del log. Questo garantisce l'integrità della traccia operativa.</p>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SEZIONE 12 — INTEGRAZIONI
+═══════════════════════════════════════════════════════════ -->
+<div class="content page-break" id="s12">
+  <div class="section-header">
+    <div class="section-icon" style="background:#dcfce7;">🔌</div>
+    <div>
+      <div class="section-num">Sezione 12</div>
+      <h2 class="section-title">Integrazioni Esterne</h2>
+    </div>
+  </div>
+
+  <div class="chapter-intro">
+    <p>Zak Ecosystem AI è progettato per integrarsi con i principali servizi di comunicazione e produttività: WhatsApp Business, Google Calendar, e provider di Voice Assistant. Ogni integrazione richiede la configurazione di variabili ambiente specifiche.</p>
+  </div>
+
+  <h3>12.1 WhatsApp Business (Meta Cloud API)</h3>
+  <p>Per abilitare l'invio e ricezione reale di messaggi WhatsApp:</p>
+
+  <div class="card card-green">
+    <div class="card-title">✅ Già configurato — Ricezione Webhook</div>
+    <p>Il webhook <code>POST /api/webhook/whatsapp</code> riceve i messaggi in arrivo da Meta. La firma viene verificata automaticamente tramite <code>META_APP_SECRET</code>.</p>
+  </div>
+
+  <div class="card card-amber">
+    <div class="card-title">⚙️ Da configurare — Invio Outbound</div>
+    <p>Per inviare messaggi reali, configura su Render le variabili:<br>
+    <code>META_WHATSAPP_ACCESS_TOKEN</code> — Token API Meta<br>
+    <code>META_WHATSAPP_PHONE_NUMBER_ID</code> — ID numero Business<br>
+    <code>META_APP_SECRET</code> — Secret per verifica firma webhook</p>
+  </div>
+
+  <div class="callout callout-tip">
+    <span class="callout-icon">💡</span>
+    <p><strong>Senza credenziali Meta:</strong> Il sistema funziona ugualmente. I messaggi vengono salvati in inbox ma non inviati via WhatsApp. Utile per ambienti di test o come fallback.</p>
+  </div>
+
+  <h3>12.2 Google Calendar</h3>
+  <p>Per sincronizzare agenda e preventivi confermati con Google Calendar:</p>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content"><strong>Crea OAuth Client Google</strong><span>Vai su Google Cloud Console → API → Google Calendar API → Credenziali → Crea OAuth 2.0 Client ID.</span></div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content"><strong>Ottieni il Refresh Token</strong><span>Completa il flusso OAuth con il tuo account Google Workspace. Salva il <code>GOOGLE_REFRESH_TOKEN</code> risultante.</span></div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content"><strong>Configura le variabili su Render</strong><span><code>GOOGLE_CLIENT_ID</code>, <code>GOOGLE_CLIENT_SECRET</code>, <code>GOOGLE_REFRESH_TOKEN</code>, <code>GOOGLE_CALENDAR_ID</code>.</span></div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-content"><strong>Abilita l'integrazione</strong><span>Imposta <code>ZAK_GOOGLE_CALENDAR_ENABLED=true</code> su Render e riavvia il servizio.</span></div>
+    </div>
+  </div>
+
+  <h3>12.3 Voice Assistant (Vapi / Bland AI)</h3>
+  <p>Per ricevere trascrizioni di chiamate telefoniche e creare automaticamente eventi agenda e task:</p>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content"><strong>Configura il provider</strong><span>Su Vapi o Bland AI, imposta il webhook di trascrizione su <code>https://zak-ecosystem-ai.onrender.com/api/webhook/voice-assistant</code>.</span></div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content"><strong>Imposta il secret</strong><span>Genera un secret casuale e configuralo sia sul provider che su Render come <code>VOICE_WEBHOOK_SECRET</code>.</span></div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content"><strong>Testa una chiamata</strong><span>Effettua una chiamata di test. Controlla nell'agenda/task se l'evento viene creato correttamente.</span></div>
+    </div>
+  </div>
+
+  <h3>12.4 Endpoint Webhook Disponibili</h3>
+  <table>
+    <thead><tr><th>Endpoint</th><th>Provider</th><th>Funzione</th></tr></thead>
+    <tbody>
+      <tr><td><code>POST /api/webhook/whatsapp</code></td><td>Meta WhatsApp</td><td>Ricezione messaggi inbound</td></tr>
+      <tr><td><code>GET /api/webhook/whatsapp</code></td><td>Meta WhatsApp</td><td>Verifica challenge iniziale</td></tr>
+      <tr><td><code>POST /api/webhook/voice-assistant</code></td><td>Vapi / Bland AI</td><td>Trascrizioni chiamate</td></tr>
+      <tr><td><code>POST /api/webhook/google-calendar</code></td><td>Google Calendar</td><td>Notifiche push modifiche calendario</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SEZIONE 13 — CONFIGURAZIONE
+═══════════════════════════════════════════════════════════ -->
+<div class="content page-break" id="s13">
+  <div class="section-header">
+    <div class="section-icon" style="background:#f1f5f9;">🔧</div>
+    <div>
+      <div class="section-num">Sezione 13</div>
+      <h2 class="section-title">Configurazione e Variabili Ambiente</h2>
+    </div>
+  </div>
+
+  <div class="chapter-intro">
+    <p>Tutte le funzionalità del sistema sono configurabili tramite variabili ambiente gestite dal pannello Render. Di seguito la lista completa con descrizione e valori attuali.</p>
+  </div>
+
+  <h3>13.1 Variabili Core — Obbligatorie</h3>
+  <table>
+    <thead><tr><th>Variabile</th><th>Descrizione</th><th>Stato</th></tr></thead>
+    <tbody>
+      <tr><td><code>DATABASE_URL</code></td><td>URL PostgreSQL Neon con SSL</td><td><span class="badge badge-green">✅ Configurata</span></td></tr>
+      <tr><td><code>NODE_ENV</code></td><td>Ambiente: <code>production</code></td><td><span class="badge badge-green">✅ Configurata</span></td></tr>
+      <tr><td><code>ZAK_AUTH_SECRET</code></td><td>Secret JWT per autenticazione staff</td><td><span class="badge badge-green">✅ Configurata</span></td></tr>
+      <tr><td><code>ZAK_BOOTSTRAP_ADMIN_TOKEN</code></td><td>Token per creare il primo admin</td><td><span class="badge badge-green">✅ Configurata</span></td></tr>
+    </tbody>
+  </table>
+
+  <h3>13.2 Variabili AI — Booking Assistant</h3>
+  <table>
+    <thead><tr><th>Variabile</th><th>Descrizione</th><th>Stato</th></tr></thead>
+    <tbody>
+      <tr><td><code>OPENAI_API_KEY</code></td><td>API Key Google AI (Gemini via compatibilità OpenAI)</td><td><span class="badge badge-green">✅ Configurata</span></td></tr>
+      <tr><td><code>OPENAI_BASE_URL</code></td><td><code>https://generativelanguage.googleapis.com/v1beta/openai/</code></td><td><span class="badge badge-green">✅ Configurata</span></td></tr>
+      <tr><td><code>ZAK_LLM_BOOKING_ENABLED</code></td><td><code>true</code> per attivare Gemini nel booking AI</td><td><span class="badge badge-green">✅ Configurata</span></td></tr>
+      <tr><td><code>ZAK_LLM_BOOKING_MODEL</code></td><td>Modello usato: <code>gemini-1.5-flash</code></td><td><span class="badge badge-green">✅ Configurata</span></td></tr>
+    </tbody>
+  </table>
+
+  <h3>13.3 Variabili WhatsApp</h3>
+  <table>
+    <thead><tr><th>Variabile</th><th>Descrizione</th><th>Stato</th></tr></thead>
+    <tbody>
+      <tr><td><code>META_WHATSAPP_ACCESS_TOKEN</code></td><td>Token Meta Cloud API per invio messaggi</td><td><span class="badge badge-amber">⚠️ Da configurare</span></td></tr>
+      <tr><td><code>META_WHATSAPP_PHONE_NUMBER_ID</code></td><td>ID numero WhatsApp Business</td><td><span class="badge badge-amber">⚠️ Da configurare</span></td></tr>
+      <tr><td><code>META_APP_SECRET</code></td><td>Secret per verifica firma webhook</td><td><span class="badge badge-amber">⚠️ Da configurare</span></td></tr>
+      <tr><td><code>META_GRAPH_API_VERSION</code></td><td>Versione API Graph (default: <code>v20.0</code>)</td><td><span class="badge badge-green">✅ Default OK</span></td></tr>
+      <tr><td><code>META_WHATSAPP_TEMPLATE_LANGUAGE</code></td><td>Lingua template (default: <code>it</code>)</td><td><span class="badge badge-green">✅ Default OK</span></td></tr>
+    </tbody>
+  </table>
+
+  <h3>13.4 Variabili Google Calendar</h3>
+  <table>
+    <thead><tr><th>Variabile</th><th>Descrizione</th><th>Stato</th></tr></thead>
+    <tbody>
+      <tr><td><code>ZAK_GOOGLE_CALENDAR_ENABLED</code></td><td><code>true</code> per attivare sync Google</td><td><span class="badge badge-red">❌ Disabilitata</span></td></tr>
+      <tr><td><code>GOOGLE_CLIENT_ID</code></td><td>OAuth Client ID Google Cloud</td><td><span class="badge badge-amber">⚠️ Da configurare</span></td></tr>
+      <tr><td><code>GOOGLE_CLIENT_SECRET</code></td><td>OAuth Client Secret</td><td><span class="badge badge-amber">⚠️ Da configurare</span></td></tr>
+      <tr><td><code>GOOGLE_REFRESH_TOKEN</code></td><td>Token di aggiornamento OAuth</td><td><span class="badge badge-amber">⚠️ Da configurare</span></td></tr>
+      <tr><td><code>GOOGLE_CALENDAR_ID</code></td><td>ID del calendario Google da usare</td><td><span class="badge badge-amber">⚠️ Da configurare</span></td></tr>
+      <tr><td><code>GOOGLE_CALENDAR_TIMEZONE</code></td><td><code>Europe/Rome</code> (default)</td><td><span class="badge badge-green">✅ Configurata</span></td></tr>
+    </tbody>
+  </table>
+
+  <h3>13.5 Variabili Voice Assistant</h3>
+  <table>
+    <thead><tr><th>Variabile</th><th>Descrizione</th><th>Stato</th></tr></thead>
+    <tbody>
+      <tr><td><code>VOICE_WEBHOOK_SECRET</code></td><td>Secret per verifica webhook voice</td><td><span class="badge badge-green">✅ Configurata</span></td></tr>
+      <tr><td><code>VAPI_WEBHOOK_SECRET</code></td><td>Secret specifico Vapi (opzionale)</td><td><span class="badge badge-gray">Opzionale</span></td></tr>
+      <tr><td><code>BLAND_WEBHOOK_SECRET</code></td><td>Secret specifico Bland AI (opzionale)</td><td><span class="badge badge-gray">Opzionale</span></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SEZIONE 14 — API REFERENCE
+═══════════════════════════════════════════════════════════ -->
+<div class="content page-break" id="s14">
+  <div class="section-header">
+    <div class="section-icon" style="background:#f0fdf4;">🔗</div>
+    <div>
+      <div class="section-num">Sezione 14</div>
+      <h2 class="section-title">Riferimento API Completo</h2>
+    </div>
+  </div>
+
+  <div class="chapter-intro">
+    <p>Tutti gli endpoint REST dell'API. Base URL: <code>https://zak-ecosystem-ai.onrender.com/api</code>. Autenticazione tramite header <code>Authorization: Bearer {token}</code>.</p>
+  </div>
+
+  <h3>14.1 Autenticazione</h3>
+  <table>
+    <thead><tr><th>Metodo</th><th>Endpoint</th><th>Descrizione</th></tr></thead>
+    <tbody>
+      <tr><td><span class="method method-post">POST</span></td><td><code>/auth/login</code></td><td>Login con email e password. Restituisce JWT token.</td></tr>
+      <tr><td><span class="method method-post">POST</span></td><td><code>/auth/logout</code></td><td>Logout. Registra in audit log.</td></tr>
+      <tr><td><span class="method method-get">GET</span></td><td><code>/auth/me</code></td><td>Dati utente autenticato corrente.</td></tr>
+      <tr><td><span class="method method-post">POST</span></td><td><code>/auth/bootstrap-admin</code></td><td>Crea il primo admin (richiede bootstrap_token nel body).</td></tr>
+    </tbody>
+  </table>
+
+  <h3>14.2 Contatti CRM</h3>
+  <table>
+    <thead><tr><th>Metodo</th><th>Endpoint</th><th>Descrizione</th></tr></thead>
+    <tbody>
+      <tr><td><span class="method method-get">GET</span></td><td><code>/contatti</code></td><td>Lista contatti con filtri e paginazione</td></tr>
+      <tr><td><span class="method method-post">POST</span></td><td><code>/contatti</code></td><td>Crea nuovo contatto</td></tr>
+      <tr><td><span class="method method-get">GET</span></td><td><code>/contatti/:id</code></td><td>Dettaglio contatto</td></tr>
+      <tr><td><span class="method method-patch">PATCH</span></td><td><code>/contatti/:id</code></td><td>Modifica contatto</td></tr>
+      <tr><td><span class="method method-delete">DELETE</span></td><td><code>/contatti/:id</code></td><td>Elimina contatto</td></tr>
+      <tr><td><span class="method method-get">GET</span></td><td><code>/contatti/:id/messaggi</code></td><td>Messaggi del contatto</td></tr>
+      <tr><td><span class="method method-get">GET</span></td><td><code>/contatti/:id/storico-stato</code></td><td>Storico cambi stato lead</td></tr>
+      <tr><td><span class="method method-post">POST</span></td><td><code>/contatti/import-csv</code></td><td>Import massivo da CSV</td></tr>
+    </tbody>
+  </table>
+
+  <h3>14.3 Preventivi</h3>
+  <table>
+    <thead><tr><th>Metodo</th><th>Endpoint</th><th>Descrizione</th></tr></thead>
+    <tbody>
+      <tr><td><span class="method method-get">GET</span></td><td><code>/preventivi</code></td><td>Lista preventivi con filtri</td></tr>
+      <tr><td><span class="method method-post">POST</span></td><td><code>/preventivi</code></td><td>Crea preventivo</td></tr>
+      <tr><td><span class="method method-get">GET</span></td><td><code>/preventivi/:id</code></td><td>Dettaglio preventivo</td></tr>
+      <tr><td><span class="method method-patch">PATCH</span></td><td><code>/preventivi/:id</code></td><td>Modifica preventivo</td></tr>
+      <tr><td><span class="method method-delete">DELETE</span></td><td><code>/preventivi/:id</code></td><td>Elimina preventivo</td></tr>
+    </tbody>
+  </table>
+
+  <h3>14.4 Agenda e Task</h3>
+  <table>
+    <thead><tr><th>Metodo</th><th>Endpoint</th><th>Descrizione</th></tr></thead>
+    <tbody>
+      <tr><td><span class="method method-get">GET</span></td><td><code>/agenda</code></td><td>Lista eventi agenda</td></tr>
+      <tr><td><span class="method method-post">POST</span></td><td><code>/agenda</code></td><td>Crea evento agenda</td></tr>
+      <tr><td><span class="method method-patch">PATCH</span></td><td><code>/agenda/:id</code></td><td>Modifica evento</td></tr>
+      <tr><td><span class="method method-delete">DELETE</span></td><td><code>/agenda/:id</code></td><td>Elimina evento</td></tr>
+      <tr><td><span class="method method-get">GET</span></td><td><code>/task-personali</code></td><td>Lista task personali</td></tr>
+      <tr><td><span class="method method-post">POST</span></td><td><code>/task-personali</code></td><td>Crea task</td></tr>
+      <tr><td><span class="method method-patch">PATCH</span></td><td><code>/task-personali/:id</code></td><td>Modifica / completa task</td></tr>
+      <tr><td><span class="method method-delete">DELETE</span></td><td><code>/task-personali/:id</code></td><td>Elimina task</td></tr>
+    </tbody>
+  </table>
+
+  <h3>14.5 Dashboard e Messaggi</h3>
+  <table>
+    <thead><tr><th>Metodo</th><th>Endpoint</th><th>Descrizione</th></tr></thead>
+    <tbody>
+      <tr><td><span class="method method-get">GET</span></td><td><code>/dashboard/metrics</code></td><td>KPI e metriche principali (cache 30s)</td></tr>
+      <tr><td><span class="method method-get">GET</span></td><td><code>/dashboard/lead-pipeline</code></td><td>Dati grafico pipeline lead</td></tr>
+      <tr><td><span class="method method-get">GET</span></td><td><code>/dashboard/eventi-mese</code></td><td>Dati grafico eventi per mese</td></tr>
+      <tr><td><span class="method method-get">GET</span></td><td><code>/dashboard/attivita-recente</code></td><td>Feed attività recenti</td></tr>
+      <tr><td><span class="method method-get">GET</span></td><td><code>/messaggi</code></td><td>Lista messaggi con filtri e paginazione</td></tr>
+      <tr><td><span class="method method-post">POST</span></td><td><code>/messaggi</code></td><td>Invia messaggio outbound</td></tr>
+      <tr><td><span class="method method-get">GET</span></td><td><code>/chat/inbox</code></td><td>Lista conversazioni inbox raggruppate</td></tr>
+      <tr><td><span class="method method-post">POST</span></td><td><code>/chat/assign</code></td><td>Assegna chat a operatore</td></tr>
+    </tbody>
+  </table>
+
+  <h3>14.6 Automazioni</h3>
+  <table>
+    <thead><tr><th>Metodo</th><th>Endpoint</th><th>Descrizione</th></tr></thead>
+    <tbody>
+      <tr><td><span class="method method-get">GET</span></td><td><code>/automazioni/config</code></td><td>Leggi configurazione automazioni</td></tr>
+      <tr><td><span class="method method-patch">PATCH</span></td><td><code>/automazioni/config/:chiave</code></td><td>Modifica parametro configurazione</td></tr>
+      <tr><td><span class="method method-post">POST</span></td><td><code>/automazioni/trigger</code></td><td>Trigger manuale job (body: <code>{tipo: "reengagement"|"ricorrenza"}</code>)</td></tr>
+      <tr><td><span class="method method-get">GET</span></td><td><code>/automazioni/log</code></td><td>Log esecuzioni automazioni</td></tr>
+      <tr><td><span class="method method-get">GET</span></td><td><code>/automazioni/performance</code></td><td>Metriche performance automazioni</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════
+     SEZIONE 15 — TROUBLESHOOTING
+═══════════════════════════════════════════════════════════ -->
+<div class="content page-break" id="s15">
+  <div class="section-header">
+    <div class="section-icon" style="background:#fee2e2;">🛠️</div>
+    <div>
+      <div class="section-num">Sezione 15</div>
+      <h2 class="section-title">Risoluzione Problemi Comuni</h2>
+    </div>
+  </div>
+
+  <h3>15.1 Non riesco ad accedere al sistema</h3>
+  <div class="card card-red">
+    <div class="card-title">❌ Problema: Pagina di login mostra errore</div>
+    <p><strong>Causa più comune:</strong> Il servizio Render è in cold start (prima richiesta dopo inattività).<br>
+    <strong>Soluzione:</strong> Aspetta 30-60 secondi e riprova. Il servizio free tier di Render va in sleep dopo 15 minuti di inattività.</p>
+  </div>
+
+  <div class="card card-red">
+    <div class="card-title">❌ Problema: Credenziali non valide</div>
+    <p><strong>Soluzione:</strong> Verifica che email e password siano corrette. Se hai dimenticato la password admin, usa di nuovo l'endpoint bootstrap-admin con il token configurato.</p>
+  </div>
+
+  <h3>15.2 I messaggi WhatsApp non arrivano in inbox</h3>
+  <div class="card card-amber">
+    <div class="card-title">⚠️ Causa: Webhook Meta non configurato</div>
+    <p>Il webhook WhatsApp di Meta deve puntare a <code>https://zak-ecosystem-ai.onrender.com/api/webhook/whatsapp</code>.<br>
+    <strong>Soluzione:</strong> Nel pannello Meta Business Manager → WhatsApp → Configurazione Webhook, verifica che l'URL sia corretto e che la verifica challenge sia superata (status verde).</p>
+  </div>
+
+  <div class="card card-amber">
+    <div class="card-title">⚠️ Causa: Servizio Render in sleep</div>
+    <p>Se il servizio va in sleep durante la ricezione di un webhook, Meta riprova per un certo periodo ma poi abbandona.<br>
+    <strong>Soluzione:</strong> Considera l'upgrade al piano Render a pagamento per avere il servizio sempre attivo, oppure configura un ping keep-alive.</p>
+  </div>
+
+  <h3>15.3 L'AI non risponde ai messaggi</h3>
+  <div class="card card-amber">
+    <div class="card-title">⚠️ Causa: Chat assegnata a operatore</div>
+    <p><strong>Soluzione:</strong> Verifica nell'inbox che la conversazione non sia assegnata a nessun operatore. Se assegnata, disassegna selezionando "Nessuno" per riattivare l'AI.</p>
+  </div>
+
+  <div class="card card-amber">
+    <div class="card-title">⚠️ Causa: LLM non configurato</div>
+    <p><strong>Soluzione:</strong> Verifica che <code>ZAK_LLM_BOOKING_ENABLED=true</code> e <code>OPENAI_API_KEY</code> siano configurati su Render. Il sistema userà il fallback rule-based, ma le risposte potrebbero essere meno intelligenti.</p>
+  </div>
+
+  <h3>15.4 Le automazioni non partono</h3>
+  <div class="card card-blue">
+    <div class="card-title">ℹ️ Verifica toggle configurazione</div>
+    <p>Vai su <strong>Automazioni → Configurazione</strong> e verifica che i toggle <em>reengagement_attivo</em> e/o <em>ricorrenza_attiva</em> siano abilitati (verde).</p>
+  </div>
+
+  <div class="card card-blue">
+    <div class="card-title">ℹ️ Verifica orario job</div>
+    <p>I job girano alle 09:00 e 10:00 ora del server (UTC). In estate l'Italia è UTC+2, quindi i job partono alle 11:00 e 12:00 ora italiana.</p>
+  </div>
+
+  <h3>15.5 Importazione CSV fallisce</h3>
+  <div class="card card-amber">
+    <div class="card-title">⚠️ Formato CSV non corretto</div>
+    <p><strong>Requisiti:</strong></p>
+    <ul>
+      <li>Encoding: UTF-8</li>
+      <li>Separatore: virgola <code>,</code></li>
+      <li>Prima riga: intestazioni colonne</li>
+      <li>Colonne richieste: <code>nome</code> (obbligatoria), poi almeno <code>telefono</code> o <code>instagram_username</code></li>
+      <li>Stato lead valido: <code>nuovo</code>, <code>qualificato</code>, <code>preventivo</code>, <code>confermato</code>, <code>perso</code></li>
+    </ul>
+  </div>
+
+  <h3>15.6 Contattare il Supporto Tecnico</h3>
+  <p>Per problemi non risolvibili con questa guida:</p>
+  <ul>
+    <li>Controlla i log del servizio su Render → Dashboard → <em>zak-ecosystem-ai</em> → Logs</li>
+    <li>Verifica la pagina <code>GET /api/health</code> per lo stato del server</li>
+    <li>Controlla <code>GET /api/production/readiness</code> (richiede auth admin) per un check completo delle integrazioni</li>
+  </ul>
+
+  <div class="doc-footer">
+    <div>
+      <strong>Zak Ecosystem AI</strong> — Guida Utente Completa v1.0<br>
+      Aggiornata il 9 Giugno 2026
+    </div>
+    <div style="text-align:right;">
+      <code>https://zak-ecosystem-ai.onrender.com</code><br>
+      Documentazione interna — Uso riservato staff
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

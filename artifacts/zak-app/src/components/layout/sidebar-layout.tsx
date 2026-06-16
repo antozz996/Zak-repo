@@ -21,6 +21,7 @@ import {
 import { useGetChatInbox, useGetCurrentUser, useLogout } from "@workspace/api-client-react";
 import { clearAuthSession } from "@/lib/auth-session";
 import { Button } from "@/components/ui/button";
+import { NotificationBell } from "@/components/layout/notification-bell";
 
 type StaffRole = "admin" | "manager" | "staff";
 
@@ -76,12 +77,15 @@ export function SidebarLayout({ children }: { children: React.ReactNode }) {
           <h1 className="font-bold text-sm">Zak Ecosystem</h1>
           <p className="text-[10px] opacity-70">Sala Operativa</p>
         </div>
-        <button
-          onClick={() => setIsMobileOpen(!isMobileOpen)}
-          className="p-1 text-sidebar-foreground hover:bg-sidebar-accent rounded-md transition-colors"
-        >
-          {isMobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-        </button>
+        <div className="flex items-center gap-2">
+          <NotificationBell />
+          <button
+            onClick={() => setIsMobileOpen(!isMobileOpen)}
+            className="p-1 text-sidebar-foreground hover:bg-sidebar-accent rounded-md transition-colors"
+          >
+            {isMobileOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
+        </div>
       </header>
 
       {/* Sidebar (Desktop & Mobile Overlay) */}
@@ -155,8 +159,13 @@ export function SidebarLayout({ children }: { children: React.ReactNode }) {
       )}
 
       {/* Main Content Area */}
-      <main className="flex-1 overflow-auto bg-background">
-        {children}
+      <main className="flex min-h-0 flex-1 flex-col bg-background">
+        <div className="hidden items-center justify-end border-b bg-background px-6 py-3 lg:flex">
+          <NotificationBell />
+        </div>
+        <div className="min-h-0 flex-1 overflow-auto bg-background">
+          {children}
+        </div>
       </main>
 
     </div>

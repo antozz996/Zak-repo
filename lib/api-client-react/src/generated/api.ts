@@ -93,6 +93,7 @@ import type {
   ListMessaggiParams,
   ListPreventiviParams,
   ListTaskPersonaliParams,
+  ListWhatsappLogsParams,
   MarginReportRow,
   Messaggio,
   MessaggioInput,
@@ -112,19 +113,26 @@ import type {
   PreventivoVersioneInput,
   PreventivoWhatsAppSendResult,
   ProductionReadiness,
+  PublicQuoteAcceptInput,
+  PublicQuoteAcceptResult,
+  PublicQuoteDetail,
   StatoLeadStoricoItem,
   TaskPersonale,
   TaskPersonaleInput,
   TaskPersonaleUpdate,
   TriggerManualInput,
   TriggerManualResponse,
+  UserNotification,
   Utente,
   UtenteInput,
   UtenteUpdate,
   VoiceWebhookPayload,
   WebhookPayload,
   WebhookResponse,
-  WebhookWhatsappChallengeParams
+  WebhookWhatsappChallengeParams,
+  WhatsappLog,
+  WhatsappTemplate,
+  WhatsappTemplateUpdate
 } from './api.schemas';
 
 import { customFetch } from '../custom-fetch';
@@ -3164,6 +3172,155 @@ export const useDeleteEventStaffAllocation = <TError = ErrorType<unknown>,
         TContext
       > => {
       return useMutation(getDeleteEventStaffAllocationMutationOptions(options));
+    }
+
+export const getGetPublicQuoteUrl = (token: string,) => {
+
+
+
+
+  return `/api/public/quotes/${token}`
+}
+
+/**
+ * @summary Get the public confirmation view for a quote token
+ */
+export const getPublicQuote = async (token: string, options?: RequestInit): Promise<PublicQuoteDetail> => {
+
+  return customFetch<PublicQuoteDetail>(getGetPublicQuoteUrl(token),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetPublicQuoteQueryKey = (token: string,) => {
+    return [
+    `/api/public/quotes/${token}`
+    ] as const;
+    }
+
+
+export const getGetPublicQuoteQueryOptions = <TData = Awaited<ReturnType<typeof getPublicQuote>>, TError = ErrorType<void>>(token: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPublicQuote>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetPublicQuoteQueryKey(token);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPublicQuote>>> = ({ signal }) => getPublicQuote(token, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(token), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPublicQuote>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetPublicQuoteQueryResult = NonNullable<Awaited<ReturnType<typeof getPublicQuote>>>
+export type GetPublicQuoteQueryError = ErrorType<void>
+
+
+/**
+ * @summary Get the public confirmation view for a quote token
+ */
+
+export function useGetPublicQuote<TData = Awaited<ReturnType<typeof getPublicQuote>>, TError = ErrorType<void>>(
+ token: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getPublicQuote>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetPublicQuoteQueryOptions(token,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getAcceptPublicQuoteUrl = (token: string,) => {
+
+
+
+
+  return `/api/public/quotes/${token}/accept`
+}
+
+/**
+ * @summary Accept and digitally confirm a quote from the public link
+ */
+export const acceptPublicQuote = async (token: string,
+    publicQuoteAcceptInput: PublicQuoteAcceptInput, options?: RequestInit): Promise<PublicQuoteAcceptResult> => {
+
+  return customFetch<PublicQuoteAcceptResult>(getAcceptPublicQuoteUrl(token),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      publicQuoteAcceptInput,)
+  }
+);}
+
+
+
+
+export const getAcceptPublicQuoteMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof acceptPublicQuote>>, TError,{token: string;data: BodyType<PublicQuoteAcceptInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof acceptPublicQuote>>, TError,{token: string;data: BodyType<PublicQuoteAcceptInput>}, TContext> => {
+
+const mutationKey = ['acceptPublicQuote'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof acceptPublicQuote>>, {token: string;data: BodyType<PublicQuoteAcceptInput>}> = (props) => {
+          const {token,data} = props ?? {};
+
+          return  acceptPublicQuote(token,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AcceptPublicQuoteMutationResult = NonNullable<Awaited<ReturnType<typeof acceptPublicQuote>>>
+    export type AcceptPublicQuoteMutationBody = BodyType<PublicQuoteAcceptInput>
+    export type AcceptPublicQuoteMutationError = ErrorType<void>
+
+    /**
+ * @summary Accept and digitally confirm a quote from the public link
+ */
+export const useAcceptPublicQuote = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof acceptPublicQuote>>, TError,{token: string;data: BodyType<PublicQuoteAcceptInput>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof acceptPublicQuote>>,
+        TError,
+        {token: string;data: BodyType<PublicQuoteAcceptInput>},
+        TContext
+      > => {
+      return useMutation(getAcceptPublicQuoteMutationOptions(options));
     }
 
 export const getListAgendaUrl = (params?: ListAgendaParams,) => {
@@ -6965,6 +7122,386 @@ export const useTriggerAutomazione = <TError = ErrorType<unknown>,
         TContext
       > => {
       return useMutation(getTriggerAutomazioneMutationOptions(options));
+    }
+
+export const getListWhatsappTemplatesUrl = () => {
+
+
+
+
+  return `/api/whatsapp/templates`
+}
+
+/**
+ * @summary List internal WhatsApp template mappings by trigger
+ */
+export const listWhatsappTemplates = async ( options?: RequestInit): Promise<WhatsappTemplate[]> => {
+
+  return customFetch<WhatsappTemplate[]>(getListWhatsappTemplatesUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListWhatsappTemplatesQueryKey = () => {
+    return [
+    `/api/whatsapp/templates`
+    ] as const;
+    }
+
+
+export const getListWhatsappTemplatesQueryOptions = <TData = Awaited<ReturnType<typeof listWhatsappTemplates>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listWhatsappTemplates>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListWhatsappTemplatesQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listWhatsappTemplates>>> = ({ signal }) => listWhatsappTemplates({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listWhatsappTemplates>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListWhatsappTemplatesQueryResult = NonNullable<Awaited<ReturnType<typeof listWhatsappTemplates>>>
+export type ListWhatsappTemplatesQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List internal WhatsApp template mappings by trigger
+ */
+
+export function useListWhatsappTemplates<TData = Awaited<ReturnType<typeof listWhatsappTemplates>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listWhatsappTemplates>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListWhatsappTemplatesQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getUpdateWhatsappTemplateUrl = (id: string,) => {
+
+
+
+
+  return `/api/whatsapp/templates/${id}`
+}
+
+/**
+ * @summary Update a WhatsApp template mapping
+ */
+export const updateWhatsappTemplate = async (id: string,
+    whatsappTemplateUpdate: WhatsappTemplateUpdate, options?: RequestInit): Promise<WhatsappTemplate> => {
+
+  return customFetch<WhatsappTemplate>(getUpdateWhatsappTemplateUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      whatsappTemplateUpdate,)
+  }
+);}
+
+
+
+
+export const getUpdateWhatsappTemplateMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateWhatsappTemplate>>, TError,{id: string;data: BodyType<WhatsappTemplateUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateWhatsappTemplate>>, TError,{id: string;data: BodyType<WhatsappTemplateUpdate>}, TContext> => {
+
+const mutationKey = ['updateWhatsappTemplate'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateWhatsappTemplate>>, {id: string;data: BodyType<WhatsappTemplateUpdate>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  updateWhatsappTemplate(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateWhatsappTemplateMutationResult = NonNullable<Awaited<ReturnType<typeof updateWhatsappTemplate>>>
+    export type UpdateWhatsappTemplateMutationBody = BodyType<WhatsappTemplateUpdate>
+    export type UpdateWhatsappTemplateMutationError = ErrorType<void>
+
+    /**
+ * @summary Update a WhatsApp template mapping
+ */
+export const useUpdateWhatsappTemplate = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateWhatsappTemplate>>, TError,{id: string;data: BodyType<WhatsappTemplateUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateWhatsappTemplate>>,
+        TError,
+        {id: string;data: BodyType<WhatsappTemplateUpdate>},
+        TContext
+      > => {
+      return useMutation(getUpdateWhatsappTemplateMutationOptions(options));
+    }
+
+export const getListWhatsappLogsUrl = (params?: ListWhatsappLogsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/whatsapp/logs?${stringifiedParams}` : `/api/whatsapp/logs`
+}
+
+/**
+ * @summary List WhatsApp template delivery logs
+ */
+export const listWhatsappLogs = async (params?: ListWhatsappLogsParams, options?: RequestInit): Promise<WhatsappLog[]> => {
+
+  return customFetch<WhatsappLog[]>(getListWhatsappLogsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListWhatsappLogsQueryKey = (params?: ListWhatsappLogsParams,) => {
+    return [
+    `/api/whatsapp/logs`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getListWhatsappLogsQueryOptions = <TData = Awaited<ReturnType<typeof listWhatsappLogs>>, TError = ErrorType<unknown>>(params?: ListWhatsappLogsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listWhatsappLogs>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListWhatsappLogsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listWhatsappLogs>>> = ({ signal }) => listWhatsappLogs(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listWhatsappLogs>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type ListWhatsappLogsQueryResult = NonNullable<Awaited<ReturnType<typeof listWhatsappLogs>>>
+export type ListWhatsappLogsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List WhatsApp template delivery logs
+ */
+
+export function useListWhatsappLogs<TData = Awaited<ReturnType<typeof listWhatsappLogs>>, TError = ErrorType<unknown>>(
+ params?: ListWhatsappLogsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listWhatsappLogs>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getListWhatsappLogsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getGetUnreadNotificationsUrl = () => {
+
+
+
+
+  return `/api/notifications/unread`
+}
+
+/**
+ * @summary List unread notifications for the authenticated user
+ */
+export const getUnreadNotifications = async ( options?: RequestInit): Promise<UserNotification[]> => {
+
+  return customFetch<UserNotification[]>(getGetUnreadNotificationsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetUnreadNotificationsQueryKey = () => {
+    return [
+    `/api/notifications/unread`
+    ] as const;
+    }
+
+
+export const getGetUnreadNotificationsQueryOptions = <TData = Awaited<ReturnType<typeof getUnreadNotifications>>, TError = ErrorType<unknown>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getUnreadNotifications>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetUnreadNotificationsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getUnreadNotifications>>> = ({ signal }) => getUnreadNotifications({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getUnreadNotifications>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetUnreadNotificationsQueryResult = NonNullable<Awaited<ReturnType<typeof getUnreadNotifications>>>
+export type GetUnreadNotificationsQueryError = ErrorType<unknown>
+
+
+/**
+ * @summary List unread notifications for the authenticated user
+ */
+
+export function useGetUnreadNotifications<TData = Awaited<ReturnType<typeof getUnreadNotifications>>, TError = ErrorType<unknown>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getUnreadNotifications>>, TError, TData>, request?: SecondParameter<typeof customFetch>}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetUnreadNotificationsQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+
+export const getMarkNotificationReadUrl = (id: string,) => {
+
+
+
+
+  return `/api/notifications/${id}/read`
+}
+
+/**
+ * @summary Mark one notification as read
+ */
+export const markNotificationRead = async (id: string, options?: RequestInit): Promise<UserNotification> => {
+
+  return customFetch<UserNotification>(getMarkNotificationReadUrl(id),
+  {
+    ...options,
+    method: 'PATCH'
+
+
+  }
+);}
+
+
+
+
+export const getMarkNotificationReadMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof markNotificationRead>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof markNotificationRead>>, TError,{id: string}, TContext> => {
+
+const mutationKey = ['markNotificationRead'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof markNotificationRead>>, {id: string}> = (props) => {
+          const {id} = props ?? {};
+
+          return  markNotificationRead(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type MarkNotificationReadMutationResult = NonNullable<Awaited<ReturnType<typeof markNotificationRead>>>
+
+    export type MarkNotificationReadMutationError = ErrorType<void>
+
+    /**
+ * @summary Mark one notification as read
+ */
+export const useMarkNotificationRead = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof markNotificationRead>>, TError,{id: string}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof markNotificationRead>>,
+        TError,
+        {id: string},
+        TContext
+      > => {
+      return useMutation(getMarkNotificationReadMutationOptions(options));
     }
 
 export const getListAuditLogUrl = (params?: ListAuditLogParams,) => {

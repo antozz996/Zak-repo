@@ -2,6 +2,7 @@ import { pgTable, text, timestamp } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 import { contattiCrmTable } from "./contatti_crm";
+import { utentiTable } from "./utenti";
 
 export const taskPersonaliTable = pgTable("task_personali", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
@@ -11,6 +12,7 @@ export const taskPersonaliTable = pgTable("task_personali", {
   priorita: text("priorita").notNull().default("media"),
   scadenza: timestamp("scadenza"),
   contatto_id: text("contatto_id").references(() => contattiCrmTable.id, { onDelete: "set null" }),
+  user_id: text("user_id").references(() => utentiTable.id, { onDelete: "set null" }),
   fonte: text("fonte").notNull().default("manuale"),
   data_creazione: timestamp("data_creazione").notNull().defaultNow(),
   completato_il: timestamp("completato_il"),

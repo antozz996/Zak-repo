@@ -1428,3 +1428,16 @@ Formato consigliato per nuove voci:
 - **Dashboard Marginalita**: introdotta la nuova pagina `/reports`, protetta manager, con filtri per data/tipologia, cards KPI, grafici Recharts e pannello operativo per salvare nuovi snapshot economici dai preventivi evento.
 - **Area 2 - Scheda Evento 360°**: evoluto `preventivi_eventi` con stato operativo `event_stage` e campi menu/logistica; aggiunte le tabelle `event_payments` e `event_staff_allocation` con facciata applicativa `/events/:id` sopra il modello esistente dei preventivi evento.
 - **Operations UI Evento**: introdotta la pagina staff `/events/:id` con tabs `Economico & Pagamenti`, `Menu & Logistica`, `Staff`, riepilogo saldo residuo, scadenziario modificabile, assegnazione team e azione `Apri evento` direttamente dalla lista Preventivi.
+
+### 2026-06-16 - Aree 3-6: conferma pubblica, sync operativo, template Meta e notifiche staff
+
+- **Area 3 - Conferma digitale pubblica**: aggiunti campi pubblici su `preventivi_eventi` (`public_token`, firma, IP, `accepted_at`), nuovo router pubblico `GET/POST /public/quotes/:token`, nuova pagina frontend `/condividi/:token` mobile-first e conferma cliente con passaggio automatico a `event_stage=confirmed`.
+- **Acconto automatico e audit pubblico**: alla firma pubblica viene creato `acconto_1` del 30% se assente, viene scritto un messaggio di sistema in Inbox, aggiornato lo stato lead e registrato audit pubblico.
+- **Area 4 - Sync preventivi/inbox/agenda**: introdotti helper condivisi per messaggi di sistema e sincronizzazione agenda collegata ai preventivi; creazione e aggiornamento preventivo scrivono ora timeline interna in `messaggi`, mentre l'import Apple Numbers prova ad associare gli item a un preventivo compatibile.
+- **Inbox contestuale**: la pagina `/inbox` carica ora evento attivo, rate e task aperti del contatto selezionato, con quick actions per cambiare `event_stage`, aprire la scheda evento e segnare una rata come pagata.
+- **Area 5 - Template WhatsApp Meta**: aggiunte tabelle `whatsapp_templates` e `whatsapp_logs`, servizio backend di dispatch template, endpoint manager per mapping/log e sezione dedicata nella pagina `Automazioni`.
+- **Trigger template attivati**: predisposti `nuovo_lead`, `invio_preventivo` e `promemoria_pagamento`; l'invio preventivo usa il link pubblico `/condividi/:token`, mentre i promemoria rata sono agganciati a job dedicato.
+- **Area 6 - Notifiche interne**: aggiunta tabella `user_notifications`, endpoint unread/read, helper backend e campanella UI con polling ogni 30 secondi; attivati trigger su firma cliente, task in scadenza e eventi confermati senza staff assegnato.
+- **Cron operativo esteso**: aggiunti job per promemoria pagamento e notifiche operative interne, mantenendo invariati i job esistenti di re-engagement, ricorrenze e promemoria agenda.
+- **Verifiche completate**: eseguiti con esito positivo `corepack pnpm --filter @workspace/api-spec run codegen`, `corepack pnpm run typecheck`, `corepack pnpm run build`, `corepack pnpm --filter @workspace/zak-app run test:critical` e `git diff --check`.
+- **Nota operativa**: il push Drizzle verso Neon per le nuove tabelle/colonne si e fermato su prompt interattivo/approval del runner; il codice e pronto, ma l'applicazione dello schema al database reale va rilanciata in ambiente con accesso esterno pieno.

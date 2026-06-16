@@ -22,6 +22,10 @@ assertIncludes(inbox, "getStreamChatEventsUrl", "Inbox uses generated SSE URL");
 assertIncludes(inbox, "new EventSource", "Inbox opens realtime SSE stream");
 assertIncludes(inbox, "useListChatTyping", "Inbox reads operator typing status");
 assertIncludes(inbox, "useUpdateChatTyping", "Inbox updates operator typing status");
+assertIncludes(inbox, "useGetEventDetail", "Inbox loads contextual event data for the selected contact");
+assertIncludes(inbox, "useListTaskPersonali", "Inbox loads contextual tasks for the selected contact");
+assertIncludes(inbox, "useUpdateEventStatus", "Inbox can change the contextual event stage");
+assertIncludes(inbox, "useUpdateEventPayment", "Inbox can mark contextual payments as paid");
 
 const preventivi = readSource("src/pages/preventivi.tsx");
 assertIncludes(preventivi, "useListPreventivi", "Preventivi loads quote list");
@@ -49,6 +53,7 @@ assertIncludes(task, "useDeleteTaskPersonale", "Task page deletes personal tasks
 
 const app = readSource("src/App.tsx");
 assertIncludes(app, 'path="/login"', "Router exposes real Login");
+assertIncludes(app, 'path="/condividi/:token"', "Router exposes public quote confirmation");
 assertIncludes(app, "ProtectedRoute", "Router protects real app routes");
 assertIncludes(app, 'path="/inbox"', "Router exposes Inbox");
 assertIncludes(app, 'path="/preventivi"', "Router exposes Preventivi");
@@ -86,5 +91,13 @@ assertIncludes(goLive, "useSyncGoogleCalendar", "Go-live page can run Google Cal
 
 const agendaImportNumbers = readSource("src/pages/agenda-import-numbers.tsx");
 assertIncludes(agendaImportNumbers, "useImportAgendaNumbersCsv", "Agenda import page uses Numbers CSV import mutation");
+
+const publicQuote = readSource("src/pages/public-quote.tsx");
+assertIncludes(publicQuote, "useGetPublicQuote", "Public quote page loads the shared quote");
+assertIncludes(publicQuote, "useAcceptPublicQuote", "Public quote page accepts the shared quote");
+
+const notificationBell = readSource("src/components/layout/notification-bell.tsx");
+assertIncludes(notificationBell, "useGetUnreadNotifications", "Notification bell loads unread notifications");
+assertIncludes(notificationBell, "useMarkNotificationRead", "Notification bell marks notifications as read");
 
 console.log("critical zak-app smoke tests passed");

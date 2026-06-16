@@ -23,6 +23,7 @@ import B2BCompetitor from "@/pages/b2b-competitor";
 import GoLive from "@/pages/go-live";
 import Login from "@/pages/login";
 import Reports from "@/pages/reports";
+import PublicQuotePage from "@/pages/public-quote";
 
 const queryClient = new QueryClient();
 configureAuthTokenGetter();
@@ -38,6 +39,8 @@ function Router() {
         <Redirect to="/dashboard" />
       </Route>
       <Route path="/login" component={Login} />
+      <Route path="/condividi/:token" component={PublicQuotePage} />
+      <Route path="/condividi/:token/" component={PublicQuotePage} />
       <Route path="/dashboard">{withAuth(<Dashboard />)}</Route>
       <Route path="/inbox">{withAuth(<Inbox />)}</Route>
       <Route path="/contatti/nuovo">{withAuth(<ContattiNuovo />)}</Route>
@@ -62,7 +65,7 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+        <WouterRouter base={import.meta.env.BASE_URL === "/" ? undefined : import.meta.env.BASE_URL.replace(/\/$/, "")}>
           <Router />
         </WouterRouter>
         <Toaster />

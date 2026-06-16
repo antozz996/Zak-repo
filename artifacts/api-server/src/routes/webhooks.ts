@@ -22,6 +22,7 @@ import {
   type NormalizedVoiceCall,
 } from "../lib/voice-provider-parser";
 import { syncAgendaItemToGoogle, syncGoogleCalendar } from "../lib/google-calendar";
+import { dispatchWhatsAppTriggerTemplate } from "../lib/whatsapp-template-service";
 
 const router = Router();
 
@@ -179,6 +180,12 @@ router.post("/webhook/whatsapp", async (req, res) => {
               nextStatus: newContatto.stato_lead,
               origine: "whatsapp_webhook",
               nota: "Nuovo lead creato da messaggio inbound",
+            });
+            await dispatchWhatsAppTriggerTemplate({
+              triggerKey: "nuovo_lead",
+              to: phone,
+              variables: [newContatto.nome],
+              contattoId: newContatto.id,
             });
             contatto = newContatto;
           }

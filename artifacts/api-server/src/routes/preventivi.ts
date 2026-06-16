@@ -9,6 +9,13 @@ import { logWhatsAppOutbound } from "../lib/whatsapp-outbound-log";
 import { logLeadStatusChange } from "../lib/lead-status-history";
 import { deleteGoogleCalendarEvent, syncPreventivoToGoogle } from "../lib/google-calendar";
 import { parseLimit, parseOffset } from "../lib/pagination";
+import {
+  buildPublicQuoteUrl,
+  createSystemMessage,
+  generatePublicQuoteToken,
+  syncLinkedAgendaForPreventivo,
+} from "../lib/preventivo-links";
+import { dispatchWhatsAppTriggerTemplate } from "../lib/whatsapp-template-service";
 
 const router = Router();
 
@@ -59,6 +66,12 @@ function formatDateForMessage(date?: string | null) {
   return `${day}/${month}/${year}`;
 }
 
+function formatBudgetForSystemMessage(value?: string | null) {
+  if (!value) return "Da definire";
+  const parsed = Number.parseFloat(value);
+  return Number.isNaN(parsed) ? "Da definire" : formatEuro(parsed);
+}
+
 function buildPreventivoWhatsAppText(preventivo: {
   contatto_nome: string | null;
   tipo_evento: string | null;
@@ -66,6 +79,7 @@ function buildPreventivoWhatsAppText(preventivo: {
   numero_invitati: number | null;
   budget_stimato: string | null;
   stato_evento: string;
+  public_url?: string | null;
 }) {
   const budget = preventivo.budget_stimato
     ? formatEuro(Number.parseFloat(preventivo.budget_stimato))
@@ -77,8 +91,9 @@ function buildPreventivoWhatsAppText(preventivo: {
     `Invitati: ${preventivo.numero_invitati ?? "Da definire"}`,
     `Budget stimato: ${budget}`,
     `Stato: ${preventivo.stato_evento}`,
+    preventivo.public_url ? `Conferma o consulta il preventivo qui: ${preventivo.public_url}` : null,
     "Rispondi a questo messaggio per confermare o chiedere modifiche.",
-  ].join("\n");
+  ].filter(Boolean).join("\n");
 }
 
 function sanitizePdfText(value: string) {
@@ -238,6 +253,11 @@ router.get("/preventivi", async (req, res) => {
       menu_bevande: preventiviEventiTable.menu_bevande,
       note_allergie: preventiviEventiTable.note_allergie,
       note_logistica: preventiviEventiTable.note_logistica,
+      public_token: preventiviEventiTable.public_token,
+      accepted_at: preventiviEventiTable.accepted_at,
+      signature_name: preventiviEventiTable.signature_name,
+      signature_svg: preventiviEventiTable.signature_svg,
+      customer_ip: preventiviEventiTable.customer_ip,
       data_creazione: preventiviEventiTable.data_creazione,
       google_calendar_id: preventiviEventiTable.google_calendar_id,
       google_event_id: preventiviEventiTable.google_event_id,
@@ -269,7 +289,17 @@ router.post("/preventivi", async (req, res) => {
   const [row] = await db.insert(preventiviEventiTable).values({
     ...parsed.data,
     event_stage: parsed.data.event_stage ?? "quoted",
+    public_token: parsed.data.public_token ?? generatePublicQuoteToken(),
   }).returning();
+  await createSystemMessage({
+    contattoId: row.contatto_id,
+    testo: `Creato preventivo #${row.id} - Totale ${formatBudgetForSystemMessage(row.budget_stimato)}`,
+  });
+  await syncLinkedAgendaForPreventivo({
+    preventivoId: row.id,
+    contattoId: row.contatto_id,
+    dataEvento: row.data_evento_richiesta,
+  });
   if (row.stato_evento === "confermato") {
     await syncPreventivoToGoogle({ ...row, contatto_nome: null });
   }
@@ -405,6 +435,7 @@ router.post("/preventivi/:id/invia-whatsapp", async (req, res) => {
       numero_invitati: preventiviEventiTable.numero_invitati,
       budget_stimato: preventiviEventiTable.budget_stimato,
       stato_evento: preventiviEventiTable.stato_evento,
+      public_token: preventiviEventiTable.public_token,
     })
     .from(preventiviEventiTable)
     .leftJoin(contattiCrmTable, eq(preventiviEventiTable.contatto_id, contattiCrmTable.id))
@@ -420,9 +451,31 @@ router.post("/preventivi/:id/invia-whatsapp", async (req, res) => {
     return;
   }
 
-  const testo = buildPreventivoWhatsAppText(preventivo);
+  let publicToken = preventivo.public_token;
+  if (!publicToken) {
+    const [updated] = await db
+      .update(preventiviEventiTable)
+      .set({ public_token: generatePublicQuoteToken() })
+      .where(eq(preventiviEventiTable.id, preventivo.id))
+      .returning({ public_token: preventiviEventiTable.public_token });
+    publicToken = updated?.public_token ?? null;
+  }
+
+  const publicUrl = publicToken ? buildPublicQuoteUrl(publicToken) : null;
+  const testo = buildPreventivoWhatsAppText({ ...preventivo, public_url: publicUrl });
   const window = await getWhatsAppConversationWindow(preventivo.contatto_id);
-  if (!window.isOpen) {
+  const templateResult = await dispatchWhatsAppTriggerTemplate({
+    triggerKey: "invio_preventivo",
+    to: preventivo.telefono,
+    variables: [
+      preventivo.contatto_nome ?? "cliente",
+      publicUrl ?? "",
+    ],
+    contattoId: preventivo.contatto_id,
+    eventId: preventivo.id,
+  });
+
+  if (!window.isOpen && templateResult.status !== "sent") {
     const result = { status: "skipped" as const, reason: "WhatsApp 24-hour conversation window closed" };
     await logWhatsAppOutbound({
       contattoId: preventivo.contatto_id,
@@ -452,10 +505,12 @@ router.post("/preventivi/:id/invia-whatsapp", async (req, res) => {
     .set({ ultimo_contatto: new Date() })
     .where(eq(contattiCrmTable.id, preventivo.contatto_id));
 
-  const result = await sendWhatsAppTextSafely({
-    to: preventivo.telefono,
-    text: testo,
-  });
+  const result = templateResult.status === "sent"
+    ? templateResult
+    : await sendWhatsAppTextSafely({
+        to: preventivo.telefono,
+        text: testo,
+      });
   await logWhatsAppOutbound({
     contattoId: preventivo.contatto_id,
     telefono: preventivo.telefono,
@@ -502,6 +557,11 @@ router.post("/preventivi/:id/conferma-digitale", async (req, res) => {
       google_event_id: preventiviEventiTable.google_event_id,
       google_sync_status: preventiviEventiTable.google_sync_status,
       google_last_synced_at: preventiviEventiTable.google_last_synced_at,
+      public_token: preventiviEventiTable.public_token,
+      accepted_at: preventiviEventiTable.accepted_at,
+      signature_name: preventiviEventiTable.signature_name,
+      signature_svg: preventiviEventiTable.signature_svg,
+      customer_ip: preventiviEventiTable.customer_ip,
     })
     .from(preventiviEventiTable)
     .leftJoin(contattiCrmTable, eq(preventiviEventiTable.contatto_id, contattiCrmTable.id))
@@ -531,6 +591,16 @@ router.post("/preventivi/:id/conferma-digitale", async (req, res) => {
     .returning();
 
   await syncPreventivoToGoogle({ ...updatedPreventivo, contatto_nome: current.contatto_nome });
+  await createSystemMessage({
+    contattoId: current.contatto_id,
+    testo: `Preventivo #${req.params.id} confermato digitalmente dallo staff.`,
+  });
+  await syncLinkedAgendaForPreventivo({
+    preventivoId: req.params.id,
+    contattoId: current.contatto_id,
+    contattoNome: current.contatto_nome,
+    dataEvento: current.data_evento_richiesta,
+  });
 
   if (current.contatto_stato_lead !== "confermato") {
     await db
@@ -613,6 +683,11 @@ router.post("/preventivi/:id/versioni", async (req, res) => {
         menu_bevande: preventivo.menu_bevande,
         note_allergie: preventivo.note_allergie,
         note_logistica: preventivo.note_logistica,
+        public_token: preventivo.public_token,
+        accepted_at: preventivo.accepted_at,
+        signature_name: preventivo.signature_name,
+        signature_svg: preventivo.signature_svg,
+        customer_ip: preventivo.customer_ip,
         data_creazione: preventivo.data_creazione,
       },
       nota,
@@ -688,6 +763,11 @@ router.get("/preventivi/:id", async (req, res) => {
       note_allergie: preventiviEventiTable.note_allergie,
       note_logistica: preventiviEventiTable.note_logistica,
       data_creazione: preventiviEventiTable.data_creazione,
+      public_token: preventiviEventiTable.public_token,
+      accepted_at: preventiviEventiTable.accepted_at,
+      signature_name: preventiviEventiTable.signature_name,
+      signature_svg: preventiviEventiTable.signature_svg,
+      customer_ip: preventiviEventiTable.customer_ip,
     })
     .from(preventiviEventiTable)
     .leftJoin(contattiCrmTable, eq(preventiviEventiTable.contatto_id, contattiCrmTable.id))
@@ -733,7 +813,19 @@ router.patch("/preventivi/:id", async (req, res) => {
   const [row] = await db.update(preventiviEventiTable).set({
     ...parsed.data,
     event_stage: nextEventStage,
+    public_token: parsed.data.public_token ?? current.public_token ?? generatePublicQuoteToken(),
   }).where(eq(preventiviEventiTable.id, req.params.id)).returning();
+  await createSystemMessage({
+    contattoId: row.contatto_id,
+    testo: `Aggiornato preventivo #${row.id} - Totale ${formatBudgetForSystemMessage(row.budget_stimato)}`,
+  });
+  if (row.data_evento_richiesta && row.data_evento_richiesta !== current.data_evento_richiesta) {
+    await syncLinkedAgendaForPreventivo({
+      preventivoId: row.id,
+      contattoId: row.contatto_id,
+      dataEvento: row.data_evento_richiesta,
+    });
+  }
   if (row.stato_evento === "confermato") {
     await syncPreventivoToGoogle({ ...row, contatto_nome: null });
   }
